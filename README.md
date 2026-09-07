@@ -11,11 +11,21 @@ A responsive learning feed for IT professionals. The initial content set covers 
 - GitHub Changelog and AWS What's New RSS headlines from a server endpoint. Requests are bounded and cached; a visibly dated two-article snapshot is used when feeds are unavailable.
 - News is linked to publishers, not presented as an AI-verified reporting service. Lesson sources are linked. Quiz items are independent practice, not official exam material or a complete certification syllabus.
 
-## Application
+## Customizable interface
+
+- Stream preserves the continuous feed; Focus presents one card with previous/next controls; Index opens learning cards from a compact topic list.
+- Signal (charcoal/lime), Midnight (ink/ice), and Daylight (white/cobalt) themes cover the interface and settings dialog. Illustrations and code examples retain their semantic colors.
+- Three text sizes, two spacing options, optional learning sidebar and daily activity, reduced motion, and expanded reference details.
+- Pinned topics appear first in navigation and filters without hiding other topics.
+- Display preferences use `stackscroll-display-v1`, separately from learning progress. Reset display restores only display preferences. Storage failures keep changes available for the session.
+- Reference links are always accessible on open cards. Expanded details distinguish a linked reference from completed independent claim review.
+
+## Application files
 
 - `app/stackscroll.tsx`: feed, pathways, recall, bookmarks, and responsive navigation.
 - `app/content.ts`: original content and pathways.
 - `app/learning.ts`: state validation, local-day activity, recall scheduling, and scoring.
+- `app/preferences.ts` and `app/customizer.tsx`: validated display settings, persistence, and customization controls.
 - `app/news.ts` and `app/api/news/route.ts`: source-restricted RSS parsing and retrieval.
 - `app/globals.css`: theme and layouts.
 
@@ -23,7 +33,7 @@ Uses the bundled Vinext/React stack and installed Shadcn primitives. `.openai/ho
 
 ## Validation
 
-`node --test tests/learning.test.mjs` checks content consistency, review due dates, scoring, saved-state validation, and RSS source restrictions. The built Worker rendering check in `tests/rendered-html.test.mjs` verifies the application title and initial surface.
+`node --test tests/learning.test.mjs` checks content consistency, review due dates, scoring, saved-state validation, RSS source restrictions, preference recovery, and pinned topic coverage. The built Worker rendering check in `tests/rendered-html.test.mjs` verifies the application title and initial surface.
 
 ## Content maintenance
 

@@ -6,7 +6,7 @@ import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 const temp = mkdtempSync(join(process.cwd(), '.learning-test-'));
 after(() => rmSync(temp, { recursive: true, force: true }));
-for (const name of ['content', 'learning', 'news']) {
+for (const name of ['content', 'learning', 'news', 'preferences']) {
  const source=readFileSync(`app/${name}.ts`,'utf8');
  const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"');
  writeFileSync(join(temp,`${name}.mjs`),compiled);
@@ -14,6 +14,19 @@ for (const name of ['content', 'learning', 'news']) {
 const { cards, topics } = await import(pathToFileURL(join(temp,'content.mjs')));
 const { initialState, stateSchema, scheduleReview, isDue, quizScore, localDay } = await import(pathToFileURL(join(temp,'learning.mjs')));
 const { parseNews, newsSources } = await import(pathToFileURL(join(temp,'news.mjs')));
+const { defaultPreferences, readPreferences, orderedTopics } = await import(pathToFileURL(join(temp,'preferences.mjs')));
+test('display settings recover invalid values without discarding valid choices',()=>{
+ assert.deepEqual(readPreferences('{broken'),defaultPreferences);
+ const p=readPreferences(JSON.stringify({skin:'daylight',layout:'unknown',textScale:999,showActivity:false,pinnedTopics:['Cloud','Cloud','Networking']}));
+ assert.equal(p.skin,'daylight');assert.equal(p.layout,'stream');assert.equal(p.textScale,100);
+ assert.equal(p.showActivity,false);assert.deepEqual(p.pinnedTopics,['Cloud','Networking']);
+ assert.deepEqual(readPreferences('null'),defaultPreferences);
+});
+test('pinning moves topics first without removing other learning areas',()=>{
+ const ordered=orderedTopics(['Cloud','Networking']);
+ assert.deepEqual(ordered.slice(0,2),['Cloud','Networking']);
+ assert.equal(ordered.length,topics.length);assert.deepEqual(new Set(ordered),new Set(topics));
+});
 test('every topic is represented and every quiz has an answer and explanation',()=>{
  assert.equal(new Set(cards.map(c=>c.id)).size,cards.length);
  for(const topic of topics)assert.ok(cards.some(c=>c.topic===topic));
