@@ -38,3 +38,15 @@ Uses the bundled Vinext/React stack and installed Shadcn primitives. `.openai/ho
 ## Content maintenance
 
 Add original cards with stable IDs and primary-source links. Recheck version-sensitive information against the relevant vendor. Use publication dates for news and keep fallback snapshots labeled. This version teaches AI development; it does not execute coding agents or run user code.
+
+## Humor, philosophy, and IT facts
+
+`app/culture.ts` contains nine starter cards: three original IT jokes, three philosophy anecdotes combining wit with practical wisdom, and three sourced IT facts. `app/content.ts` mixes one culture card after every three study cards. Dedicated format filters, bookmarking, completion, and Stream/Focus/Index layouts support all three types. The 31 study cards and certification pathway totals remain unchanged.
+
+Keep joke authorship explicit. For philosopher anecdotes, name the ancient text, distinguish literary accounts from verified history, and label modern IT analogies as our interpretation. Facts and anecdotes include a source review date. All new cards include a visible context note and a source link; humor references explain the technical background and are not attributed as authors of the joke. Existing local learning and display data retain their storage keys.
+
+For each new entry, use a stable ID and one of `humor`, `anecdote`, or `fact`; supply the topic, title, body, takeaway, source, source name, and context note. Include `reviewedAt` for facts and anecdotes. Add content to the existing collection; do not modify IDs already used in saved progress.
+
+## Infrastructure and updates
+
+See [the infrastructure inventory](docs/infrastructure.md) for the current runtime, persistence, release workflow, and next steps. GitHub stores source history; pushing there does not publish the Site.

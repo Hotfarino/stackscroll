@@ -1,12 +1,16 @@
-export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows";
-export type Kind = "lesson" | "quiz" | "flashcard" | "news";
+import { cultureCards } from "./culture";
+
+export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows" | "Philosophy";
+export const contentKinds = ["lesson", "quiz", "flashcard", "news", "humor", "anecdote", "fact"] as const;
+export type Kind = typeof contentKinds[number];
 export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
   body?: string; takeaway?: string; code?: string; language?: string; visual?: "network" | "subnet" | "workflow";
   options?: string[]; answer?: number; explanation?: string; back?: string;
   source: string; sourceName: string; date?: string; minutes?: number;
+  sourceNote?: string; reviewedAt?: string;
 };
-export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows"];
+export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Philosophy"];
 const refs = {
   network: ["https://www.rfc-editor.org/rfc/rfc826", "IETF · ARP"],
   subnet: ["https://www.rfc-editor.org/rfc/rfc4632", "IETF · CIDR"],
@@ -17,7 +21,7 @@ const refs = {
   agent: ["https://www.anthropic.com/engineering/building-effective-agents", "Anthropic · Engineering"],
 };
 function c(data: Omit<Card,"source"|"sourceName">, ref: string[]): Card {return {...data,source:ref[0],sourceName:ref[1]};}
-export const cards: Card[] = [
+export const studyCards: Card[] = [
  c({id:"net-mac",kind:"lesson",topic:"Networking",level:"Foundation",title:"IP finds the destination.\nMAC finds the next hop.",body:"Sending to another network? Your computer addresses the Ethernet frame to the gateway’s MAC address, while the IP packet still targets the remote host.",visual:"network",takeaway:"At each routed Ethernet hop, the link-layer addresses change. Without NAT, the source and destination IP addresses stay the same.",minutes:2},refs.network),
  c({id:"quiz-dns",kind:"quiz",topic:"CompTIA",level:"Foundation",title:"An IP address works. The hostname doesn’t. What do you check?",body:"A workstation reaches a server by IP address but cannot resolve its fully qualified domain name. Which service is the most likely problem?",options:["DHCP","DNS","NTP","SSH"],answer:1,explanation:"DNS resolves names to addresses. Reaching the server by IP makes name resolution the strongest clue. DHCP supplies network settings, NTP synchronizes clocks, and SSH provides remote access."},["https://www.rfc-editor.org/rfc/rfc1034","IETF · Domain names"]),
  c({id:"flash-cidr",kind:"flashcard",topic:"CCNA",level:"Foundation",title:"How many usable host addresses are in a /26 IPv4 subnet?",back:"62 usable hosts",explanation:"32 − 26 = 6 host bits. 2⁶ = 64 total addresses. In a conventional subnet, subtract the network and broadcast addresses: 64 − 2 = 62."},refs.subnet),
@@ -50,6 +54,13 @@ export const cards: Card[] = [
  c({id:"bash-pipe",kind:"quiz",topic:"Languages",level:"Foundation",title:"What does the pipe symbol do in a shell command?",body:"Consider: cat access.log | wc -l",options:["Runs commands on different servers","Sends standard output into the next command’s standard input","Redirects all errors into access.log","Encrypts the log"],answer:1,explanation:"A pipe connects standard output to the next command’s standard input. Here wc -l counts newline characters from the log. Standard error is not included by the plain | operator."},["https://www.gnu.org/software/bash/manual/html_node/Pipelines.html","GNU Bash · Pipelines"]),
  c({id:"workflow-eval",kind:"flashcard",topic:"AI workflows",level:"Advanced",title:"What stays constant when comparing two prompt versions?",back:"A representative evaluation set and scoring criteria.",explanation:"Run both versions on the same cases, including edge cases. Compare correctness, tool behavior, latency, and cost. Keep holdout cases to avoid overfitting your evaluation set."},refs.agent),
 ];
+// One culture card after each three study cards; retain every original stable ID.
+export const cards: Card[] = studyCards.flatMap((card, index) => {
+  const extra = (index + 1) % 3 === 0 ? cultureCards[Math.floor(index / 3)] : undefined;
+  return extra ? [card, extra] : [card];
+});
+cards.push(...cultureCards.slice(Math.floor(studyCards.length / 3)));
+
 export const curatedNews: Card[] = [
  {id:"news-copilot-aug",kind:"news",topic:"Agentic AI",level:"Intermediate",title:"Copilot adds more controls for agents and code review",body:"GitHub’s August Visual Studio update introduces organization-level custom agents, adjustable thinking effort for supported models, and Git-agent reviews of uncommitted changes or commits.",takeaway:"Learning connection: write a scoped agent brief, then compare automated review findings with the actual diff.",source:"https://github.blog/changelog/2026-08-28-github-copilot-in-visual-studio-august-update-2/",sourceName:"GitHub Changelog",date:"2026-08-28"},
  {id:"news-aws-interconnect",kind:"news",topic:"Cloud",level:"Intermediate",title:"AWS Interconnect brings managed last-mile connectivity",body:"AWS announced Interconnect – last mile with Lumen in the US. It automates network configuration, including BGP peering and VLAN setup, for private connectivity to AWS.",takeaway:"Learning connection: review BGP, VLANs, and Direct Connect before evaluating managed connectivity.",source:"https://aws.amazon.com/about-aws/whats-new/2026/04/aws-announces-ga-AWS-interconnect-last-mile/",sourceName:"AWS What's New",date:"2026-04-13"},

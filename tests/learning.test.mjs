@@ -6,12 +6,12 @@ import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 const temp = mkdtempSync(join(process.cwd(), '.learning-test-'));
 after(() => rmSync(temp, { recursive: true, force: true }));
-for (const name of ['content', 'learning', 'news', 'preferences']) {
+for (const name of ['culture', 'content', 'learning', 'news', 'preferences']) {
  const source=readFileSync(`app/${name}.ts`,'utf8');
- const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"');
+ const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"').replaceAll('"./culture"','"./culture.mjs"');
  writeFileSync(join(temp,`${name}.mjs`),compiled);
 }
-const { cards, topics } = await import(pathToFileURL(join(temp,'content.mjs')));
+const { cards, studyCards, topics } = await import(pathToFileURL(join(temp,'content.mjs')));
 const { initialState, stateSchema, scheduleReview, isDue, quizScore, localDay } = await import(pathToFileURL(join(temp,'learning.mjs')));
 const { parseNews, newsSources } = await import(pathToFileURL(join(temp,'news.mjs')));
 const { defaultPreferences, readPreferences, orderedTopics } = await import(pathToFileURL(join(temp,'preferences.mjs')));
@@ -59,4 +59,28 @@ test('publisher RSS is decoded, dated, and restricted to its source host',()=>{
  assert.equal(items.length,1);assert.equal(items[0].title,'Agents & code');assert.equal(items[0].topic,'Agentic AI');
  assert.equal(items[0].date,'2026-09-07T08:00:00.000Z');
  assert.deepEqual(parseNews('<rss/>',newsSources[0]),[]);
+});
+
+
+test('culture cards survive saved-state reload alongside existing progress', () => {
+ const culture = cards.filter(c => ['humor', 'anecdote', 'fact'].includes(c.kind));
+ assert.equal(culture.length, 9);
+ const original = {...initialState, saved: [studyCards[0], ...culture], answers: {'quiz-dns': 1}, reviews: {'flash-cidr': {due: 123456, interval: 1}}, done: {'net-mac': '2026-09-07'}};
+ assert.deepEqual(stateSchema.parse(JSON.parse(JSON.stringify(original))), original);
+ for (const card of culture) {
+  assert.ok(card.source.startsWith('https://'));
+  assert.ok(card.sourceNote);
+  assert.equal(isDue(card, initialState), false);
+  if (card.kind !== 'humor') assert.match(card.reviewedAt, /^\d{4}-\d{2}-\d{2}$/);
+ }
+});
+
+test('mixed feed retains every study card and places lighter content between lessons', () => {
+ assert.equal(studyCards.length, 31);
+ assert.deepEqual(cards.filter(c => !['humor', 'anecdote', 'fact'].includes(c.kind)), studyCards);
+ assert.equal(cards[3].kind, 'humor');
+ assert.equal(cards[7].kind, 'anecdote');
+ assert.equal(cards[11].kind, 'fact');
+ assert.equal(cards.length, 40);
+ assert.ok(studyCards.every(c => ['lesson', 'quiz', 'flashcard'].includes(c.kind)));
 });

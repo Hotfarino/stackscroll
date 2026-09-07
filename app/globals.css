@@ -576,3 +576,8 @@ button svg,a svg {flex-shrink:0}
   .layout-choices,.skin-choices {gap:6px}
   .layout-choice {padding:12px 8px}
 }
+
+/* Culture cards inherit the active theme in all three reading layouts. */
+.kind-badge.humor,.kind-badge.anecdote,.kind-badge.fact {color:var(--primary);background:var(--card);border-color:var(--border)}
+.topic-philosophy {color:var(--primary);background:var(--card);border-color:var(--border)}
+.content-context {font-size:.875rem;line-height:1.6;color:var(--soft);margin:14px 0 0;padding-left:12px;border-left:2px solid var(--border)}
