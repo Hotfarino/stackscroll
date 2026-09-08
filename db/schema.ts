@@ -31,3 +31,30 @@ export const topicFeedback = sqliteTable("topic_feedback", {
   preference: text("preference").notNull(),
   updatedAt: integer("updated_at").notNull(),
 }, table => [primaryKey({columns:[table.userId,table.topic]})]);
+
+export const stackAccounts = sqliteTable("stack_accounts", {
+  userId: text("user_id").primaryKey(),
+  agePolicy: text("age_policy").notNull(),
+  ageMethod: text("age_method").notNull(),
+  attestedAt: integer("attested_at").notNull(),
+});
+
+export const personalStacks = sqliteTable("personal_stacks", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  draft: text("draft").notNull(),
+  revision: integer("revision").notNull(),
+  activeVersion: integer("active_version"),
+  lastOperationId: text("last_operation_id").notNull(),
+  lastOperationHash: text("last_operation_hash").notNull(),
+  createdAt: integer("created_at").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+}, table => [index("personal_stacks_user_updated").on(table.userId, table.updatedAt)]);
+
+export const personalStackVersions = sqliteTable("personal_stack_versions", {
+  stackId: text("stack_id").notNull().references(() => personalStacks.id, { onDelete: "cascade" }),
+  version: integer("version").notNull(),
+  userId: text("user_id").notNull(),
+  edition: text("edition").notNull(),
+  createdAt: integer("created_at").notNull(),
+}, table => [primaryKey({ columns: [table.stackId, table.version] })]);

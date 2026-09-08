@@ -1,4 +1,4 @@
-export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows";
+export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows" | "Data centers";
 export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer" | "story" | "podcast";
 export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
@@ -6,7 +6,7 @@ export type Card = {
   options?: string[]; answer?: number; explanation?: string; back?: string;
   source: string; sourceName: string; date?: string; minutes?: number;
 };
-export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows"];
+export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Data centers"];
 const refs = {
   network: ["https://www.rfc-editor.org/rfc/rfc826", "IETF · ARP"],
   subnet: ["https://www.rfc-editor.org/rfc/rfc4632", "IETF · CIDR"],
@@ -18,6 +18,10 @@ const refs = {
 };
 function c(data: Omit<Card,"source"|"sourceName">, ref: string[]): Card {return {...data,source:ref[0],sourceName:ref[1]};}
 export const cards: Card[] = [
+ c({id:"dc-airflow",kind:"lesson",topic:"Data centers",level:"Foundation",title:"Cooling starts with the path of the air.",body:"In a hot-aisle/cold-aisle arrangement, server intakes face the cold aisle and exhausts face the hot aisle. The goal is to reduce mixing between cool supply air and hot exhaust. This is an airflow concept; changes to a live room need coordination with its facilities team.",takeaway:"When reading a rack layout, identify the intake side, exhaust side, and return-air path.",minutes:2},["https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center/move-hot-aislecold-aisle-layout","ENERGY STAR · Hot and cold aisles"]),
+ c({id:"dc-ai-fabrics",kind:"lesson",topic:"Data centers",level:"Foundation",title:"An AI cluster has more than one network job.",body:"NVIDIA's DGX BasePOD NDR400 reference architecture describes a compute network, an Ethernet network for system management and storage, and an out-of-band management network. These roles help explain why training communication, data access, and administration are considered separately. This is one reference design, not a rule for every data center.",takeaway:"Read a cluster diagram by asking what each network carries and which devices it connects.",minutes:2},["https://docs.nvidia.com/dgx-basepod/reference-architecture-infrastructure-foundation-enterprise-ai/latest/reference-architectures.html","NVIDIA · DGX BasePOD reference architecture"]),
+ c({id:"dc-gpu-health",kind:"lesson",topic:"Data centers",level:"Foundation",title:"GPU operations includes health, not just workloads.",body:"NVIDIA Data Center GPU Manager (DCGM) supports GPU behavior monitoring, configuration, policy oversight, health checks, diagnostics, and process statistics. These capabilities give infrastructure teams a way to observe and manage the GPUs supporting AI workloads.",takeaway:"Connect the software running on a GPU with the infrastructure tools used to monitor and maintain it.",minutes:2},["https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/index.html","NVIDIA · DCGM overview"]),
+
  c({id:"net-mac",kind:"lesson",topic:"Networking",level:"Foundation",title:"IP finds the destination.\nMAC finds the next hop.",body:"Sending to another network? Your computer addresses the Ethernet frame to the gateway’s MAC address, while the IP packet still targets the remote host.",visual:"network",takeaway:"At each routed Ethernet hop, the link-layer addresses change. Without NAT, the source and destination IP addresses stay the same.",minutes:2},refs.network),
  c({id:"quiz-dns",kind:"quiz",topic:"CompTIA",level:"Foundation",title:"An IP address works. The hostname doesn’t. What do you check?",body:"A workstation reaches a server by IP address but cannot resolve its fully qualified domain name. Which service is the most likely problem?",options:["DHCP","DNS","NTP","SSH"],answer:1,explanation:"DNS resolves names to addresses. Reaching the server by IP makes name resolution the strongest clue. DHCP supplies network settings, NTP synchronizes clocks, and SSH provides remote access."},["https://www.rfc-editor.org/rfc/rfc1034","IETF · Domain names"]),
  c({id:"flash-cidr",kind:"flashcard",topic:"CCNA",level:"Foundation",title:"How many usable host addresses are in a /26 IPv4 subnet?",back:"62 usable hosts",explanation:"32 − 26 = 6 host bits. 2⁶ = 64 total addresses. In a conventional subnet, subtract the network and broadcast addresses: 64 − 2 = 62."},refs.subnet),

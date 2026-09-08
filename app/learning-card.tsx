@@ -5,7 +5,7 @@ import {RadioGroup,RadioGroupItem} from "@/components/ui/radio-group";
 import {StackButton} from "./brand";
 import type {Card} from "./content";
 import {scheduleReview,type LearningState} from "./learning";
-const icons = {Networking:Network,CompTIA:Cpu,CCNA:Network,Cloud:Cloud,Development:Code2,Languages:Terminal,"Agentic AI":Bot,"Machine learning":BrainCircuit,"AI workflows":Workflow};
+const icons = {Networking:Network,CompTIA:Cpu,CCNA:Network,Cloud:Cloud,Development:Code2,Languages:Terminal,"Agentic AI":Bot,"Machine learning":BrainCircuit,"AI workflows":Workflow,"Data centers":Server};
 const kinds = {lesson:"Quick lesson",quiz:"Knowledge check",flashcard:"Flashcard",news:"Tech news",video:"Video",quote:"Quote",explainer:"AI explainer",story:"IT story",podcast:"Podcast"};
 const typeIcons = {lesson:BookOpen,quiz:CircleHelp,flashcard:Layers,news:Rss,video:Radio,quote:Quote,explainer:Clapperboard,story:BookOpen,podcast:Headphones};
 function dateLabel(date?:string){if(!date)return "";return new Date(date).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"});}

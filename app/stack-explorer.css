@@ -43,7 +43,7 @@
 .stack-stage .assembly-sheet {top:50px;height:148px}
 .stack-stage .assembly-label {font-size:.8rem;bottom:26px;left:20px}
 .stack-stage .assembly-index {font-size:.75rem;left:20px;top:18px}
-.stack-stage .stack-assembly[data-expanded=true] .assembly-sheet {transform:translateY(calc(var(--layer-index)*52px - 12px)) rotateX(52deg) rotateZ(-31deg)}
+.stack-stage .stack-assembly[data-expanded=true] .assembly-sheet {transform:translateY(calc(var(--layer-index)*var(--layer-gap,52px) - 12px)) rotateX(52deg) rotateZ(-31deg)}
 .stack-stage .assembly-sheet[data-selected=true] {filter:drop-shadow(0 2px 0 #2454ed88) drop-shadow(-3px 13px 10px #172d4720)}
 .stack-stage .assembly-sheet:focus-visible {outline-offset:10px}
 .stack-expand-control {font-size:.875rem;display:inline-flex;align-items:center;gap:9px;min-height:44px;color:var(--copy);padding:8px 14px;border:1px solid var(--border);border-radius:24px;background:var(--card)}

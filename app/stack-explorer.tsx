@@ -1,6 +1,6 @@
 "use client";
 
-import { useRef, useState, type CSSProperties, type ReactNode } from "react";
+import { useRef, useState,  type ReactNode } from "react";
 import { ArrowDown, ArrowRight, BookOpen, Check, ChevronRight, ExternalLink, Heart, Layers, Search, X } from "lucide-react";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
@@ -10,19 +10,10 @@ import { cards, type Card } from "./content";
 import { type LearningStack } from "./stacks";
 import { stackCollections, collectionCards, collectionPractice, collectionSources, collectionMatchesSearch, type StackCollection } from "./stack-collections";
 import "./stack-explorer.css";
+import {Assembly} from "./stack-assembly";
+import {PersonalStackWorkspace} from "./personal-stack-workspace";
 
-// The sheets are an interactive topic diagram, with a matching flat control list.
-function Assembly({ stack, expanded = false, selected = 0, onSelect }: { stack: StackCollection; expanded?: boolean; selected?: number; onSelect?: (index: number) => void }) {
-  return <div className="stack-assembly" data-expanded={expanded} aria-hidden={!onSelect || undefined}>
-    {stack.layers.map((layer, index) => {
-      const style = { "--layer-index": index, "--layer-order": stack.layers.length - index } as CSSProperties;
-      const face = <span className={`assembly-face tone-${layer.color}`}><span className="assembly-trace"/><span className="assembly-label">{layer.label}</span><span className="assembly-index">0{index + 1}</span></span>;
-      return onSelect ? <button type="button" key={layer.topic} className="assembly-sheet" style={style} data-selected={selected === index} aria-pressed={selected === index} aria-label={`Explore ${layer.topic} layer`} onClick={() => onSelect(index)}>{face}</button> : <span key={layer.topic} className="assembly-sheet" style={style}>{face}</span>;
-    })}
-  </div>;
-}
-
-export function StackExplorer({ onPractice, renderContent }: { onPractice: (stack: LearningStack) => void; renderContent: (card: Card) => ReactNode }) {
+function StackDiscovery({ onPractice, renderContent }: { onPractice: (stack: LearningStack) => void; renderContent: (card: Card) => ReactNode }) {
   const [query, setQuery] = useState("");
   const [activeId, setActiveId] = useState(stackCollections[0].id);
   const [layerIndex, setLayerIndex] = useState(0);
@@ -78,3 +69,5 @@ export function StackExplorer({ onPractice, renderContent }: { onPractice: (stac
     <Sheet open={inspecting !== null} onOpenChange={open => { if (!open) setInspecting(null); }}><SheetContent className="stack-idea-sheet" showCloseButton={false} onCloseAutoFocus={event => { event.preventDefault(); ideaTrigger.current?.focus({ preventScroll: true }); }}><SheetClose asChild><button type="button" className="stack-idea-close" aria-label="Close idea"><X size={20}/></button></SheetClose><SheetHeader><SheetTitle>{inspecting?.title || "Explore an idea"}</SheetTitle><SheetDescription>{inspecting?.topic} · From {stack.name}</SheetDescription></SheetHeader><div className="stack-sheet-content">{inspecting && renderContent(inspecting)}</div></SheetContent></Sheet>
   </div>;
 }
+
+export function StackExplorer(props: {onPractice:(stack:LearningStack)=>void;renderContent:(card:Card)=>ReactNode}) {return <PersonalStackWorkspace {...props} discovery={<StackDiscovery {...props}/>}/>;}
