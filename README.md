@@ -14,7 +14,7 @@ A responsive learning feed for IT professionals. The initial content set covers 
 ## Customizable interface
 
 - Stream preserves the continuous feed; Focus presents one card with previous/next controls; Index opens learning cards from a compact topic list.
-- Signal (charcoal/lime), Midnight (ink/ice), and Daylight (white/cobalt) themes cover the interface and settings dialog. Illustrations and code examples retain their semantic colors.
+- Signal (white/electric blue), Midnight (ink/ice), and Daylight (soft white/cobalt) themes cover the interface and settings dialog. Illustrations and code examples retain their semantic colors.
 - Three text sizes, two spacing options, optional learning sidebar and daily activity, reduced motion, and expanded reference details.
 - Pinned topics appear first in navigation and filters without hiding other topics.
 - Display preferences use `stackscroll-display-v1`, separately from learning progress. Reset display restores only display preferences. Storage failures keep changes available for the session.
@@ -38,3 +38,9 @@ Uses the bundled Vinext/React stack and installed Shadcn primitives. `.openai/ho
 ## Content maintenance
 
 Add original cards with stable IDs and primary-source links. Recheck version-sensitive information against the relevant vendor. Use publication dates for news and keep fallback snapshots labeled. This version teaches AI development; it does not execute coding agents or run user code.
+
+## UI framework
+
+Signal now opens with bright white surfaces, electric blue actions, cyan network diagrams, and distinct topic colors. Midnight remains the dark option; Daylight offers a quieter light palette. Saved theme IDs and learning data are retained.
+
+See `UI_FRAMEWORK.md` for the shared visual rules and the tokens used by new components.

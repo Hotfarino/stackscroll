@@ -26,7 +26,7 @@ export function useDisplayPreferences() {
     root.dataset.motion = preferences.reduceMotion ? "reduced" : "system";
     root.dataset.sources = preferences.expandSources ? "expanded" : "collapsed";
     root.style.fontSize = `${preferences.textScale}%`;
-    root.classList.toggle("dark", preferences.skin !== "daylight");
+    root.classList.toggle("dark", preferences.skin === "midnight");
     if (!loaded) return;
     try { localStorage.setItem(preferenceKey, JSON.stringify(preferences)); }
     catch {
@@ -67,9 +67,9 @@ export function Customizer({ preferences: p, onChange, canSave }: {
           <div className="setting-heading"><h3>02 / Color & light</h3></div>
           <RadioGroup value={p.skin} onValueChange={value => set("skin", value as Preferences["skin"])} className="skin-choices" aria-label="Color theme">
             {[
-              {id:"signal",name:"Signal",detail:"Charcoal / lime"},
+              {id:"signal",name:"Signal",detail:"White / electric blue"},
               {id:"midnight",name:"Midnight",detail:"Ink / ice"},
-              {id:"daylight",name:"Daylight",detail:"White / cobalt"},
+              {id:"daylight",name:"Daylight",detail:"Soft white / cobalt"},
             ].map(option => <label className={`skin-choice ${p.skin === option.id ? "chosen" : ""}`} key={option.id}>
               <RadioGroupItem value={option.id} className="setting-radio"/>
               <span className={`theme-swatch swatch-${option.id}`} aria-hidden="true"><i/><i/><i/>{p.skin === option.id && <Check size={16}/>}</span>
