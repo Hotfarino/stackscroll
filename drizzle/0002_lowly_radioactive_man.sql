@@ -1,4 +1,5 @@
-CREATE TABLE `personal_stack_versions` (
+-- Resume the failed setup when its tables already exist; preserve all rows.
+CREATE TABLE IF NOT EXISTS `personal_stack_versions` (
 	`stack_id` text NOT NULL,
 	`version` integer NOT NULL,
 	`user_id` text NOT NULL,
@@ -8,7 +9,7 @@ CREATE TABLE `personal_stack_versions` (
 	FOREIGN KEY (`stack_id`) REFERENCES `personal_stacks`(`id`) ON UPDATE no action ON DELETE cascade
 );
 --> statement-breakpoint
-CREATE TABLE `personal_stacks` (
+CREATE TABLE IF NOT EXISTS `personal_stacks` (
 	`id` text PRIMARY KEY NOT NULL,
 	`user_id` text NOT NULL,
 	`draft` text NOT NULL,
@@ -20,8 +21,8 @@ CREATE TABLE `personal_stacks` (
 	`updated_at` integer NOT NULL
 );
 --> statement-breakpoint
-CREATE INDEX `personal_stacks_user_updated` ON `personal_stacks` (`user_id`,`updated_at`);--> statement-breakpoint
-CREATE TABLE `stack_accounts` (
+CREATE INDEX IF NOT EXISTS `personal_stacks_user_updated` ON `personal_stacks` (`user_id`,`updated_at`);--> statement-breakpoint
+CREATE TABLE IF NOT EXISTS `stack_accounts` (
 	`user_id` text PRIMARY KEY NOT NULL,
 	`age_policy` text NOT NULL,
 	`age_method` text NOT NULL,
