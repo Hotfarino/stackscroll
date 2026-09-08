@@ -14,7 +14,7 @@ A responsive learning feed for IT professionals. The initial content set covers 
 ## Customizable interface
 
 - Stream preserves the continuous feed; Focus presents one card with previous/next controls; Index opens learning cards from a compact topic list.
-- Signal (white/electric blue), Midnight (ink/ice), and Daylight (soft white/cobalt) themes cover the interface and settings dialog. Illustrations and code examples retain their semantic colors.
+- Signal (white/ink), Midnight (ink/ice), and Daylight (soft white/cobalt) themes cover the interface and settings dialog. Illustrations and code examples retain their semantic colors.
 - Three text sizes, two spacing options, optional learning sidebar and daily activity, reduced motion, and expanded reference details.
 - Pinned topics appear first in navigation and filters without hiding other topics.
 - Display preferences use `stackscroll-display-v1`, separately from learning progress. Reset display restores only display preferences. Storage failures keep changes available for the session.
@@ -41,6 +41,8 @@ Add original cards with stable IDs and primary-source links. Recheck version-sen
 
 ## UI framework
 
-Signal now opens with bright white surfaces, electric blue actions, cyan network diagrams, and distinct topic colors. Midnight remains the dark option; Daylight offers a quieter light palette. Saved theme IDs and learning data are retained.
+Signal now opens with a minimalist white/ink interface and the provisional Stackscroll mark. Utility icons and buttons follow shared brand rules. Midnight remains the dark option; Daylight offers a quieter light palette. Saved theme IDs and learning data are retained.
 
 See `UI_FRAMEWORK.md` for the shared visual rules and the tokens used by new components.
+
+The top-left Stackscroll identity appears on desktop and mobile. `app/brand.tsx` centralizes its mark, wordmark, and shared Button wrapper. Free UI kit research and license sources are recorded in `UI_KIT_RESEARCH.md`; the installed shadcn/Radix and Lucide foundation is retained.

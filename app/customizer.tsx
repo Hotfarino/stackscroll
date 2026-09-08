@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { topics } from "./content";
+import { StackButton } from "./brand";
 import { defaultPreferences, preferenceKey, readPreferences, type Preferences } from "./preferences";
 
 export function useDisplayPreferences() {
@@ -46,7 +47,7 @@ export function Customizer({ preferences: p, onChange, canSave }: {
     <SheetContent className="customizer" aria-describedby="customizer-description">
       <SheetHeader className="customizer-header">
         <span className="customizer-kicker">STACKSCROLL / YOUR SPACE</span>
-        <SheetTitle className="customizer-title">Set your rhythm.</SheetTitle>
+        <SheetTitle className="customizer-title">Make it yours.</SheetTitle>
         <SheetDescription id="customizer-description">{canSave ? "Changes apply immediately and save on this device." : "Changes apply for this session. Device storage is unavailable."}</SheetDescription>
       </SheetHeader>
       <div className="customizer-body">
@@ -67,9 +68,9 @@ export function Customizer({ preferences: p, onChange, canSave }: {
           <div className="setting-heading"><h3>02 / Color & light</h3></div>
           <RadioGroup value={p.skin} onValueChange={value => set("skin", value as Preferences["skin"])} className="skin-choices" aria-label="Color theme">
             {[
-              {id:"signal",name:"Signal",detail:"White / electric blue"},
+              {id:"signal",name:"Signal",detail:"White / ink"},
               {id:"midnight",name:"Midnight",detail:"Ink / ice"},
-              {id:"daylight",name:"Daylight",detail:"Soft white / cobalt"},
+              {id:"daylight",name:"Daylight",detail:"Soft white / blue"},
             ].map(option => <label className={`skin-choice ${p.skin === option.id ? "chosen" : ""}`} key={option.id}>
               <RadioGroupItem value={option.id} className="setting-radio"/>
               <span className={`theme-swatch swatch-${option.id}`} aria-hidden="true"><i/><i/><i/>{p.skin === option.id && <Check size={16}/>}</span>
@@ -107,7 +108,7 @@ export function Customizer({ preferences: p, onChange, canSave }: {
       </div>
       <SheetFooter className="customizer-footer">
         <button className="reset-display" onClick={() => { onChange({...defaultPreferences,pinnedTopics:[]}); toast("Display defaults restored. Learning progress and saved cards are kept."); }}><RotateCcw size={14}/>Reset display</button>
-        <SheetClose asChild><button className="primary-button">Back to learning <ArrowRight size={16}/></button></SheetClose>
+        <SheetClose asChild><StackButton>Back to learning <ArrowRight size={16}/></StackButton></SheetClose>
       </SheetFooter>
     </SheetContent>
   </Sheet>;

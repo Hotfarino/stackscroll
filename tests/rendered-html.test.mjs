@@ -28,7 +28,8 @@ test("renders the Stackscroll application and its metadata", async () => {
   );
   const html = await response.text();
   assert.match(html, /<title>Stackscroll/);
-  assert.match(html, /A better kind of scroll/);
+  assert.match(html, /Your daily stack/);
+  assert.match(html, /brand-wordmark[^>]*>Stackscroll/);
   assert.match(html, /Customize your interface/);
   assert.doesNotMatch(html, /codex-preview/);
 });
