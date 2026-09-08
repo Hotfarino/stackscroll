@@ -46,3 +46,6 @@ next-env.d.ts
 /.video-test-*/
 
 .stack-test-*/
+/.catalog-test-*/
+__pycache__/
+*.pyc

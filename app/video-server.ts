@@ -26,8 +26,8 @@ export function writeAccess(request: Request): Response | null {
   return null;
 }
 
-export async function readBody(request: Request): Promise<unknown> {
-  if (Number(request.headers.get("content-length")) > 8192) throw new Error("Request too large");
+export async function readBody(request: Request, limit = 8192): Promise<unknown> {
+  if (Number(request.headers.get("content-length")) > limit) throw new Error("Request too large");
   // Enforce the bound even for chunked requests or missing Content-Length.
   const reader = request.body?.getReader();
   if (!reader) throw new Error("Missing request");
@@ -39,7 +39,7 @@ export async function readBody(request: Request): Promise<unknown> {
       const result = await reader.read();
       if (result.done) break;
       total += result.value.byteLength;
-      if (total > 8192) { await reader.cancel(); throw new Error("Request too large"); }
+      if (total > limit) { await reader.cancel(); throw new Error("Request too large"); }
       text += decoder.decode(result.value, {stream:true});
     }
     return JSON.parse(text + decoder.decode());

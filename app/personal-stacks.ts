@@ -11,7 +11,7 @@ export const storedStackDefinitionSchema = z.object({
   skin: z.enum(stackSkinIds).default("prism"),
   purpose: z.string().trim().max(300),
   layers: z.array(z.object({ topic: z.enum(topics as [Topic, ...Topic[]]), emphasis: z.union([z.literal(1), z.literal(2), z.literal(3)]) }).strict()).max(6),
-  excludedIds: z.array(z.string().max(80)).max(60),
+  excludedIds: z.array(z.string().max(80)).max(1100),
 }).strict().superRefine((value, context) => {
   if (new Set(value.layers.map(layer => layer.topic)).size !== value.layers.length) context.addIssue({ code: "custom", message: "Choose each topic only once." });
   if (new Set(value.excludedIds).size !== value.excludedIds.length) context.addIssue({ code: "custom", message: "Excluded ideas must be unique." });

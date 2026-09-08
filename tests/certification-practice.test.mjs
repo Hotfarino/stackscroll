@@ -12,11 +12,11 @@ after(() => { sqlite.close(); rmSync(temp, { recursive: true, force: true }); })
 function compile(source, name) {
   let code = ts.transpileModule(readFileSync(source, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
   code = code.replaceAll('"cloudflare:workers"', '"./env.mjs"');
-  for (const name of ['content', 'stacks', 'stack-skins', 'video-server', 'personal-stacks', 'certification-catalog', 'certification-bank', 'exam-state']) for (const prefix of ['./', '../../']) code = code.replaceAll(`"${prefix}${name}"`, `"./${name}.mjs"`);
+  for (const name of ['catalog-records', 'content', 'stacks', 'stack-skins', 'video-server', 'personal-stacks', 'certification-catalog', 'certification-bank', 'exam-state']) for (const prefix of ['./', '../../']) code = code.replaceAll(`"${prefix}${name}"`, `"./${name}.mjs"`);
   writeFileSync(join(temp, name + '.mjs'), code);
 }
 writeFileSync(join(temp, 'env.mjs'), 'export const env={};');
-for (const name of ['content', 'stacks', 'stack-skins', 'video-server', 'personal-stacks', 'certification-catalog', 'certification-bank', 'exam-state']) compile(`app/${name}.ts`, name);
+for (const name of ['catalog-records', 'content', 'stacks', 'stack-skins', 'video-server', 'personal-stacks', 'certification-catalog', 'certification-bank', 'exam-state']) compile(`app/${name}.ts`, name);
 compile('app/api/exam-attempts/route.ts', 'route');
 const imp = name => import(pathToFileURL(join(temp, name + '.mjs')));
 const { env } = await imp('env'); const route = await imp('route');

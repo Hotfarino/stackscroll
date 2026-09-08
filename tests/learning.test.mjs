@@ -6,9 +6,9 @@ import { pathToFileURL } from 'node:url';
 import ts from 'typescript';
 const temp = mkdtempSync(join(process.cwd(), '.learning-test-'));
 after(() => rmSync(temp, { recursive: true, force: true }));
-for (const name of ['content', 'learning', 'news', 'preferences']) {
+for (const name of ['catalog-records','content', 'learning', 'news', 'preferences']) {
  const source=readFileSync(`app/${name}.ts`,'utf8');
- const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"');
+ const compiled=ts.transpileModule(source,{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"').replaceAll('"./catalog-records"','"./catalog-records.mjs"');
  writeFileSync(join(temp,`${name}.mjs`),compiled);
 }
 const { cards, topics } = await import(pathToFileURL(join(temp,'content.mjs')));

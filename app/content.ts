@@ -1,10 +1,21 @@
 export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows" | "Data centers";
-export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer" | "story" | "podcast";
+export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer" | "story" | "podcast" | "resource" | "humor";
+export type CatalogMetadata = {
+  edition: "launch-1000";
+  delivery: "source" | "native";
+  format: "guide" | "reference" | "article" | "repository" | "podcast" | "video" | "humor" | "practice";
+  checkedAt: string;
+  review: "publisher-linked" | "original-review-pending" | "original-humor";
+  rights: "link-only" | "original";
+  tags: string[];
+  prompt?: string;
+  excerpt?: string;
+};
 export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
   body?: string; takeaway?: string; code?: string; language?: string; visual?: "network" | "subnet" | "workflow";
   options?: string[]; answer?: number; explanation?: string; back?: string;
-  source: string; sourceName: string; date?: string; minutes?: number;
+  source: string; sourceName: string; date?: string; minutes?: number; catalog?: CatalogMetadata;
 };
 export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Data centers"];
 const refs = {
@@ -17,7 +28,7 @@ const refs = {
   agent: ["https://www.anthropic.com/engineering/building-effective-agents", "Anthropic · Engineering"],
 };
 function c(data: Omit<Card,"source"|"sourceName">, ref: string[]): Card {return {...data,source:ref[0],sourceName:ref[1]};}
-export const cards: Card[] = [
+export const coreCards: Card[] = [
  c({id:"dc-airflow",kind:"lesson",topic:"Data centers",level:"Foundation",title:"Cooling starts with the path of the air.",body:"In a hot-aisle/cold-aisle arrangement, server intakes face the cold aisle and exhausts face the hot aisle. The goal is to reduce mixing between cool supply air and hot exhaust. This is an airflow concept; changes to a live room need coordination with its facilities team.",takeaway:"When reading a rack layout, identify the intake side, exhaust side, and return-air path.",minutes:2},["https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center/move-hot-aislecold-aisle-layout","ENERGY STAR · Hot and cold aisles"]),
  c({id:"dc-ai-fabrics",kind:"lesson",topic:"Data centers",level:"Foundation",title:"An AI cluster has more than one network job.",body:"NVIDIA's DGX BasePOD NDR400 reference architecture describes a compute network, an Ethernet network for system management and storage, and an out-of-band management network. These roles help explain why training communication, data access, and administration are considered separately. This is one reference design, not a rule for every data center.",takeaway:"Read a cluster diagram by asking what each network carries and which devices it connects.",minutes:2},["https://docs.nvidia.com/dgx-basepod/reference-architecture-infrastructure-foundation-enterprise-ai/latest/reference-architectures.html","NVIDIA · DGX BasePOD reference architecture"]),
  c({id:"dc-gpu-health",kind:"lesson",topic:"Data centers",level:"Foundation",title:"GPU operations includes health, not just workloads.",body:"NVIDIA Data Center GPU Manager (DCGM) supports GPU behavior monitoring, configuration, policy oversight, health checks, diagnostics, and process statistics. These capabilities give infrastructure teams a way to observe and manage the GPUs supporting AI workloads.",takeaway:"Connect the software running on a GPU with the infrastructure tools used to monitor and maintain it.",minutes:2},["https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/index.html","NVIDIA · DCGM overview"]),
@@ -54,6 +65,13 @@ export const cards: Card[] = [
  c({id:"bash-pipe",kind:"quiz",topic:"Languages",level:"Foundation",title:"What does the pipe symbol do in a shell command?",body:"Consider: cat access.log | wc -l",options:["Runs commands on different servers","Sends standard output into the next command’s standard input","Redirects all errors into access.log","Encrypts the log"],answer:1,explanation:"A pipe connects standard output to the next command’s standard input. Here wc -l counts newline characters from the log. Standard error is not included by the plain | operator."},["https://www.gnu.org/software/bash/manual/html_node/Pipelines.html","GNU Bash · Pipelines"]),
  c({id:"workflow-eval",kind:"flashcard",topic:"AI workflows",level:"Advanced",title:"What stays constant when comparing two prompt versions?",back:"A representative evaluation set and scoring criteria.",explanation:"Run both versions on the same cases, including edge cases. Compare correctness, tool behavior, latency, and cost. Keep holdout cases to avoid overfitting your evaluation set."},refs.agent),
 ];
+import { catalogCards } from "./catalog-records";
+export { catalogCards };
+export const cards: Card[] = [...coreCards, ...catalogCards];
+export const cardById = new Map(cards.map(card => [card.id, card]));
+export function resolveCatalogSaved(saved: Card[], resolveOther: (saved: Card[]) => Card[]): Card[] {
+  return saved.flatMap(card => card.id.startsWith("catalog-") ? (cardById.has(card.id) ? [cardById.get(card.id)!] : []) : resolveOther([card]));
+}
 export const curatedNews:Card[]=[
   {
     "id": "news-linux-2027-preview",

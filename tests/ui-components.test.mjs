@@ -140,7 +140,7 @@ test("mixed feed includes every format and resolves saved originals from the cur
  const {stateSchema,initialState}=await vite.ssrLoadModule("/app/learning.ts");
  const pool=[...videoCatalog.map(videoAsCard),...mediaCards(),...curatedNews,...cards];
  const result=mixedFeed(pool,[]);
- assert.deepEqual(result.slice(0,7).map(item=>item.kind),['video','quote','explainer','news','lesson','quiz','flashcard']);
+ assert.deepEqual(result.slice(0,11).map(item=>item.kind),['video','quote','story','explainer','news','lesson','quiz','podcast','flashcard','humor','resource']);
  assert.equal(new Set(result.map(item=>item.id)).size,result.length);
  const tuned=mixedFeed(pool,[{topic:'Development',preference:'more'}]);assert.equal(tuned[0].topic,'Development');
  for(const quote of quotes){assert.ok(quote.quote.split(/\s+/).length<=25);assert.match(quote.source,/^https:\/\//);assert.ok(quote.author);}

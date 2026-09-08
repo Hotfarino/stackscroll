@@ -37,7 +37,7 @@ export async function POST(request: Request) {
   if (request.headers.get("origin") !== new URL(request.url).origin) return json({ error: "This request must come from Stackscroll." }, 403);
   if (!request.headers.get("content-type")?.startsWith("application/json")) return json({ error: "JSON is required." }, 415);
   let command: z.infer<typeof commandSchema>;
-  try { command = commandSchema.parse(await readBody(request)); } catch { return json({ error: "That Stack update is not valid. Check its topics and content." }, 400); }
+  try { command = commandSchema.parse(await readBody(request, 100_000)); } catch { return json({ error: "That Stack update is not valid. Check its topics and content." }, 400); }
   try {
     const db = database(); const now = Date.now();
     if (command.operation === "attest") {

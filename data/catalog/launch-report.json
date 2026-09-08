@@ -1,0 +1,634 @@
+{
+  "edition": "launch-1000",
+  "count": 1000,
+  "native": 120,
+  "sourcePreviews": 880,
+  "byKind": {
+    "flashcard": 60,
+    "quiz": 20,
+    "humor": 40,
+    "podcast": 69,
+    "story": 51,
+    "resource": 710,
+    "video": 50
+  },
+  "byTopic": {
+    "Languages": 208,
+    "Development": 260,
+    "Cloud": 135,
+    "Networking": 35,
+    "Data centers": 30,
+    "Machine learning": 232,
+    "Agentic AI": 52,
+    "AI workflows": 38,
+    "CCNA": 3,
+    "CompTIA": 7
+  },
+  "byPublisher": {
+    "Python · copy": 2,
+    "Python · collections": 1,
+    "Python · json": 2,
+    "Python · pathlib": 2,
+    "Python · logging": 2,
+    "Python · asyncio tasks": 3,
+    "Python · context managers": 1,
+    "Python · subprocess": 1,
+    "Python · csv": 2,
+    "Python · datetime": 2,
+    "Git · bisect": 3,
+    "Git · reflog": 2,
+    "Git · diff": 2,
+    "Git · ignore rules": 3,
+    "Git · stash": 2,
+    "PostgreSQL · Transactions": 3,
+    "PostgreSQL · Joins": 2,
+    "PostgreSQL · Aggregates": 1,
+    "PostgreSQL · Window functions": 1,
+    "PostgreSQL · EXPLAIN": 3,
+    "Kubernetes · Probes": 4,
+    "Kubernetes · Secrets": 3,
+    "Kubernetes · ConfigMaps": 2,
+    "Kubernetes · Services": 1,
+    "Kubernetes · DNS": 1,
+    "Kubernetes · Network policies": 3,
+    "Kubernetes · Namespaces": 2,
+    "Kubernetes · DaemonSets": 3,
+    "Kubernetes · StatefulSets": 1,
+    "scikit-learn · Pipelines": 1,
+    "scikit-learn · Cross-validation": 3,
+    "scikit-learn · Model evaluation": 3,
+    "scikit-learn · Clustering": 3,
+    "scikit-learn · Decomposition": 1,
+    "scikit-learn · Preprocessing": 1,
+    "scikit-learn · Linear models": 2,
+    "scikit-learn · Decision trees": 1,
+    "scikit-learn · Common pitfalls": 3,
+    "LangGraph · Persistence": 1,
+    "LangGraph · Interrupts": 3,
+    "LangGraph · Durable execution": 3,
+    "LangChain · Tools": 2,
+    "LangChain · Structured output": 3,
+    "LangChain · MCP": 2,
+    "LangChain · Context engineering": 2,
+    "LangChain · Testing": 3,
+    "NVIDIA · DCGM": 4,
+    "IETF · IPv6": 3,
+    "IETF · ARP": 2,
+    "IETF · DHCP": 2,
+    "IETF · DNS": 3,
+    "IETF · HTTP semantics": 2,
+    "Google SRE · Monitoring": 2,
+    "Google SRE · Incidents": 2,
+    "Google SRE · Postmortems": 2,
+    "LangGraph · Overview": 1,
+    "Changelog": 29,
+    "Changelog · Friends": 30,
+    "GitHub": 1,
+    "Kubernetes": 107,
+    "TWiT · Security Now": 10,
+    "NVIDIA": 20,
+    "ansible · GitHub": 1,
+    "netbox-community · GitHub": 1,
+    "nornir-automation · GitHub": 1,
+    "ktbyers · GitHub": 1,
+    "napalm-automation · GitHub": 1,
+    "secdev · GitHub": 1,
+    "mininet · GitHub": 1,
+    "srl-labs · GitHub": 1,
+    "esnet · GitHub": 1,
+    "wireshark · GitHub": 1,
+    "prometheus · GitHub": 1,
+    "grafana · GitHub": 1,
+    "netdata · GitHub": 1,
+    "openbmc · GitHub": 1,
+    "opencomputeproject · GitHub": 1,
+    "DMTF · GitHub": 1,
+    "opentofu · GitHub": 1,
+    "kubernetes-sigs · GitHub": 1,
+    "k3s-io · GitHub": 1,
+    "helm · GitHub": 1,
+    "argoproj · GitHub": 1,
+    "langchain-ai · GitHub": 1,
+    "pydantic · GitHub": 2,
+    "microsoft · GitHub": 5,
+    "huggingface · GitHub": 1,
+    "jupyterlab · GitHub": 1,
+    "mlflow · GitHub": 1,
+    "ray-project · GitHub": 1,
+    "vllm-project · GitHub": 1,
+    "duckdb · GitHub": 1,
+    "astral-sh · GitHub": 2,
+    "fastapi · GitHub": 1,
+    "PowerShell · GitHub": 1,
+    "StatQuest with Josh Starmer": 50,
+    "Docker": 21,
+    "Git": 45,
+    "Hugging Face": 72,
+    "MDN": 29,
+    "LangChain": 35,
+    "PostgreSQL": 67,
+    "Python": 67,
+    "PyTorch": 49,
+    "The Rust Project": 66,
+    "scikit-learn": 55,
+    "Google SRE": 63,
+    "TypeScript": 25
+  },
+  "review": "Source identity, reachability, metadata, original answer consistency, and release structure checked. Independent factual review remains pending.",
+  "mediaRights": "External works remain at the publisher. No third-party video, audio, image, or GIF files are redistributed.",
+  "supply": "Manual candidate collection and explicit release. No scheduled auto-publication.",
+  "excluded": [
+    {
+      "url": "https://docs.docker.com/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.docker.com/bot-detection/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.docker.com/get-started/resources/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.docker.com/guides/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.docker.com/llms-full.txt",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.docker.com/llms.txt",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.docker.com/manuals/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.docker.com/reference/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter0/1",
+      "reason": "course onboarding rather than a specific idea"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter1/10",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter1/11",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.langchain.com/oss/python/learn",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/admin.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/bug-reporting.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/client-interfaces.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/internals.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/preface.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/reference.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/server-programming.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/sql.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/tutorial.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://docs.python.org/3/library/intro.html",
+      "reason": "course onboarding rather than a specific idea"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/beginner/basics/intro.html",
+      "reason": "course onboarding rather than a specific idea"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/beginner/ddp_series_intro.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/beginner/deep_learning_60min_blitz.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/beginner/introyt/introyt_index.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/beginner/onnx/intro_onnx.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/intermediate/TCPStore_libuv_backend.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/intermediate/pipelining_tutorial.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/intermediate/torch_compile_tutorial.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/intermediate/torchrec_intro_tutorial.html",
+      "reason": "course index rather than individual tutorial"
+    },
+    {
+      "url": "https://docs.pytorch.org/tutorials/intro.html",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/agents-course/en/unit0/discord101",
+      "reason": "course onboarding rather than a specific idea"
+    },
+    {
+      "url": "https://huggingface.co/learn/agents-course/en/unit0/onboarding",
+      "reason": "course onboarding rather than a specific idea"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter8/7",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter11/5",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter11/7",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter5/8",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter4/6",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter9/9",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter7/9",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter6/10",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter10/7",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter12/5",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://huggingface.co/learn/llm-course/en/chapter2/9",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch01-01-installation.html",
+      "reason": "duplicate canonical URL"
+    },
+    {
+      "url": "https://sre.google/sre-book/bibliography/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/sre-book/conclusion/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/sre-book/part-I-introduction/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/sre-book/part-II-principles/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/sre-book/part-III-practices/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/sre-book/part-IV-management/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/sre-book/part-V-conclusions/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/sre-book/preface/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/workbook/colophon/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/workbook/conclusion/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/workbook/part-I-foundations/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/workbook/part-II-practices/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/workbook/part-III-processes/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://sre.google/workbook/preface/",
+      "reason": "navigation, recap, or non-specific discovery entry"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/compositepodgroup-api/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/autoscaling/horizontal-pod-autoscale/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/topology-aware-routing/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/ingress/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/architecture/cgroups/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/ingress-controllers/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/scheduling-group/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/cluster-ip-allocation/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/overview/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/pods/probes/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/workloads/controllers/statefulset/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/containers/container-environment/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://kubernetes.io/docs/concepts/services-networking/service/",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/tutorial-sql.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/information-schema.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/libpq.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://www.postgresql.org/docs/current/textsearch.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/binary.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/numbers.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/configparser.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/reprlib.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/math.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/copyreg.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/shelve.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/pprint.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/persistence.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/sqlite3.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/io.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/textwrap.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/functions.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/bisect.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/pathlib.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/os.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/time-complexity.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/stat.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/pickle.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/text.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/linecache.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://docs.python.org/3/library/logging.config.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch12-01-accepting-command-line-arguments.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch19-00-patterns.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch06-01-defining-an-enum.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch14-03-cargo-workspaces.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch08-01-vectors.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch15-06-reference-cycles.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch05-01-defining-structs.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch10-01-syntax.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch10-02-traits.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch16-02-message-passing.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch08-00-common-collections.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch05-02-example-structs.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch05-03-method-syntax.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch18-01-what-is-oo.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch07-05-separating-modules-into-different-files.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch03-03-how-functions-work.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch10-03-lifetime-syntax.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch09-03-to-panic-or-not-to-panic.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch07-00-managing-growing-projects-with-packages-crates-and-modules.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch19-02-refutability.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch03-02-data-types.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch07-03-paths-for-referring-to-an-item-in-the-module-tree.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch12-03-improving-error-handling-and-modularity.html",
+      "reason": "held for a later edition to balance the launch mix"
+    },
+    {
+      "url": "https://doc.rust-lang.org/book/ch17-04-streams.html",
+      "reason": "held for a later edition to balance the launch mix"
+    }
+  ]
+}

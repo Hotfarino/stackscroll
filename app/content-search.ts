@@ -9,5 +9,5 @@ export function matchesSearch(query:string,fields:(string|undefined)[]):boolean{
 }
 export function cardMatchesSearch(card:Card,query:string,videos:VideoRecord[]=[]):boolean{
  const quote=quotes.find(v=>v.id===card.id),clip=explainers.find(v=>v.id===card.id),video=videos.find(v=>v.id===card.id);
- return matchesSearch(query,[card.title,card.topic,card.kind,card.level,card.body,card.explanation,card.back,card.takeaway,card.code,card.language,card.sourceName,quote?.context,quote?.prompt,video?.description,video?.creator,clip?.description,...(clip?.transcript||[])]);
+ return matchesSearch(query,[card.title,card.topic,card.kind,card.level,card.body,card.explanation,card.back,card.takeaway,card.code,card.language,card.sourceName,card.catalog?.excerpt,card.catalog?.prompt,...(card.catalog?.tags||[]),card.kind==="humor"?"memes funny tech humor":"",card.catalog?.format,quote?.context,quote?.prompt,video?.description,video?.creator,clip?.description,...(clip?.transcript||[])]);
 }

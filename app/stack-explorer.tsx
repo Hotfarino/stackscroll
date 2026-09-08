@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Sheet, SheetClose, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/components/ui/sheet";
 import { Input } from "@/components/ui/input";
 import { StackButton } from "./brand";
-import { cards, type Card } from "./content";
+import { cards, type Card, type Topic } from "./content";
 import { type LearningStack } from "./stacks";
 import { stackCollections, collectionCards, collectionPractice, collectionSources, collectionMatchesSearch, type StackCollection } from "./stack-collections";
 import "./stack-explorer.css";
@@ -70,4 +70,4 @@ function StackDiscovery({ onPractice, renderContent }: { onPractice: (stack: Lea
   </div>;
 }
 
-export function StackExplorer(props: {onPractice:(stack:LearningStack)=>void;renderContent:(card:Card)=>ReactNode}) {return <PersonalStackWorkspace {...props} discovery={<StackDiscovery {...props}/>}/>;}
+export function StackExplorer(props: {seedTopic?:Topic|null;onSeedConsumed?:()=>void;onPractice:(stack:LearningStack)=>void;renderContent:(card:Card)=>ReactNode}) {return <PersonalStackWorkspace {...props} discovery={<StackDiscovery {...props}/>}/>;}

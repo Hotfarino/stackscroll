@@ -6,8 +6,8 @@ import {pathToFileURL} from 'node:url';
 import ts from 'typescript';
 const temp=mkdtempSync(join(process.cwd(),'.learning-test-'));
 after(()=>rmSync(temp,{recursive:true,force:true}));
-for(const name of ['content','mixed-feed','editorial-content','learning']){
- const code=ts.transpileModule(readFileSync(`app/${name}.ts`,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"');writeFileSync(join(temp,name+'.mjs'),code);
+for(const name of ['catalog-records','content','mixed-feed','editorial-content','learning']){
+ const code=ts.transpileModule(readFileSync(`app/${name}.ts`,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"').replaceAll('"./catalog-records"','"./catalog-records.mjs"');writeFileSync(join(temp,name+'.mjs'),code);
 }
 const load=name=>import(pathToFileURL(join(temp,name+'.mjs')));
 const {mixedFeed,eligibleCard,preferenceScore,feedReason}=await load('mixed-feed');

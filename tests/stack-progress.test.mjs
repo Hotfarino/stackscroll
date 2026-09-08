@@ -9,9 +9,9 @@ const temp=mkdtempSync(join(process.cwd(),'.stack-test-'));
 const sqlite=new DatabaseSync(':memory:');
 sqlite.exec(readFileSync('drizzle/0001_normal_wendigo.sql','utf8'));
 after(()=>{sqlite.close();rmSync(temp,{recursive:true,force:true});});
-function compile(source,name){let code=ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText;for(const [from,to] of [['cloudflare:workers','./env.mjs'],['./content','./content.mjs'],['../../video-server','./video-server.mjs'],['../../stacks','./stacks.mjs']])code=code.replaceAll('"'+from+'"','"'+to+'"');writeFileSync(join(temp,name+'.mjs'),code);}
+function compile(source,name){let code=ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText;for(const [from,to] of [['cloudflare:workers','./env.mjs'],['./content','./content.mjs'],['./catalog-records','./catalog-records.mjs'],['../../video-server','./video-server.mjs'],['../../stacks','./stacks.mjs']])code=code.replaceAll('"'+from+'"','"'+to+'"');writeFileSync(join(temp,name+'.mjs'),code);}
 writeFileSync(join(temp,'env.mjs'),'export const env={};');
-compile('app/content.ts','content');compile('app/stacks.ts','stacks');compile('app/video-server.ts','video-server');compile('app/api/stacks/route.ts','route');
+compile('app/catalog-records.ts','catalog-records');compile('app/content.ts','content');compile('app/stacks.ts','stacks');compile('app/video-server.ts','video-server');compile('app/api/stacks/route.ts','route');
 const imp=name=>import(pathToFileURL(join(temp,name+'.mjs')));
 const {env}=await imp('env');const route=await imp('route');
 const {blankSession,transitionSession,rankStacks,learningStacks}=await imp('stacks');

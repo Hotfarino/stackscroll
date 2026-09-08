@@ -13,17 +13,17 @@ for (const file of ['0001_normal_wendigo.sql', '0002_lowly_radioactive_man.sql']
 after(() => { sqlite.close(); rmSync(temp, { recursive: true, force: true }); });
 function compile(source, name) {
   let code = ts.transpileModule(readFileSync(source, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
-  for (const [from, to] of [['cloudflare:workers', './env.mjs'], ['./content', './content.mjs'], ['./stacks', './stacks.mjs'], ['./stack-skins', './stack-skins.mjs'], ['../../video-server', './video-server.mjs'], ['../../personal-stacks', './personal-stacks.mjs']]) code = code.replaceAll('"' + from + '"', '"' + to + '"');
+  for (const [from, to] of [['cloudflare:workers', './env.mjs'], ['./content', './content.mjs'], ['./catalog-records', './catalog-records.mjs'], ['./stacks', './stacks.mjs'], ['./stack-skins', './stack-skins.mjs'], ['../../video-server', './video-server.mjs'], ['../../personal-stacks', './personal-stacks.mjs']]) code = code.replaceAll('"' + from + '"', '"' + to + '"');
   writeFileSync(join(temp, name + '.mjs'), code);
 }
 writeFileSync(join(temp, 'env.mjs'), 'export const env={};');
-for (const name of ['content', 'stacks', 'stack-skins', 'video-server', 'personal-stacks']) compile(`app/${name}.ts`, name);
+for (const name of ['catalog-records','content', 'stacks', 'stack-skins', 'video-server', 'personal-stacks']) compile(`app/${name}.ts`, name);
 compile('app/api/personal-stacks/route.ts', 'route');
 const imp = name => import(pathToFileURL(join(temp, name + '.mjs')));
 const { env } = await imp('env');
 const route = await imp('route');
 const { stackMix, aiInfrastructureStarter, emptyStack, stackDefinitionSchema, createEdition } = await imp('personal-stacks');
-const { cards } = await imp('content');
+const { cards, coreCards } = await imp('content');
 let beforeBatch = null;
 let failAt = -1;
 function prepared(sql, args = []) {
@@ -62,7 +62,7 @@ test('starter definitions are independent and every layer has actual referenced 
   const edition = createEdition(next);
   assert.equal(edition.contentIds.length, new Set(edition.contentIds).size);
   for (const layer of next.layers) assert.ok(edition.contentIds.some(id => cards.find(card => card.id === id)?.topic === layer.topic));
-  const dataCenterCards = cards.filter(card => card.topic === 'Data centers');
+  const dataCenterCards = coreCards.filter(card => card.topic === 'Data centers');
   assert.equal(dataCenterCards.length, 3);
   for (const card of dataCenterCards) assert.ok(['www.energystar.gov', 'docs.nvidia.com'].includes(new URL(card.source).hostname));
   assert.ok(edition.practiceIds.includes('agent-feedback')); assert.ok(edition.practiceIds.includes('ml-generalization'));
@@ -176,4 +176,19 @@ test('private Stack limit is account-scoped and storage failures remain visible'
   const old = console.error; console.error = () => {}; env.DB = undefined;
   try { assert.equal((await route.GET(request())).status, 503); assert.equal((await post(command())).status, 503); }
   finally { console.error = old; env.DB = binding; }
+});
+
+test('a catalog-sized customization crosses the old body limit and saves its exact finite edition', async () => {
+  await attest('large-catalog-owner');
+  const layers = [{ topic: 'Languages', emphasis: 3 }, { topic: 'Development', emphasis: 2 }];
+  const selected = cards.filter(card => layers.some(layer => layer.topic === card.topic));
+  const keep = new Set(layers.flatMap(layer => selected.filter(card => card.topic === layer.topic).slice(0, 3).map(card => card.id)));
+  const definition = { ...emptyStack(), name: 'Small deliberate mix', purpose: 'Keep six ideas from the larger launch catalog.', layers, excludedIds: selected.filter(card => !keep.has(card.id)).map(card => card.id) };
+  const operation = command('activate', crypto.randomUUID(), 0, definition);
+  assert.ok(new TextEncoder().encode(JSON.stringify(operation)).length > 8192);
+  const record = await saved(operation, 'large-catalog-owner');
+  assert.deepEqual(new Set(record.active.contentIds), keep);
+  assert.equal(record.draft.excludedIds.length, definition.excludedIds.length);
+  const listed = await list('large-catalog-owner');
+  assert.deepEqual(listed.stacks[0].active, record.active);
 });
