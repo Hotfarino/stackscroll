@@ -158,3 +158,11 @@ test("podcast discovery uses official links without loading or rehosting audio",
   assert.ok(html.includes(card.source));assert.match(html,/Listen on/);assert.match(html,/Audio stays with the publisher/);assert.doesNotMatch(html,/<iframe|<audio|<video/);
  }
 });
+
+test("playlist data is bounded and the unopened playlist loads no media",async()=>{
+ const {parsePlaylist,VideoPlaylist}=await vite.ssrLoadModule("/app/video-playlist.tsx");
+ assert.deepEqual(parsePlaylist(JSON.stringify({name:"Network lab",ids:["a","a","b"]})),{name:"Network lab",ids:["a","b"]});
+ for(const value of [null,{name:"x",ids:[{}]},{name:"x",ids:Array(101).fill("a")},{name:"x".repeat(81),ids:[]}])assert.throws(()=>parsePlaylist(JSON.stringify(value)));
+ const html=renderToStaticMarkup(React.createElement(VideoPlaylist,{model:{list:{name:"Tech",ids:["original-dns"]},ready:true,notice:"",setList(){},clear(){}},videos:[],blocked:false,onOpen(){}}));
+ assert.match(html,/Playlist \(1\)/);assert.doesNotMatch(html,/<iframe|<video|youtube.com\/iframe_api/);
+});
