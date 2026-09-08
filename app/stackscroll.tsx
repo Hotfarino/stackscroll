@@ -13,15 +13,18 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { Customizer, useDisplayPreferences } from "./customizer";
 import { orderedTopics } from "./preferences";
 import { Brand, StackButton } from "./brand";
+import { VideoCard } from "./video-card";
+import { PrivacyControls } from "./privacy-controls";
+import { videoAsCard, resolveSavedVideos, videoIdentity, createPlaybackSession, type VideoRecord } from "./video-catalog";
 import { Toaster } from "@/components/ui/sonner";
 import { toast } from "sonner";
 import { cards, curatedNews, topics, paths, type Card, type Topic, type Kind } from "./content";
 import { initialState, stateSchema, localDay, scheduleReview, isDue, quizScore, type LearningState } from "./learning";
 
 const icons = {Networking:Network,CompTIA:Cpu,CCNA:Network,Cloud:Cloud,Development:Code2,Languages:Terminal,"Agentic AI":Bot,"Machine learning":BrainCircuit,"AI workflows":Workflow};
-const kinds = {lesson:"Quick lesson",quiz:"Knowledge check",flashcard:"Flashcard",news:"Tech news"};
-const typeIcons = {lesson:BookOpen,quiz:CircleHelp,flashcard:Layers,news:Rss};
-const tabs = [{id:"all",label:"For you"},{id:"lesson",label:"Lessons"},{id:"quiz",label:"Quizzes"},{id:"flashcard",label:"Flashcards"},{id:"news",label:"Tech news"}];
+const kinds = {lesson:"Quick lesson",quiz:"Knowledge check",flashcard:"Flashcard",news:"Tech news",video:"Video"};
+const typeIcons = {lesson:BookOpen,quiz:CircleHelp,flashcard:Layers,news:Rss,video:Radio};
+const tabs = [{id:"all",label:"For you"},{id:"lesson",label:"Lessons"},{id:"video",label:"Videos"},{id:"quiz",label:"Quizzes"},{id:"flashcard",label:"Flashcards"},{id:"news",label:"Tech news"}];
 type View = "feed" | "paths" | "review" | "saved";
 const nav = [{id:"feed",label:"Your feed",icon:PanelsTopLeft},{id:"paths",label:"Learning paths",icon:Waypoints},{id:"review",label:"Review cards",icon:GalleryVerticalEnd},{id:"saved",label:"Saved",icon:Bookmark}] as const;
 function dateLabel(date?:string) {if(!date)return "";const d=new Date(date);return Number.isFinite(d.getTime())?d.toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"}):"";}
@@ -65,6 +68,21 @@ export default function Stackscroll(){
  const { preferences, setPreferences, canSave } = useDisplayPreferences();
  const quickTopics = orderedTopics(preferences.pinnedTopics);
  const [focusIndex,setFocusIndex] = useState(0);
+ const [videos,setVideos] = useState<VideoRecord[]>([]);
+ const [videoStatus,setVideoStatus] = useState("loading");
+ const [activeVideo,setActiveVideo] = useState<string|null>(null);
+ const playbackSession=useRef(createPlaybackSession()).current;
+ const unloadVideos=useCallback(()=>{playbackSession.revoke();setActiveVideo(null);},[playbackSession]);
+ const refreshVideos = useCallback(async()=>{
+  try {
+   const response=await fetch("/api/videos",{cache:"no-store"});
+   const result=await response.json() as {items:VideoRecord[]};
+   if(!response.ok||!Array.isArray(result.items))throw new Error("Unavailable");
+   setVideos(result.items);setVideoStatus(result.items.length?"ready":"empty");
+   setActiveVideo(id=>result.items.some((video:VideoRecord)=>videoIdentity(video)===id)?id:null);
+  } catch {setVideos([]);setActiveVideo(null);setVideoStatus("unavailable");}
+ },[]);
+ useEffect(()=>{void refreshVideos();const timer=setInterval(()=>void refreshVideos(),30000);window.addEventListener("focus",refreshVideos);return()=>{clearInterval(timer);window.removeEventListener("focus",refreshVideos);};},[refreshVideos]);
  const [state,setState]=useState<LearningState>(initialState);const [ready,setReady]=useState(false);const [storageOk,setStorageOk]=useState(true);
  const [view,setView]=useState<View>("feed");const [tab,setTab]=useState("all");const [topic,setTopic]=useState("All topics");const [level,setLevel]=useState("all");const [limit,setLimit]=useState(8);
  const [news,setNews]=useState<Card[]>(curatedNews);const [newsStatus,setNewsStatus]=useState("curated");const [newsLoading,setNewsLoading]=useState(false);const [newsFetched,setNewsFetched]=useState("");
@@ -72,27 +90,43 @@ export default function Stackscroll(){
  useEffect(()=>{try{const raw=localStorage.getItem("stackscroll-learning-v1");if(raw){const parsed=stateSchema.safeParse(JSON.parse(raw));if(parsed.success)setState(parsed.data);else toast("Previous saved data could not be read. Starting a fresh session.");}}catch{setStorageOk(false);}setReady(true);},[]);
  useEffect(()=>{if(!ready)return;try{localStorage.setItem("stackscroll-learning-v1",JSON.stringify(state));}catch{setStorageOk(false);if(!storageWarned.current){toast("Progress is available for this session only. Device storage is unavailable.");storageWarned.current=true;}}},[state,ready]);
  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(timer);},[]);
- const refreshNews=useCallback(async()=>{setNewsLoading(true);try{const response=await fetch("/api/news");if(!response.ok)throw new Error("News unavailable");const result=await response.json();if(!Array.isArray(result.items))throw new Error("Invalid news");setNews(result.items.length?result.items:curatedNews);setNewsStatus(result.status||"curated");setNewsFetched(result.fetchedAt||"");}catch{setNews(curatedNews);setNewsStatus("unavailable");}finally{setNewsLoading(false);}},[]);
+ const refreshNews=useCallback(async()=>{setNewsLoading(true);try{const response=await fetch("/api/news");if(!response.ok)throw new Error("News unavailable");const result=await response.json() as {items:Card[];status?:string;fetchedAt?:string};if(!Array.isArray(result.items))throw new Error("Invalid news");setNews(result.items.length?result.items:curatedNews);setNewsStatus(result.status||"curated");setNewsFetched(result.fetchedAt||"");}catch{setNews(curatedNews);setNewsStatus("unavailable");}finally{setNewsLoading(false);}},[]);
  useEffect(()=>{void refreshNews();},[refreshNews]);
- useEffect(()=>{setLimit(8);setFocusIndex(0);},[view,tab,topic,level,state.path,preferences.layout]);
+ useEffect(()=>{setLimit(8);setFocusIndex(0);unloadVideos();},[view,tab,topic,level,state.path,preferences.layout,unloadVideos]);
  const activePath=paths.find(p=>p.id===state.path);const due=cards.filter(c=>isDue(c,state,now));
  const todayCount=Object.values(state.done).filter(d=>d===localDay(new Date(now))).length;const score=quizScore(state);
- const allCards=useMemo(()=>{const result=[...cards];news.slice(0,5).forEach((n,i)=>result.splice(Math.min(5+i*8,result.length),0,n));return result;},[news]);
+ const allCards=useMemo(()=>{const result=[...cards];news.slice(0,5).forEach((n,i)=>result.splice(Math.min(5+i*8,result.length),0,n));videos.forEach((video,i)=>result.splice(Math.min(2+i*9,result.length),0,videoAsCard(video)));return result;},[news,videos]);
  const filtered=useMemo(()=>{
-  const base=view==="saved"?state.saved:view==="review"?due:tab==="news"?news:allCards;
+  const base=view==="saved"?resolveSavedVideos(state.saved,videos):view==="review"?due:tab==="news"?news:allCards;
   return base.filter(c=>(view!=="feed"||tab==="all"||c.kind===tab)&&(topic==="All topics"||c.topic===topic)&&(level==="all"||c.level===level)&&(view!=="feed"||!activePath||activePath.topics.includes(c.topic)));
- },[view,state.saved,due,tab,news,allCards,topic,level,activePath]);
+ },[view,state.saved,due,tab,news,allCards,topic,level,activePath,videos]);
  useEffect(()=>{const el=sentinel.current;if(preferences.layout==="focus"||!el||limit>=filtered.length)return;const observer=new IntersectionObserver(entries=>{if(entries[0].isIntersecting)setLimit(n=>Math.min(n+6,filtered.length));},{rootMargin:"300px"});observer.observe(el);return()=>observer.disconnect();},[limit,filtered.length,preferences.layout]);
  function scrollToTop(){window.scrollTo({top:0,behavior:preferences.reduceMotion||window.matchMedia("(prefers-reduced-motion: reduce)").matches?"instant":"smooth"});}
- function navigate(v:View){setView(v);setTopic("All topics");setLevel("all");scrollToTop();}
+ function navigate(v:View){unloadVideos();setView(v);setTopic("All topics");setLevel("all");scrollToTop();}
  function chooseTopic(t:Topic){setView("feed");setTopic(t);setTab("all");setState(s=>({...s,path:"all"}));scrollToTop();}
  function choosePath(id:string){setState(s=>({...s,path:id as LearningState["path"]}));setView("feed");setTopic("All topics");setTab("all");setLevel("all");scrollToTop();}
  function save(c:Card){const exists=state.saved.some(v=>v.id===c.id);setState(s=>({...s,saved:exists?s.saved.filter(v=>v.id!==c.id):[c,...s.saved]}));toast(exists?"Removed from saved":"Added to your saved stack");}
- function complete(id:string){setState(s=>({...s,done:{...s.done,[id]:localDay()}}));}
+ function complete(id:string){if(allCards.find(c=>c.id===id)?.kind==="video")return;setState(s=>({...s,done:{...s.done,[id]:localDay()}}));}
  function answer(id:string,a:number){setState(s=>({...s,answers:{...s.answers,[id]:a},done:{...s.done,[id]:localDay()}}));}
  function review(id:string,grade:"again"|"good"|"easy"){setState(s=>({...s,reviews:{...s.reviews,[id]:scheduleReview(s.reviews[id],grade)},done:{...s.done,[id]:localDay()}}));toast(grade==="again"?"Back in your review queue in 10 minutes":"Your next review is scheduled");}
  const activeIndex = Math.min(focusIndex, Math.max(0, filtered.length-1));
- const renderCard = (c:Card) => <LearningCard key={`${view}-${c.id}`} card={c} state={state} onSave={save} onComplete={complete} onAnswer={answer} onReview={review}/>;
+ function clearHistory(){
+  const next={...state,done:{},answers:{},reviews:{}};
+  try{localStorage.setItem("stackscroll-learning-v1",JSON.stringify(next));setState(next);toast("Learning history cleared from this device.");}
+  catch{toast("Could not clear device data. Check your browser's storage permissions.");}
+ }
+ function clearVideoBookmarks(){
+  const next={...state,saved:state.saved.filter(card=>card.kind!=="video")};
+  try{localStorage.setItem("stackscroll-learning-v1",JSON.stringify(next));setState(next);toast("Saved video bookmarks removed.");}
+  catch{toast("Could not remove device data. Check your browser's storage permissions.");}
+ }
+ const renderCard = (c:Card) => {
+  if(c.kind==="video"){
+   const video=videos.find(item=>item.id===c.id);
+   return video?<VideoCard key={`${view}-${c.id}`} video={video} saved={state.saved.some(item=>item.id===c.id)} blocked={preferences.blockExternalVideos} active={activeVideo===videoIdentity(video)} session={playbackSession} onActivate={setActiveVideo} onUnload={unloadVideos} onSave={()=>save(videoAsCard(video))}/>:null;
+  }
+  return <LearningCard key={`${view}-${c.id}`} card={c} state={state} onSave={save} onComplete={complete} onAnswer={answer} onReview={review}/>;
+ };
  const contentCards=<>
   {preferences.layout === "focus" && filtered.length > 0 ? <section className="focus-session" aria-label="Focused learning">
    <div className="focus-controls"><span><strong>{String(activeIndex+1).padStart(2,"0")}</strong> / {String(filtered.length).padStart(2,"0")}<small>{kinds[filtered[activeIndex].kind]}</small></span><div><button aria-label="Previous card" disabled={activeIndex===0} onClick={()=>{setFocusIndex(activeIndex-1);scrollToTop();}}><ChevronLeft size={19}/></button><button aria-label="Next card" disabled={activeIndex===filtered.length-1} onClick={()=>{setFocusIndex(activeIndex+1);scrollToTop();}}><ChevronRight size={19}/></button></div></div>
@@ -100,12 +134,13 @@ export default function Stackscroll(){
    <div className="focus-bottom"><p>One idea. Room to think.</p>{activeIndex<filtered.length-1?<StackButton tone="primary" onClick={()=>{setFocusIndex(activeIndex+1);scrollToTop();}}>Next card<ArrowRight size={16}/></StackButton>:<StackButton tone="secondary" onClick={()=>navigate(view==="review"?"feed":"review")}>{view==="review"?"Back to feed":"Practice recall"}<ArrowRight size={16}/></StackButton>}</div>
   </section> : preferences.layout === "index" ? <Accordion type="multiple" className="topic-index" aria-label="Learning card index">{filtered.slice(0,limit).map((c,i)=>{const Icon=typeIcons[c.kind];return <AccordionItem value={c.id} key={c.id} className="index-item"><AccordionTrigger className="index-trigger"><span className="index-number">{String(i+1).padStart(2,"0")}</span><span className="index-content"><span className="index-meta"><Icon size={13}/>{c.topic}<b> / </b>{kinds[c.kind]}</span><strong>{c.title}</strong><span className="index-level">{c.level}{state.done[c.id]&&<> · Explored<Check size={12}/></>}</span></span></AccordionTrigger><AccordionContent className="index-detail">{renderCard(c)}</AccordionContent></AccordionItem>})}</Accordion> : filtered.slice(0,limit).map(renderCard)}
  {filtered.length===0&&<Empty className="empty-state"><EmptyHeader><EmptyMedia variant="icon">{view==="saved"?<Bookmark/>:view==="review"?<CheckCircle2/>:<Layers/>}</EmptyMedia><EmptyTitle>{view==="saved"?"Your next great find belongs here.":view==="review"?"You’re all caught up.":"A quieter corner of your stack."}</EmptyTitle><EmptyDescription>{view==="saved"?"Tap a bookmark on any card to keep it for later.":view==="review"?"No cards are due with these filters. Explore new topics or come back for your scheduled reviews.":"No cards match this combination. Try another topic or show the full feed."}</EmptyDescription></EmptyHeader><StackButton tone="primary" onClick={()=>{setState(s=>({...s,path:"all"}));setTab("all");navigate("feed");}}>Explore the feed <ArrowRight size={16}/></StackButton></Empty>}{preferences.layout!=="focus" && (limit<filtered.length?<div ref={sentinel} className="load-more"><StackButton tone="secondary" onClick={()=>setLimit(n=>n+6)}>Keep learning <ArrowRight size={16}/></StackButton></div>:filtered.length>0&&<div className="feed-end"><span><CheckCircle2 size={20}/></span><strong>You’ve reached the end of this stack.</strong><p>Let it sink in. Your flashcards will be here when you’re ready.</p><button onClick={()=>navigate(view==="review"?"feed":"review")}>{view==="review"?"Back to feed":"Practice recall"}<ArrowRight size={15}/></button></div>)}</>;
- return <SidebarProvider style={{"--sidebar-width":"15rem"} as CSSProperties}><Navigation view={view} onNavigate={navigate} due={due.length} saved={state.saved.length} onTopic={chooseTopic} quickTopics={quickTopics}/><div className="app-main" data-layout={preferences.layout} data-rail={preferences.showRail?"show":"hide"} data-activity={preferences.showActivity?"show":"hide"}><header className="topbar"><div className="topbar-left"><button className="mobile-brand brand-home" aria-label="Stackscroll home" onClick={()=>navigate("feed")}><Brand/></button><div className="desktop-location"><span className="desktop-crumb">Workspace <ChevronRight size={14}/></span><strong>{nav.find(n=>n.id===view)?.label}</strong></div></div><div className="topbar-right"><Customizer preferences={preferences} onChange={setPreferences} canSave={canSave}/><SidebarTrigger className="mobile-trigger"/><span className="header-goal"><Zap size={16}/><b>{todayCount}</b><span>/ 5 today</span></span><span className="topbar-divider"/><span className="small-avatar">BW</span></div></header><div className="workspace"><main id="main-content" className={`feed-column ${view==="paths"?"paths-column":""}`}>
+ return <SidebarProvider style={{"--sidebar-width":"15rem"} as CSSProperties}><Navigation view={view} onNavigate={navigate} due={due.length} saved={state.saved.length} onTopic={chooseTopic} quickTopics={quickTopics}/><div className="app-main" data-layout={preferences.layout} data-rail={preferences.showRail?"show":"hide"} data-activity={preferences.showActivity?"show":"hide"}><header className="topbar"><div className="topbar-left"><button className="mobile-brand brand-home" aria-label="Stackscroll home" onClick={()=>navigate("feed")}><Brand/></button><div className="desktop-location"><span className="desktop-crumb">Workspace <ChevronRight size={14}/></span><strong>{nav.find(n=>n.id===view)?.label}</strong></div></div><div className="topbar-right"><PrivacyControls blocked={preferences.blockExternalVideos} onBlock={value=>{unloadVideos();setPreferences(current=>({...current,blockExternalVideos:value}));}} onUnload={()=>{unloadVideos();toast("Video player unloaded.");}} onClearHistory={clearHistory} onClearVideos={clearVideoBookmarks} onResetInterests={()=>{setState(current=>({...current,path:"all"}));setPreferences(current=>({...current,pinnedTopics:[]}));setTopic("All topics");setLevel("all");toast("Path and pinned topics reset.");}}/><Customizer preferences={preferences} onChange={setPreferences} canSave={canSave}/><SidebarTrigger className="mobile-trigger"/><span className="header-goal"><Zap size={16}/><b>{todayCount}</b><span>/ 5 today</span></span><span className="topbar-divider"/><span className="small-avatar">BW</span></div></header><div className="workspace"><main id="main-content" className={`feed-column ${view==="paths"?"paths-column":""}`}>
  <div className="page-heading"><div><span className="eyebrow">{view==="feed"?"LEARN / EXPLORE":view==="paths"?"LEARN / PATHS":view==="review"?"LEARN / RECALL":"LEARN / COLLECTION"}</span><h1>{view==="feed"?"Your daily stack":view==="paths"?"Learning paths":view==="review"?"Review your stack":"Saved for later"}</h1><p>{view==="feed"?"One useful idea at a time.":view==="paths"?"Choose the skills behind your next move.":view==="review"?`${due.length} flashcards are new or due for review.`:"Your bookmarked lessons, questions, and ideas."}</p></div></div>
  {view==="paths"?<div className="path-grid">{paths.map((p,i)=>{const pool=cards.filter(c=>p.topics.includes(c.topic));const completed=pool.filter(c=>state.done[c.id]).length;const Icon=[Cpu,Cloud,Code2,BrainCircuit][i];return <article className={`path-card path-${i}`} key={p.id}><span className="path-icon"><Icon size={27}/></span><span className="eyebrow">{p.eyebrow}</span><h2>{p.name}</h2><p>{p.description}</p><ol>{p.steps.map((step,j)=><li key={step}><span>0{j+1}</span>{step}</li>)}</ol><div className="path-progress"><span>{completed} of {pool.length} cards explored</span><Progress value={completed/pool.length*100} aria-label={`${p.name} cards explored`}/></div><StackButton tone="primary" onClick={()=>choosePath(p.id)}>{state.path===p.id?"Continue learning":"Explore this path"}<ArrowRight size={16}/></StackButton></article>;})}<p className="path-footnote">Starter pathways cover selected concepts, not complete certification syllabi. Practice questions are original and are not official exam items.</p></div>:<>
  {activePath&&view==="feed"&&<div className="active-path"><Route size={16}/><span>Following: <strong>{activePath.name}</strong></span><button aria-label="Show all learning paths in feed" onClick={()=>setState(s=>({...s,path:"all"}))}><X size={15}/></button></div>}
  <Tabs value={tab} onValueChange={setTab} className="feed-tabs">{view==="feed"&&<TabsList variant="line" className="format-tabs" aria-label="Content format">{tabs.map(t=><TabsTrigger value={t.id} key={t.id}>{t.id==="all"&&<Layers size={14}/>}<span>{t.label}</span></TabsTrigger>)}</TabsList>}
  <div className="filter-row"><div className="topic-chips"><button className={topic==="All topics"?"chip selected":"chip"} onClick={()=>setTopic("All topics")}>All topics</button>{quickTopics.map(t=><button key={t} className={topic===t?"chip selected":"chip"} onClick={()=>setTopic(t)}>{preferences.pinnedTopics.includes(t)&&<Pin size={11}/>} {t}</button>)}</div><Select value={level} onValueChange={setLevel}><SelectTrigger className="level-select" aria-label="Difficulty level"><SelectValue/></SelectTrigger><SelectContent><SelectItem value="all">All levels</SelectItem><SelectItem value="Foundation">Foundation</SelectItem><SelectItem value="Intermediate">Intermediate</SelectItem><SelectItem value="Advanced">Advanced</SelectItem></SelectContent></Select></div>
+ {tab==="video"&&view==="feed"&&<div className="video-feed-notice" role="status"><strong>{videoStatus==="loading"?"Loading video sources…":videoStatus==="unavailable"?"Videos are temporarily unavailable":videoStatus==="empty"?"Videos are awaiting source review":"Creator videos, on your terms"}</strong><p>{videoStatus==="unavailable"?"We could not check the moderation records. Your lessons and quizzes are still available.":"Official players load only after your click. These videos have not completed independent factual review. Uploads and copied clips are not available."}</p>{videoStatus==="unavailable"&&<StackButton tone="secondary" onClick={()=>void refreshVideos()}>Try again</StackButton>}</div>}
  {tab==="news"&&view==="feed"&&<div className="news-notice"><Rss size={18}/><div><strong>{newsStatus==="live"?"From the source":newsStatus==="partial"?"Some sources are available":"Curated news snapshot"}</strong><p>{newsStatus==="live"||newsStatus==="partial"?`Publisher headlines · checked ${dateLabel(newsFetched)}. Open each source for details.`:"Live sources are unavailable. Showing dated articles selected September 7, 2026."}</p></div><button aria-label="Refresh news" onClick={()=>void refreshNews()} disabled={newsLoading}><RefreshCw size={18} className={newsLoading?"spin":""}/></button></div>}
  {view==="feed"?<>{tabs.map(t=><TabsContent value={t.id} key={t.id} className="feed-content">{ready?contentCards:<><Skeleton className="card-skeleton"/><Skeleton className="card-skeleton"/></>}</TabsContent>)}</>:<div className="feed-content">{ready?contentCards:<Skeleton className="card-skeleton"/>}</div>}
  </Tabs></>}

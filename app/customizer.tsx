@@ -107,7 +107,7 @@ export function Customizer({ preferences: p, onChange, canSave }: {
         </section>
       </div>
       <SheetFooter className="customizer-footer">
-        <button className="reset-display" onClick={() => { onChange({...defaultPreferences,pinnedTopics:[]}); toast("Display defaults restored. Learning progress and saved cards are kept."); }}><RotateCcw size={14}/>Reset display</button>
+        <button className="reset-display" onClick={() => { onChange(current=>({...defaultPreferences,pinnedTopics:[],blockExternalVideos:current.blockExternalVideos})); toast("Display defaults restored. Privacy choices, learning progress, and saved cards are kept."); }}><RotateCcw size={14}/>Reset display</button>
         <SheetClose asChild><StackButton>Back to learning <ArrowRight size={16}/></StackButton></SheetClose>
       </SheetFooter>
     </SheetContent>

@@ -1,5 +1,15 @@
 import assert from "node:assert/strict";
-import test from "node:test";
+import test, {after} from "node:test";
+import { registerHooks } from "node:module";
+// The built Worker imports Cloudflare's runtime binding API. The HTML test has
+// no database requests, so supply an empty binding object under Node only.
+const hooks=registerHooks({
+ resolve(specifier,context,nextResolve){
+  if(specifier==="cloudflare:workers")return {url:"data:text/javascript,export const env = {};",shortCircuit:true};
+  return nextResolve(specifier,context);
+ }
+});
+after(()=>hooks.deregister());
 
 test("renders the Stackscroll application and its metadata", async () => {
   const workerUrl = new URL("../dist/server/index.js", import.meta.url);

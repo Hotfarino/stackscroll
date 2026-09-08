@@ -46,3 +46,9 @@ Signal now opens with a minimalist white/ink interface and the provisional Stack
 See `UI_FRAMEWORK.md` for the shared visual rules and the tokens used by new components.
 
 The top-left Stackscroll identity appears on desktop and mobile. `app/brand.tsx` centralizes its mark, wordmark, and shared Button wrapper. Free UI kit research and license sources are recorded in `UI_KIT_RESEARCH.md`; the installed shadcn/Radix and Lucide foundation is retained.
+
+## Video privacy and permissions
+
+The Videos feed now uses curated official embeds with explicit click-to-load controls, no viewing-history tracking or view-based rewards, separate permission and factual-review records, and device privacy controls. D1 stores general content reports and moderator hide/restore state; existing learning data remains device-local. `/content-review` is restricted server-side to the private workspace owner. `/privacy` and `/terms` describe the actual current behavior.
+
+See `VIDEO_SAFEGUARDS.md` for source evidence, the October 8, 2026 source recheck, moderation operation, and the remaining legal/creator steps before native clips or public uploads.

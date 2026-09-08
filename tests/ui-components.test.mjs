@@ -83,3 +83,22 @@ test("renders sidebar skeletons deterministically", async () => {
   assert.equal(first, second);
   assert.match(first, /--skeleton-width:70%/);
 });
+
+test("video players make no embedded requests before a click and respect blocking and expiry", async () => {
+  const { VideoCard } = await vite.ssrLoadModule("/app/video-card.tsx");
+  const { videoCatalog, createPlaybackSession } = await vite.ssrLoadModule("/app/video-catalog.ts");
+  const video = {...videoCatalog[0],rights:{...videoCatalog[0].rights,checkedAt:new Date(Date.now()-1000).toISOString(),recheckAfter:new Date(Date.now()+86400000).toISOString()}};
+  const props={video,session:createPlaybackSession(),saved:false,blocked:false,active:false,onActivate(){},onUnload(){},onSave(){}};
+  const render=extra=>renderToStaticMarkup(React.createElement(VideoCard,{...props,...extra}));
+  const before=render({});
+  assert.doesNotMatch(before,/<(?:iframe|img|script)\b/);
+  assert.match(before,/Load YouTube player/);
+  assert.match(before,/Factual review pending/);
+  assert.doesNotMatch(before,/Mark learned/);
+  const after=render({active:true});
+  assert.match(after,/<iframe[^>]+src="https:\/\/www.youtube-nocookie.com\/embed\//);
+  assert.match(after,/referrerPolicy="strict-origin-when-cross-origin"/i);
+  assert.match(after,/autoplay=0/);
+  assert.doesNotMatch(render({active:true,blocked:true}),/<iframe\b/);
+  assert.doesNotMatch(render({active:true,video:{...video,rights:{...video.rights,status:'revoked'}}}),/<iframe\b/);
+});
