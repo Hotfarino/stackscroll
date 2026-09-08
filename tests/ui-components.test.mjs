@@ -166,3 +166,18 @@ test("playlist data is bounded and the unopened playlist loads no media",async()
  const html=renderToStaticMarkup(React.createElement(VideoPlaylist,{model:{list:{name:"Tech",ids:["original-dns"]},ready:true,notice:"",setList(){},clear(){}},videos:[],blocked:false,onOpen(){}}));
  assert.match(html,/Playlist \(1\)/);assert.doesNotMatch(html,/<iframe|<video|youtube.com\/iframe_api/);
 });
+
+test("content search matches multiple terms, creator names and original transcripts",async()=>{
+ const {matchesSearch,cardMatchesSearch}=await vite.ssrLoadModule("/app/content-search.ts");
+ const {cards}=await vite.ssrLoadModule("/app/content.ts");
+ const {mediaCards}=await vite.ssrLoadModule("/app/media-content.ts");
+ const {videoCatalog,videoAsCard}=await vite.ssrLoadModule("/app/video-catalog.ts");
+ assert.equal(matchesSearch(" DNS  hostname ",["Hostname resolution uses DNS"]),true);
+ assert.equal(matchesSearch("dns unrelatedword",["DNS"]),false);
+ assert.equal(matchesSearch("   ",[]),true);
+ assert.equal(matchesSearch("C++",["C++ programming"]),true);
+ assert.ok(cards.some(card=>cardMatchesSearch(card,"DNS")));
+ assert.ok(videoCatalog.some(v=>cardMatchesSearch(videoAsCard(v),"Dion Training",videoCatalog)));
+ assert.ok(mediaCards().some(card=>cardMatchesSearch(card,"resolver cache")));
+ assert.equal(matchesSearch("<script>",["safe text"]),false);
+});
