@@ -24,7 +24,7 @@
 .stack-tile-footer svg {flex-shrink:0;color:var(--foreground)}
 .stack-assembly {position:relative;height:180px;width:min(100%,310px);margin:0 auto;isolation:isolate;perspective:900px}
 .assembly-sheet {position:absolute;display:block;left:17%;width:66%;height:108px;top:38px;z-index:var(--layer-order);padding:0;border:0;background:none;transform:translateY(calc(var(--layer-index)*15px)) rotateX(52deg) rotateZ(-31deg);filter:drop-shadow(0 2px 0 #63768e45) drop-shadow(-3px 12px 9px #172d4714);transition:transform 460ms cubic-bezier(.22,.8,.22,1),filter 300ms;transition-delay:calc(var(--layer-index)*28ms);transform-origin:center}
-.assembly-face {position:relative;display:block;width:100%;height:100%;color:#142d49;background:var(--sheet-pearl);clip-path:polygon(0 0,70% 0,70% 10%,80% 10%,80% 0,100% 0,100% 100%,44% 100%,44% 88%,33% 88%,33% 100%,0 100%);border-radius:3px;box-shadow:inset 0 0 0 1px #ffffffc9}
+.assembly-face {position:relative;display:block;width:100%;height:100%;color:var(--sheet-ink,#142d49);background:var(--sheet-pearl);clip-path:polygon(0 0,70% 0,70% 10%,80% 10%,80% 0,100% 0,100% 100%,44% 100%,44% 88%,33% 88%,33% 100%,0 100%);border-radius:3px;box-shadow:inset 0 0 0 1px #ffffffc9}
 .tone-blue {background:var(--sheet-blue)}.tone-lime {background:var(--sheet-lime)}.tone-orange {background:var(--sheet-orange)}.tone-pearl {background:var(--sheet-pearl)}
 .assembly-label {position:absolute;bottom:21px;left:15px;font-size:.75rem;letter-spacing:.045em;line-height:1.2;font-weight:500}
 .assembly-index {position:absolute;top:13px;left:15px;font-size:.75rem;letter-spacing:.08em;opacity:.7}
@@ -76,3 +76,7 @@
 
 .stack-idea-close {position:absolute;top:10px;right:10px;width:44px;height:44px;display:flex;align-items:center;justify-content:center;border-radius:6px;color:var(--foreground);z-index:1}
 .stack-idea-close:focus-visible {outline:2px solid var(--ring);outline-offset:2px}
+
+.stack-assembly[data-stack-skin=ion],.owned-stack[data-stack-skin=ion] {--sheet-blue:#76a9ff;--sheet-lime:#97e9f2;--sheet-orange:#bed0ff;--sheet-pearl:#e9f5ff}
+.stack-assembly[data-stack-skin=terminal],.owned-stack[data-stack-skin=terminal] {--sheet-blue:#173d34;--sheet-lime:#214f42;--sheet-orange:#305c4d;--sheet-pearl:#163128;--sheet-ink:#e0fff0}
+.stack-assembly[data-stack-skin=frost],.owned-stack[data-stack-skin=frost] {--sheet-blue:#d4e3ee;--sheet-lime:#ecf2f6;--sheet-orange:#c5d7e4;--sheet-pearl:#f7fafb}

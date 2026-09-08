@@ -58,3 +58,16 @@ export const personalStackVersions = sqliteTable("personal_stack_versions", {
   edition: text("edition").notNull(),
   createdAt: integer("created_at").notNull(),
 }, table => [primaryKey({ columns: [table.stackId, table.version] })]);
+
+export const examAttempts = sqliteTable("exam_attempts", {
+  id: text("id").primaryKey(),
+  userId: text("user_id").notNull(),
+  examId: text("exam_id").notNull(),
+  data: text("data").notNull(),
+  revision: integer("revision").notNull(),
+  lastOperationId: text("last_operation_id").notNull(),
+  lastOperationHash: text("last_operation_hash").notNull(),
+  startedAt: integer("started_at").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+  submittedAt: integer("submitted_at"),
+}, table => [index("exam_attempts_user_updated").on(table.userId, table.updatedAt)]);

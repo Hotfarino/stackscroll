@@ -13,11 +13,11 @@ for (const file of ['0001_normal_wendigo.sql', '0002_lowly_radioactive_man.sql']
 after(() => { sqlite.close(); rmSync(temp, { recursive: true, force: true }); });
 function compile(source, name) {
   let code = ts.transpileModule(readFileSync(source, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
-  for (const [from, to] of [['cloudflare:workers', './env.mjs'], ['./content', './content.mjs'], ['./stacks', './stacks.mjs'], ['../../video-server', './video-server.mjs'], ['../../personal-stacks', './personal-stacks.mjs']]) code = code.replaceAll('"' + from + '"', '"' + to + '"');
+  for (const [from, to] of [['cloudflare:workers', './env.mjs'], ['./content', './content.mjs'], ['./stacks', './stacks.mjs'], ['./stack-skins', './stack-skins.mjs'], ['../../video-server', './video-server.mjs'], ['../../personal-stacks', './personal-stacks.mjs']]) code = code.replaceAll('"' + from + '"', '"' + to + '"');
   writeFileSync(join(temp, name + '.mjs'), code);
 }
 writeFileSync(join(temp, 'env.mjs'), 'export const env={};');
-for (const name of ['content', 'stacks', 'video-server', 'personal-stacks']) compile(`app/${name}.ts`, name);
+for (const name of ['content', 'stacks', 'stack-skins', 'video-server', 'personal-stacks']) compile(`app/${name}.ts`, name);
 compile('app/api/personal-stacks/route.ts', 'route');
 const imp = name => import(pathToFileURL(join(temp, name + '.mjs')));
 const { env } = await imp('env');
@@ -68,6 +68,18 @@ test('starter definitions are independent and every layer has actual referenced 
   assert.ok(edition.practiceIds.includes('agent-feedback')); assert.ok(edition.practiceIds.includes('ml-generalization'));
 });
 
+test('skins preserve the mix and practice; older definitions receive the original appearance', () => {
+  const original = aiInfrastructureStarter();
+  const legacy = { ...original }; delete legacy.skin;
+  assert.equal(stackDefinitionSchema.parse(legacy).skin, 'prism');
+  for (const skin of ['prism', 'ion', 'terminal', 'frost']) {
+    const definition = stackDefinitionSchema.parse({ ...original, skin });
+    assert.deepEqual(stackMix(definition), stackMix(original));
+    assert.deepEqual(createEdition(definition).practiceIds, createEdition(original).practiceIds);
+  }
+  assert.equal(stackDefinitionSchema.safeParse({ ...original, skin: 'unapproved-style' }).success, false);
+});
+
 test('drafts allow incomplete work but schema and activation enforce topic, content, and naming rules', () => {
   assert.ok(stackDefinitionSchema.safeParse(emptyStack()).success);
   assert.throws(() => createEdition(emptyStack()), /name/);
@@ -112,6 +124,17 @@ test('activation retries are idempotent and cannot reuse a request identifier fo
   assert.deepEqual(retry, first); assert.equal(versions(first.id).length, 1);
   assert.equal((await post({ ...create, definition: { ...create.definition, name: 'Different' } })).status, 409);
   assert.deepEqual((await list()).stacks[0], first);
+});
+
+test('a saved skin survives reload and old active editions normalize without false draft changes', async () => {
+  await attest(); const definition = { ...aiInfrastructureStarter(), skin: 'terminal' };
+  const active = await saved(command('activate', crypto.randomUUID(), 0, definition));
+  assert.equal((await list()).stacks[0].active.definition.skin, 'terminal');
+  const legacy = { ...active.draft }; delete legacy.skin;
+  sqlite.prepare('UPDATE personal_stacks SET draft=? WHERE id=?').run(JSON.stringify(legacy), active.id);
+  sqlite.prepare('UPDATE personal_stack_versions SET edition=? WHERE stack_id=?').run(JSON.stringify({ ...active.active, definition: legacy }), active.id);
+  const loaded = (await list()).stacks[0];
+  assert.equal(loaded.draft.skin, 'prism'); assert.deepEqual(loaded.draft, loaded.active.definition);
 });
 
 test('cross-account reads, edits, deletes and identifier collisions cannot expose or overwrite another Stack', async () => {

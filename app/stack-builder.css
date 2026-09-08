@@ -113,3 +113,16 @@
 @media(min-width:1000px) {.my-stacks-grid {grid-template-columns:repeat(2,minmax(0,1fr))}.my-stack-open {padding:20px 16px;grid-template-columns:100px minmax(0,1fr) 18px}.my-stack-open .stack-assembly {width:100px}}
 @media(max-width:599px) {.stack-discovery-workspace.stack-workspace[data-layout][data-rail] .workspace {padding-top:20px}.personal-stack-workspace .stack-explorer-heading {gap:10px;margin-bottom:14px}.personal-stack-workspace .stack-explorer-heading h1 {font-size:1.8rem}.personal-stack-workspace .stack-explorer-heading>.stack-button {min-height:48px}.personal-stack-workspace .stack-explorer-heading .eyebrow {font-size:.65rem}.stack-first-build>.stack-first-art {order:2}.stack-first-build .stack-button {width:100%;min-height:48px;justify-content:center}.stack-idea-sheet {width:100vw!important;max-width:none!important}.stack-idea-sheet .stack-sheet-content {padding-bottom:calc(24px + env(safe-area-inset-bottom))}}
 @media(prefers-reduced-motion:reduce) {.stack-builder-sheet,.stack-builder-sheet * {animation:none!important;transition:none!important;scroll-behavior:auto!important}}
+
+.builder-skins {margin:22px 0 26px}
+.builder-skins legend {font-size:1rem;font-weight:550;margin-bottom:12px}
+.builder-skins>p {font-size:.875rem;color:var(--copy);line-height:1.5;margin-top:12px}
+.stack-skin-options {display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.stack-skin-choice {min-width:0;cursor:pointer;border:1px solid var(--border);border-radius:6px;padding:10px;background:var(--card)}
+.stack-skin-choice[data-selected=true] {border-color:var(--ring);box-shadow:inset 0 0 0 1px var(--ring)}
+.stack-skin-choice .stack-assembly {height:116px;width:120px;max-width:100%}
+.stack-skin-choice .assembly-sheet {height:54px;top:7px;transform:translateY(calc(var(--layer-index)*10px)) rotateX(52deg) rotateZ(-31deg)}
+.stack-skin-choice .assembly-label,.stack-skin-choice .assembly-index {display:none}
+.stack-skin-choice>span {display:flex;align-items:center;gap:8px;min-height:44px}
+.stack-skin-choice strong {font-size:.9375rem;font-weight:500}
+.stack-skin-choice small {display:block;color:var(--soft);font-size:.8125rem;line-height:1.5}

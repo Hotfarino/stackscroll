@@ -1,12 +1,14 @@
 import { z } from "zod";
 import { cards, topics, type Card, type Topic } from "./content";
 import { learningStacks } from "./stacks";
+import { stackSkinIds } from "./stack-skins";
 import type { StackCollection } from "./stack-collections";
 
 export const adultPolicy = "18plus-v1";
 export const emphasisLabels = { 1: "Supporting", 2: "Balanced", 3: "Main focus" } as const;
 export const storedStackDefinitionSchema = z.object({
   name: z.string().trim().max(80),
+  skin: z.enum(stackSkinIds).default("prism"),
   purpose: z.string().trim().max(300),
   layers: z.array(z.object({ topic: z.enum(topics as [Topic, ...Topic[]]), emphasis: z.union([z.literal(1), z.literal(2), z.literal(3)]) }).strict()).max(6),
   excludedIds: z.array(z.string().max(80)).max(60),
@@ -22,9 +24,9 @@ export type StackEdition = { definition: StackDefinition; contentIds: string[]; 
 export type PersonalStack = { id: string; draft: StackDefinition; revision: number; activeVersion: number | null; active: StackEdition | null; createdAt: number; updatedAt: number };
 
 export function aiInfrastructureStarter(): StackDefinition {
-  return { name: "AI Systems Builder", purpose: "Build agentic software and understand AI/ML systems, supported by data center fundamentals.", layers: [{ topic: "Agentic AI", emphasis: 3 }, { topic: "Machine learning", emphasis: 3 }, { topic: "AI workflows", emphasis: 2 }, { topic: "Data centers", emphasis: 1 }], excludedIds: [] };
+  return { skin: "prism", name: "AI Systems Builder", purpose: "Build agentic software and understand AI/ML systems, supported by data center fundamentals.", layers: [{ topic: "Agentic AI", emphasis: 3 }, { topic: "Machine learning", emphasis: 3 }, { topic: "AI workflows", emphasis: 2 }, { topic: "Data centers", emphasis: 1 }], excludedIds: [] };
 }
-export function emptyStack(): StackDefinition { return { name: "", purpose: "", layers: [], excludedIds: [] }; }
+export function emptyStack(): StackDefinition { return { skin: "prism", name: "", purpose: "", layers: [], excludedIds: [] }; }
 
 // Deterministic weighted scheduling: emphasis changes early representation,
 // never adds duplicates, invents content, or removes a supporting topic.
@@ -61,5 +63,5 @@ const colors = ["blue", "lime", "orange", "pearl", "blue", "lime"];
 export function personalCollection(record: PersonalStack, draft = false): StackCollection {
   const definition = !draft && record.active ? record.active.definition : record.draft;
   const ids = new Set(!draft && record.active ? record.active.contentIds : stackMix(definition).map(card => card.id));
-  return { id: record.id, name: definition.name || "Untitled Stack", description: definition.purpose || "A private Stack in progress.", layers: definition.layers.map((layer, index) => ({ topic: layer.topic, label: layer.topic, color: colors[index], description: `${emphasisLabels[layer.emphasis]} in this Stack.`, cardIds: cards.filter(card => card.topic === layer.topic && ids.has(card.id)).map(card => card.id) })), practiceIds: !draft && record.active ? record.active.practiceIds : learningStacks.filter(practice => definition.layers.some(layer => layer.topic === practice.topic)).map(practice => practice.id) };
+  return { id: record.id, skin: definition.skin || "prism", name: definition.name || "Untitled Stack", description: definition.purpose || "A private Stack in progress.", layers: definition.layers.map((layer, index) => ({ topic: layer.topic, label: layer.topic, color: colors[index], description: `${emphasisLabels[layer.emphasis]} in this Stack.`, cardIds: cards.filter(card => card.topic === layer.topic && ids.has(card.id)).map(card => card.id) })), practiceIds: !draft && record.active ? record.active.practiceIds : learningStacks.filter(practice => definition.layers.some(layer => layer.topic === practice.topic)).map(practice => practice.id) };
 }

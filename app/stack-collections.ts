@@ -3,7 +3,7 @@ import { learningStacks } from "./stacks";
 import { matchesSearch } from "./content-search";
 
 export type StackLayer = { topic: Topic; label: string; color: string; description: string; cardIds: string[] };
-export type StackCollection = { id: string; name: string; description: string; layers: StackLayer[]; practiceIds: string[] };
+export type StackCollection = { id: string; skin?: import("./stack-skins").StackSkin; name: string; description: string; layers: StackLayer[]; practiceIds: string[] };
 
 // Curated design-preview collections. These are not user-created memberships.
 export const stackCollections: StackCollection[] = [

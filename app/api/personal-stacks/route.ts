@@ -5,7 +5,9 @@ import { adultPolicy, stackDefinitionSchema, storedStackDefinitionSchema, create
 type Row = { id: string; user_id: string; draft: string; revision: number; active_version: number | null; last_operation_id: string; last_operation_hash: string; created_at: number; updated_at: number; edition: string | null };
 const select = "SELECT s.*, v.edition FROM personal_stacks s LEFT JOIN personal_stack_versions v ON v.stack_id = s.id AND v.version = s.active_version AND v.user_id = s.user_id WHERE s.user_id = ?";
 function stored(row: Row): PersonalStack {
-  return { id: row.id, draft: storedStackDefinitionSchema.parse(JSON.parse(row.draft)), revision: row.revision, activeVersion: row.active_version, active: row.edition ? JSON.parse(row.edition) as StackEdition : null, createdAt: row.created_at, updatedAt: row.updated_at };
+  const active = row.edition ? JSON.parse(row.edition) as StackEdition : null;
+  if (active) active.definition = storedStackDefinitionSchema.parse(active.definition);
+  return { id: row.id, draft: storedStackDefinitionSchema.parse(JSON.parse(row.draft)), revision: row.revision, activeVersion: row.active_version, active, createdAt: row.created_at, updatedAt: row.updated_at };
 }
 const commandSchema = z.discriminatedUnion("operation", [
   z.object({ operation: z.literal("attest"), adult: z.literal(true), policy: z.literal(adultPolicy) }).strict(),
