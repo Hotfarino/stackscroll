@@ -149,3 +149,12 @@ test("mixed feed includes every format and resolves saved originals from the cur
  assert.deepEqual(resolveOriginalMedia([{...original,id:'removed-quote'}]),[]);
  assert.ok(videoCatalog.filter(video=>video.format==='short').length>=6);
 });
+
+test("podcast discovery uses official links without loading or rehosting audio",async()=>{
+ const {EditorialCard}=await vite.ssrLoadModule("/app/editorial-card.tsx");
+ const {editorialCards}=await vite.ssrLoadModule("/app/editorial-content.ts");
+ for(const card of editorialCards.filter(item=>item.kind==='podcast')){
+  const html=renderToStaticMarkup(React.createElement(EditorialCard,{card,saved:false,onSave(){}}));
+  assert.ok(html.includes(card.source));assert.match(html,/Listen on/);assert.match(html,/Audio stays with the publisher/);assert.doesNotMatch(html,/<iframe|<audio|<video/);
+ }
+});

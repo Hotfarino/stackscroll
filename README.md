@@ -70,3 +70,7 @@ See `VIDEO_SAFEGUARDS.md` for source evidence, the October 8, 2026 source rechec
 ## Guided-stack implementation
 
 See `UX_IMPLEMENTATION.md` for the new navigation, finite learning flow, persistence boundaries, content evidence, and verification scope.
+
+## Stories, podcasts, and feed quality
+
+The Feed now includes two source-backed historical incident stories and three official podcast episode links. Stories distinguish the original incident account from practical interpretation; podcasts play on the publisher's site. Stories and Podcasts tabs and bookmarks are available. Each feed card has an explanation and More/Less controls. Candidate validation, external-link deduplication, topic/publisher diversity and an explicit Update mix action strengthen the original ranking without adding watch tracking. See `CONTENT_AND_FEED.md` for sources, exact weights, permissions boundaries and validation. Gaming remains deferred.

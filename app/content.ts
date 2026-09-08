@@ -1,5 +1,5 @@
 export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows";
-export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer";
+export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer" | "story" | "podcast";
 export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
   body?: string; takeaway?: string; code?: string; language?: string; visual?: "network" | "subnet" | "workflow";

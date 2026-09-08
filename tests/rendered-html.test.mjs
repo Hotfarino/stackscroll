@@ -45,7 +45,10 @@ test("renders the Stackscroll application and its metadata", async () => {
   assert.match(html, /AI-authored animation/);
   assert.match(html, /Tune my feed/);
   assert.match(html, /Feed format/);
-  assert.match(html, /\/media\/dns-in-motion.mp4/);
+  // Diversity ranking may choose either original explainer for the first page.
+  assert.match(html, /\/media\/(?:dns-in-motion|agent-feedback-loop)\.mp4/);
+  assert.match(html, /What happened next/);
+  assert.match(html, /Why this/);
   assert.doesNotMatch(html, /5 today|Mark learned/);
   assert.doesNotMatch(html, /codex-preview/);
 });
