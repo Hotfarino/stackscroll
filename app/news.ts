@@ -18,7 +18,7 @@ export function parseNews(xml:string,source:typeof newsSources[number],now=Date.
   const item=match[1],title=field(item,"title"),link=field(item,"link"),date=field(item,"pubDate");
   try {
    const url=new URL(link);const time=Date.parse(date);
-   if(url.protocol!=="https:"||url.hostname!==source.host||url.username||url.password||url.port||!title||!Number.isFinite(time)||time>now+86400000)continue;
+   if(url.protocol!=="https:"||url.hostname!==source.host||url.username||url.password||url.port||!title||!Number.isFinite(time)||time>now)continue;
    const ai=/copilot|agent|\bai\b|model|machine learning|bedrock/i.test(title);
    items.push({id:`rss-${url.href}`,kind:"news",topic:ai?"Agentic AI":source.topic,level:"Intermediate",title:title.slice(0,240),body:`A release update from ${source.name}. Read the original announcement for availability, requirements, and implementation details.`,source:url.href,sourceName:source.name,date:new Date(time).toISOString()});
   }catch{continue;}

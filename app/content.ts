@@ -1,5 +1,5 @@
 export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows";
-export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video";
+export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer";
 export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
   body?: string; takeaway?: string; code?: string; language?: string; visual?: "network" | "subnet" | "workflow";
@@ -50,10 +50,45 @@ export const cards: Card[] = [
  c({id:"bash-pipe",kind:"quiz",topic:"Languages",level:"Foundation",title:"What does the pipe symbol do in a shell command?",body:"Consider: cat access.log | wc -l",options:["Runs commands on different servers","Sends standard output into the next command’s standard input","Redirects all errors into access.log","Encrypts the log"],answer:1,explanation:"A pipe connects standard output to the next command’s standard input. Here wc -l counts newline characters from the log. Standard error is not included by the plain | operator."},["https://www.gnu.org/software/bash/manual/html_node/Pipelines.html","GNU Bash · Pipelines"]),
  c({id:"workflow-eval",kind:"flashcard",topic:"AI workflows",level:"Advanced",title:"What stays constant when comparing two prompt versions?",back:"A representative evaluation set and scoring criteria.",explanation:"Run both versions on the same cases, including edge cases. Compare correctness, tool behavior, latency, and cost. Keep holdout cases to avoid overfitting your evaluation set."},refs.agent),
 ];
-export const curatedNews: Card[] = [
- {id:"news-copilot-aug",kind:"news",topic:"Agentic AI",level:"Intermediate",title:"Copilot adds more controls for agents and code review",body:"GitHub’s August Visual Studio update introduces organization-level custom agents, adjustable thinking effort for supported models, and Git-agent reviews of uncommitted changes or commits.",takeaway:"Learning connection: write a scoped agent brief, then compare automated review findings with the actual diff.",source:"https://github.blog/changelog/2026-08-28-github-copilot-in-visual-studio-august-update-2/",sourceName:"GitHub Changelog",date:"2026-08-28"},
- {id:"news-aws-interconnect",kind:"news",topic:"Cloud",level:"Intermediate",title:"AWS Interconnect brings managed last-mile connectivity",body:"AWS announced Interconnect – last mile with Lumen in the US. It automates network configuration, including BGP peering and VLAN setup, for private connectivity to AWS.",takeaway:"Learning connection: review BGP, VLANs, and Direct Connect before evaluating managed connectivity.",source:"https://aws.amazon.com/about-aws/whats-new/2026/04/aws-announces-ga-AWS-interconnect-last-mile/",sourceName:"AWS What's New",date:"2026-04-13"},
+export const curatedNews:Card[]=[
+  {
+    "id": "news-linux-2027-preview",
+    "kind": "news",
+    "topic": "Cloud",
+    "level": "Intermediate",
+    "title": "Amazon Linux 2027 is now available in public preview",
+    "body": "AWS opened an early release of its next Linux distribution for application testing and feedback. It includes newer development tools, SELinux enforcement by default, and images for both major processor architectures.",
+    "takeaway": "Preview release: test compatibility in a lab before planning production changes.",
+    "source": "https://aws.amazon.com/about-aws/whats-new/2026/09/announcing-amazon-linux-2027/",
+    "sourceName": "AWS · What’s New",
+    "date": "2026-09-03"
+  },
+  {
+    "id": "news-bedrock-sync",
+    "kind": "news",
+    "topic": "AI workflows",
+    "level": "Intermediate",
+    "title": "Amazon Bedrock Managed Knowledge Base now supports automatic sync scheduling for data source connectors",
+    "body": "Teams can schedule source refreshes at daily, weekly, or monthly intervals. The feature reduces manual work and custom scheduling infrastructure for retrieval systems that depend on changing enterprise documents.",
+    "takeaway": "A retrieval workflow needs a freshness policy as well as a good model.",
+    "source": "https://aws.amazon.com/about-aws/whats-new/2026/09/amazon-bedrock-managed-knowledge-base-automatic-sync-scheduling-data-source-connectors/",
+    "sourceName": "AWS · What’s New",
+    "date": "2026-09-04"
+  },
+  {
+    "id": "news-cloudflare-cache",
+    "kind": "news",
+    "topic": "Networking",
+    "level": "Intermediate",
+    "title": "How we could save petabytes of cache storage with Zstandard and Pingora",
+    "body": "Cloudflare tested compressing eligible cached content to reduce disk use and transfers between data centers. Results from a limited test corpus suggest substantial savings for modest CPU overhead; broader evaluation remains planned.",
+    "takeaway": "Engineering experiment: distinguish a prototype result from a completed production rollout.",
+    "source": "https://blog.cloudflare.com/cache-transcoding/",
+    "sourceName": "Cloudflare · Engineering",
+    "date": "2026-09-01"
+  }
 ];
+
 export const paths = [
  {id:"foundation",name:"IT foundations",eyebrow:"BUILD YOUR BASE",description:"Hardware, support, networking, and security fundamentals.",topics:["CompTIA","Networking"] as Topic[],steps:["CompTIA A+ concepts","Network+ fundamentals","Security fundamentals"]},
  {id:"network",name:"Network → Cloud",eyebrow:"CONNECT THE DOTS",description:"From packets and VLANs to routing and cloud infrastructure.",topics:["CCNA","Networking","Cloud"] as Topic[],steps:["IP addressing & switching","CCNA routing concepts","Cloud networking"]},

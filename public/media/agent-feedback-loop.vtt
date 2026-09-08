@@ -1,0 +1,33 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.000
+A coding agent makes progress by checking what its tools did.
+
+2
+00:00:04.000 --> 00:00:08.000
+Start with a bounded task and a clear success condition.
+
+3
+00:00:08.000 --> 00:00:12.000
+Use a tool to inspect code, make an edit, or run a check.
+
+4
+00:00:12.000 --> 00:00:16.000
+Choose tests that check the intended behavior.
+
+5
+00:00:16.000 --> 00:00:20.000
+Read failures, revise the change, and run relevant checks again.
+
+6
+00:00:20.000 --> 00:00:24.000
+Finish when the task is met. Report checks and remaining limits.
+
+7
+00:00:24.000 --> 00:00:28.000
+Ask for authorization before consequential production actions.
+
+8
+00:00:28.000 --> 00:00:32.000
+Confident text is not a passed check.

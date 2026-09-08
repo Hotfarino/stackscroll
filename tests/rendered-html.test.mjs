@@ -38,12 +38,14 @@ test("renders the Stackscroll application and its metadata", async () => {
   );
   const html = await response.text();
   assert.match(html, /<title>Stackscroll/);
-  assert.match(html, /Your next stack/);
+  assert.match(html, /Your daily mix/);
   assert.match(html, /brand-wordmark[^>]*>Stackscroll/);
   assert.match(html, /Customize your interface/);
-  assert.match(html, /When the IP works, but the name/);
-  assert.match(html, /Start stack/);
-  assert.match(html, /Why this stack/);
+  assert.match(html, /Tim Berners-Lee/);
+  assert.match(html, /AI-authored animation/);
+  assert.match(html, /Tune my feed/);
+  assert.match(html, /Feed format/);
+  assert.match(html, /\/media\/dns-in-motion.mp4/);
   assert.doesNotMatch(html, /5 today|Mark learned/);
   assert.doesNotMatch(html, /codex-preview/);
 });

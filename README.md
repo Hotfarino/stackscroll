@@ -1,6 +1,18 @@
 # Stackscroll
 
-A responsive learning feed for IT professionals. The initial content set covers networking, CompTIA concepts, CCNA concepts, cloud networking, software development, programming languages, machine learning, coding agents, and AI workflows.
+A mixed-media learning feed for IT professionals. The initial content set covers networking, CompTIA concepts, CCNA concepts, cloud networking, software development, programming languages, machine learning, coding agents, and AI workflows.
+
+## Mixed-media discovery
+
+The default Feed mixes creator clips, sourced quotes, AI-authored animation videos, news, lessons, questions, and flashcards. Format tabs expose Mix, Clips, Quotes, AI videos, News, and Stacks. Guided learning remains available through Stacks and a compact unfinished-stack shortcut.
+
+- Eight added official creator uploads: Dion Training, NetworkChuck, Fireship, David Bombal, and Jeff Geerling. Six are original YouTube Shorts; two are compact full videos. Two existing AWS/Google Cloud videos are retained. Runtimes and publication dates were checked against public YouTube metadata.
+- Four short quotes checked against primary sources, with attribution, context, and original practical prompts.
+- Two actual H264 MP4 explainers (DNS 28 seconds; agent feedback loop 32 seconds), authored with AI. Both are original silent animations, captioned on screen, with VTT and transcripts. They use local assets, native controls, and no autoplay.
+- Three dated primary-publisher news picks, plus retained live GitHub/AWS RSS headlines. The source parser rejects future publication timestamps. Older clips keep their original dates.
+- Explicit topic preferences rank within a rotation of formats. Recent dated video and news items break equal-score ties. Viewing does not train the feed or award learning credit.
+
+See `MEDIA_CONTENT.md` for provenance and limits.
 
 ## Learning experience
 
@@ -9,7 +21,7 @@ A responsive learning feed for IT professionals. The initial content set covers 
 - New and due flashcard review queue, with 10-minute, one-day, and longer review intervals based on recall ratings.
 - Seven guided stacks use a situation → explanation → question → reasoning → recap sequence. D1 stores account-scoped positions, answers, recall schedules, bookmarks, and explicit recommendation feedback.
 - Individual card-library bookmarks, quiz answers, and flashcard schedules retain their existing device-local storage.
-- GitHub Changelog and AWS What's New RSS headlines from a server endpoint. Requests are bounded and cached; a visibly dated two-article snapshot is used when feeds are unavailable.
+- GitHub Changelog and AWS What's New RSS headlines from a server endpoint. Requests are bounded and cached; a visibly dated three-article snapshot is used when feeds are unavailable.
 - News is linked to publishers, not presented as an AI-verified reporting service. Lesson sources are linked. Quiz items are independent practice, not official exam material or a complete certification syllabus.
 
 ## Customizable interface
@@ -51,7 +63,7 @@ The top-left Stackscroll identity appears on desktop and mobile. `app/brand.tsx`
 
 ## Video privacy and permissions
 
-The Videos feed now uses curated official embeds with explicit click-to-load controls, no viewing-history tracking or view-based rewards, separate permission and factual-review records, and device privacy controls. D1 stores general content reports and moderator hide/restore state; existing individual card learning data remains device-local; guided-stack progress is account-scoped in D1. `/content-review` is restricted server-side to the private workspace owner. `/privacy` and `/terms` describe the actual current behavior.
+The Videos feed now uses curated official embeds with explicit click-to-load controls, no viewing-history tracking or view-based rewards, separate permission and factual-review records, and device privacy controls. D1 stores general creator-video reports and moderator hide/restore state; existing individual card learning data remains device-local; guided-stack progress is account-scoped in D1. `/content-review` is restricted server-side to the private workspace owner. `/privacy` and `/terms` describe the actual current behavior.
 
 See `VIDEO_SAFEGUARDS.md` for source evidence, the October 8, 2026 source recheck, moderation operation, and the remaining legal/creator steps before native clips or public uploads.
 

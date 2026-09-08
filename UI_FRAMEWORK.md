@@ -1,6 +1,6 @@
 # Stackscroll UI framework
 
-A minimalist technical workspace with a provisional Stackscroll identity. A guided learning stack is the primary activity. Individual cards remain in Explore, Practice, and Saved.
+A minimalist technical workspace with a provisional Stackscroll identity. The primary Feed is a mixed-media collection. Guided stacks remain a focused learning mode alongside creator clips, quotes, original AI animations, and news.
 
 ## Foundations
 
@@ -54,4 +54,8 @@ See `UI_KIT_RESEARCH.md` for the repository comparison, license sources and reas
 
 ## Guided stacks
 
-The feed has one reading surface, a five-step ruler, a source reference, and one primary progression action. Career paths and the card library sit under Explore. One Filters sheet holds topic, format, and level. Stream has explicit load-more; no automatic endless loading. Wrap-up offers a deliberate finish, optional next-day recall, and a related stack without auto-starting it. The right rail shows the current outline and separates read, attempted, and later-recall activity. Main stack copy uses 1–1.0625rem and controls retain 44px targets where composed here.
+The Stacks tab has one reading surface, a five-step ruler, a source reference, and one primary progression action. Career paths and the card library sit under Explore. One Filters sheet holds topic, format, and level. Stream has explicit load-more; no automatic endless loading. Wrap-up offers a deliberate finish, optional next-day recall, and a related stack without auto-starting it. The right rail shows the current outline and separates read, attempted, and later-recall activity. Main stack copy uses 1–1.0625rem and controls retain 44px targets where composed here.
+
+## Media formats
+
+Mix / Clips / Quotes / AI videos / News / Stacks use the existing accessible Tabs primitive. Source quotes get a typographic blockquote, precise attribution, and a practical reflection. Creator clips retain official player branding, actual runtime, original publication date, and explicit click-to-load consent. No third-party thumbnail is fetched before consent. Local original animations have visible AI authorship, native controls, burned-in captions, a VTT track, transcript, and source links. They do not autoplay. Starting another player or changing the browsing context stops the active video. Posters and videos reuse the three-bar Stackscroll identity.

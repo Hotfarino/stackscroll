@@ -117,3 +117,35 @@ test("rescheduled recall asks a fresh question without revealing the earlier ans
  const html=renderToStaticMarkup(React.createElement(StackRecall,{stack:learningStacks[0],session:{...blankSession(),step:4,completedAt:100,recallAt:200,recallAnswer:1,reviewDue:300},busy:false,onAction:async()=>true}));
  assert.match(html,/Check recall/);assert.doesNotMatch(html,/Best answer:|Recalled correctly/);
 });
+
+
+test("original explainers are real local videos with captions and no autoplay or third-party player",async()=>{
+ const {ExplainerCard}=await vite.ssrLoadModule("/app/media-cards.tsx");
+ const {explainers}=await vite.ssrLoadModule("/app/media-content.ts");
+ for(const clip of explainers){
+  const html=renderToStaticMarkup(React.createElement(ExplainerCard,{clip,saved:false,active:false,onActivate(){},onSave(){},onStack(){}}));
+  assert.match(html,/<video[^>]*controls/);assert.match(html,/preload="none"/);assert.match(html,/<track[^>]*kind="captions"/);
+  assert.match(html,/AI-authored animation/);assert.doesNotMatch(html,/<iframe|autoPlay|autoplay|src="https:\/\//);
+  for(const asset of [clip.video,clip.poster,clip.captions])assert.ok((await readFile(path.join(root,'public',asset))).length>0);
+  const transcript=JSON.parse(await readFile(path.join(root,'public',clip.video.replace('.mp4','.json')),'utf8'));
+  assert.equal(clip.duration,transcript.duration_seconds);assert.equal(transcript.audio,false);assert.ok(clip.transcript.length>=7);
+ }
+});
+
+test("mixed feed includes every format and resolves saved originals from the current catalog",async()=>{
+ const {mixedFeed}=await vite.ssrLoadModule("/app/mixed-feed.ts");
+ const {cards,curatedNews}=await vite.ssrLoadModule("/app/content.ts");
+ const {videoCatalog,videoAsCard}=await vite.ssrLoadModule("/app/video-catalog.ts");
+ const {quotes,mediaCards,resolveOriginalMedia}=await vite.ssrLoadModule("/app/media-content.ts");
+ const {stateSchema,initialState}=await vite.ssrLoadModule("/app/learning.ts");
+ const pool=[...videoCatalog.map(videoAsCard),...mediaCards(),...curatedNews,...cards];
+ const result=mixedFeed(pool,[]);
+ assert.deepEqual(result.slice(0,7).map(item=>item.kind),['video','quote','explainer','news','lesson','quiz','flashcard']);
+ assert.equal(new Set(result.map(item=>item.id)).size,result.length);
+ const tuned=mixedFeed(pool,[{topic:'Development',preference:'more'}]);assert.equal(tuned[0].topic,'Development');
+ for(const quote of quotes){assert.ok(quote.quote.split(/\s+/).length<=25);assert.match(quote.source,/^https:\/\//);assert.ok(quote.author);}
+ assert.equal(stateSchema.safeParse({...initialState,saved:mediaCards()}).success,true);
+ const original=mediaCards()[0];assert.deepEqual(resolveOriginalMedia([{...original,title:'Tampered source',source:'https://attacker.example/'}]),[original]);
+ assert.deepEqual(resolveOriginalMedia([{...original,id:'removed-quote'}]),[]);
+ assert.ok(videoCatalog.filter(video=>video.format==='short').length>=6);
+});
