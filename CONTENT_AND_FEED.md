@@ -2,6 +2,18 @@
 
 Stackscroll remains an IT/tech discovery and career-learning product. Gaming sessions are deferred. The existing quizzes, flashcards, creator clips, quotes, original videos and guided stacks remain available.
 
+## Product principle: curiosity first
+
+The home feed is tech doomscrolling for adults: a varied stream that invites curiosity, unexpected connections, and thinking beyond a current role or certification. It stays the default entry point. Preserve clips, news, quotes, stories, podcasts, explainers, technical questions, and flashcards as the catalog supports them.
+
+- Stacks organize interests people choose as they explore. Keep building and customizing them reachable from the feed, with explicit names, topics, layers, and skins.
+- Choosing or practicing an exam does not convert the home feed into an exam syllabus or change feed ranking. Practice is an intentional destination with the exact exam name and code visible.
+- Maintain topic, publisher, and format diversity. Personal interests guide discovery without removing unrelated eligible tech ideas from the unfiltered mix. Explicit search and filters can narrow it.
+- Keep first cards light with explanation, reference, and a related task available for voluntary depth. Browsing, answers, and later recall remain distinct.
+- Retain deliberate finishes for named playlists and guided sequences. Do not autoplay unrelated items or imply that consumption proves understanding.
+
+This pass improves navigation labels and exam identity only. The existing mix algorithm, content sources, account data model, and separate practice scoring are unchanged. These principles describe the product direction; they are not claims of measured learning or engagement gains.
+
 ## New editorial content
 
 Two original short incident stories draw on primary organizational accounts:

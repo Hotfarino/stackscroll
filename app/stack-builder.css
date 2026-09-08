@@ -126,3 +126,10 @@
 .stack-skin-choice>span {display:flex;align-items:center;gap:8px;min-height:44px}
 .stack-skin-choice strong {font-size:.9375rem;font-weight:500}
 .stack-skin-choice small {display:block;color:var(--soft);font-size:.8125rem;line-height:1.5}
+
+/* Keep personalization destinations explicit on narrow screens. */
+.stack-customize-help {font-size:.9375rem;line-height:1.6;color:var(--copy);margin:0 0 20px}
+.stack-customize-help strong {font-weight:550;color:var(--foreground)}
+.builder-steps button {padding:8px 3px;gap:6px}
+.builder-steps button>span {flex-shrink:0}
+.builder-steps button>strong {font-weight:inherit;line-height:1.35;min-width:0}
