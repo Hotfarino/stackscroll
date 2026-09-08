@@ -91,7 +91,14 @@ test("video players make no embedded requests before a click and respect blockin
   const props={video,session:createPlaybackSession(),saved:false,blocked:false,active:false,onActivate(){},onUnload(){},onSave(){}};
   const render=extra=>renderToStaticMarkup(React.createElement(VideoCard,{...props,...extra}));
   const before=render({});
-  assert.doesNotMatch(before,/<(?:iframe|img|script)\b/);
+  assert.doesNotMatch(before,/<(?:iframe|script)\b/);
+  const coverImages = [...before.matchAll(/<img\b[^>]*>/g)].map(match=>match[0]);
+  assert.ok(coverImages.length > 0);
+  for (const image of coverImages) {
+    assert.match(image,/src="\/media\/cards\/[a-z-]+\.webp"/);
+    assert.doesNotMatch(image,/https?:|srcSet=/i);
+  }
+  assert.match(before,/AI topic artwork/);
   assert.match(before,/Load YouTube player/);
   assert.match(before,/Factual review pending/);
   assert.doesNotMatch(before,/Mark learned/);

@@ -6,6 +6,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Textarea } from "@/components/ui/textarea";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
 import { StackButton } from "./brand";
+import { CardArt } from "./card-art";
 import { embedUrl, videoIdentity, type createPlaybackSession, type VideoRecord } from "./video-catalog";
 
 export function ReportVideo({video}: {video?:VideoRecord}) {
@@ -67,6 +68,7 @@ export function VideoCard({video,saved,blocked,active,session,onActivate,onUnloa
   }
   return <article className={`learning-card kind-video ${video.format==="short"?"creator-short":""}`} data-topic={video.topic}>
     <div className="card-top"><div className="topic-icon"><Video size={20}/></div><div className="card-author"><strong>{video.creator}</strong><span>{video.topic} <b>·</b> {video.level}</span></div><span className="kind-badge"><Play size={13}/>{video.format==="short"?"Clip":"Video"}{video.durationSeconds&&<> · {Math.floor(video.durationSeconds/60)}:{String(video.durationSeconds%60).padStart(2,"0")}</>}</span></div>
+    {!(active&&!blocked&&src)&&<CardArt topic={video.topic} format="video" label="Creator spotlight"/>}
     <div className="card-main"><h2>{video.title.replace(/\s+#\S+/g,"")}</h2>{video.description&&<p className="creator-description">{video.description}</p>}{video.publishedAt&&<p className="creator-date">Published {new Date(video.publishedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"})}</p>}
       <div className="video-review-status"><span>Official embed</span><span>{video.factualReview.status==="reviewed"?"Factual review recorded":"Factual review pending"}</span></div>
       {active&&!blocked&&src ? <div className="loaded-video">

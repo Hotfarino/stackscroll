@@ -3,6 +3,7 @@ import {useEffect,useRef,useState} from "react";
 import {Bookmark,ExternalLink,Quote,Clapperboard,ArrowRight} from "lucide-react";
 import {Accordion,AccordionItem,AccordionTrigger,AccordionContent} from "@/components/ui/accordion";
 import {StackButton} from "./brand";
+import "./card-visuals.css";
 import type {QuoteRecord,ExplainerRecord} from "./media-content";
 
 function SaveMedia({title,saved,onSave}:{title:string;saved:boolean;onSave:()=>void}){return <button className={`icon-button save-button ${saved?"is-saved":""}`} aria-label={`${saved?"Unsave":"Save"} ${title}`} aria-pressed={saved} onClick={onSave}><Bookmark size={18} fill={saved?"currentColor":"none"}/></button>;}
