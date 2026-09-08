@@ -1,4 +1,4 @@
-import { sqliteTable, text, integer, index } from "drizzle-orm/sqlite-core";
+import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
 export const contentReports = sqliteTable("content_reports", {
   id: text("id").primaryKey(),
@@ -16,3 +16,18 @@ export const videoModeration = sqliteTable("video_moderation", {
   blocked: integer("blocked").notNull().default(0),
   updatedAt: integer("updated_at").notNull(),
 });
+
+export const stackSessions = sqliteTable("stack_sessions", {
+  userId: text("user_id").notNull(),
+  stackId: text("stack_id").notNull(),
+  data: text("data").notNull(),
+  revision: integer("revision").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+}, table => [primaryKey({columns:[table.userId,table.stackId]})]);
+
+export const topicFeedback = sqliteTable("topic_feedback", {
+  userId: text("user_id").notNull(),
+  topic: text("topic").notNull(),
+  preference: text("preference").notNull(),
+  updatedAt: integer("updated_at").notNull(),
+}, table => [primaryKey({columns:[table.userId,table.topic]})]);

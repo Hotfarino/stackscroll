@@ -1,6 +1,6 @@
 # Stackscroll UI framework
 
-A minimalist technical workspace with a provisional Stackscroll identity. The learning card and its controls remain the primary activity.
+A minimalist technical workspace with a provisional Stackscroll identity. A guided learning stack is the primary activity. Individual cards remain in Explore, Practice, and Saved.
 
 ## Foundations
 
@@ -40,7 +40,7 @@ Topic roles remain available through `data-topic` for technical diagrams and fut
 
 ## Implementation boundaries
 
-This pass changes presentation, shared styling, and theme descriptions. It does not add creator clips, recommendations, accounts, age verification, or a completed content-review process. Preserve existing content provenance and learning state when extending the framework.
+The current flow adds seven guided stacks, account-scoped progress, and explicit rule-based recommendation controls. It preserves the official click-to-load video integration and existing device-local card state. It does not add public uploads, age verification, or a completed independent content-review process. Preserve content provenance and learning state when extending the framework.
 
 ## Validation
 
@@ -51,3 +51,7 @@ The production build and existing learning/rendering checks are the implementati
 `app/brand.tsx` owns the wordmark, original stack mark and button wrapper. `--brand-font`, `--icon-stroke` and `--control-radius` separate brand choices from layout. The mobile header shows the full Stackscroll lockup without requiring the navigation drawer to be opened. Final font and color choices remain open.
 
 See `UI_KIT_RESEARCH.md` for the repository comparison, license sources and reasons for retaining the installed UI foundation.
+
+## Guided stacks
+
+The feed has one reading surface, a five-step ruler, a source reference, and one primary progression action. Career paths and the card library sit under Explore. One Filters sheet holds topic, format, and level. Stream has explicit load-more; no automatic endless loading. Wrap-up offers a deliberate finish, optional next-day recall, and a related stack without auto-starting it. The right rail shows the current outline and separates read, attempted, and later-recall activity. Main stack copy uses 1–1.0625rem and controls retain 44px targets where composed here.

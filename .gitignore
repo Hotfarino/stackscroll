@@ -44,3 +44,5 @@ next-env.d.ts
 *.tsbuildinfo
 /.learning-test-*/
 /.video-test-*/
+
+.stack-test-*/

@@ -52,10 +52,10 @@ export function Customizer({ preferences: p, onChange, canSave }: {
       </SheetHeader>
       <div className="customizer-body">
         <section className="custom-section">
-          <div className="setting-heading"><h3>01 / Reading layout</h3></div>
+          <div className="setting-heading"><h3>01 / Card library layout</h3></div>
           <RadioGroup value={p.layout} onValueChange={value => set("layout", value as Preferences["layout"])} className="layout-choices" aria-label="Reading layout">
             {[
-              {id:"stream",name:"Stream",detail:"The continuous feed",icon:Rows3},
+              {id:"stream",name:"Stream",detail:"Browse a few cards",icon:Rows3},
               {id:"focus",name:"Focus",detail:"One card at a time",icon:ScanLine},
               {id:"index",name:"Index",detail:"Browse, then open",icon:List},
             ].map(option => <label className={`layout-choice ${p.layout === option.id ? "chosen" : ""}`} key={option.id}>
@@ -94,15 +94,15 @@ export function Customizer({ preferences: p, onChange, canSave }: {
         <section className="custom-section">
           <div className="setting-heading"><h3>04 / Keep what helps</h3></div>
           {[
-            {key:"showRail" as const,label:"Learning sidebar",detail:"Paths, review queue, and progress on wide screens."},
-            {key:"showActivity" as const,label:"Daily activity",detail:"Show your daily count and learning statistics."},
+            {key:"showRail" as const,label:"Learning sidebar",detail:"Stack outline and activity on wide screens."},
+            {key:"showActivity" as const,label:"Stack activity",detail:"Separate read, attempted, and later recall counts."},
             {key:"expandSources" as const,label:"Expand source details",detail:"Show the reference and review status under each card."},
             {key:"reduceMotion" as const,label:"Reduce motion",detail:"Stop interface animations and smooth scrolling."},
           ].map(option => <div className="switch-setting" key={option.key}><label htmlFor={`setting-${option.key}`}><strong>{option.label}</strong><span>{option.detail}</span></label><Switch id={`setting-${option.key}`} checked={p[option.key]} onCheckedChange={value => set(option.key, value)}/></div>)}
         </section>
         <section className="custom-section">
           <div className="setting-heading"><h3>05 / Quick topics</h3><Pin size={15}/></div>
-          <p className="setting-note">Pinned topics come first in your navigation. All topics stay available.</p>
+          <p className="setting-note">Pinned topics help shape your stack recommendations. All topics stay available in Explore.</p>
           <div className="pin-topics">{topics.map(topic => <label key={topic} className={p.pinnedTopics.includes(topic) ? "pinned" : ""}><Checkbox checked={p.pinnedTopics.includes(topic)} onCheckedChange={checked => set("pinnedTopics", checked === true ? [...p.pinnedTopics, topic] : p.pinnedTopics.filter(t => t !== topic))}/><span>{topic}</span></label>)}</div>
         </section>
       </div>

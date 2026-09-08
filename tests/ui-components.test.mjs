@@ -102,3 +102,18 @@ test("video players make no embedded requests before a click and respect blockin
   assert.doesNotMatch(render({active:true,blocked:true}),/<iframe\b/);
   assert.doesNotMatch(render({active:true,video:{...video,rights:{...video.rights,status:'revoked'}}}),/<iframe\b/);
 });
+
+
+test("stack recap separates skipped practice from later recall", async()=>{
+ const {StackSessionView}=await vite.ssrLoadModule("/app/stack-session.tsx");
+ const {learningStacks,blankSession}=await vite.ssrLoadModule("/app/stacks.ts");
+ const html=renderToStaticMarkup(React.createElement(StackSessionView,{stack:learningStacks[0],session:{...blankSession(),step:4,seen:[0,1,2,3],completedAt:100},busy:false,onAction:async()=>true,onExit(){},onRelated(){}}));
+ assert.match(html,/Skipped/);assert.match(html,/Not attempted/);assert.match(html,/Done for now/);assert.doesNotMatch(html,/1 \/ 1 correct|Mastered/);
+});
+
+test("rescheduled recall asks a fresh question without revealing the earlier answer",async()=>{
+ const {StackRecall}=await vite.ssrLoadModule("/app/stack-session.tsx");
+ const {learningStacks,blankSession}=await vite.ssrLoadModule("/app/stacks.ts");
+ const html=renderToStaticMarkup(React.createElement(StackRecall,{stack:learningStacks[0],session:{...blankSession(),step:4,completedAt:100,recallAt:200,recallAnswer:1,reviewDue:300},busy:false,onAction:async()=>true}));
+ assert.match(html,/Check recall/);assert.doesNotMatch(html,/Best answer:|Recalled correctly/);
+});

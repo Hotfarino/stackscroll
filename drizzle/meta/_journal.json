@@ -8,6 +8,13 @@
       "when": 1788830742836,
       "tag": "0000_hesitant_xorn",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "6",
+      "when": 1788833404483,
+      "tag": "0001_normal_wendigo",
+      "breakpoints": true
     }
   ]
 }
