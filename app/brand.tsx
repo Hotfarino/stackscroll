@@ -5,8 +5,10 @@ import type { ComponentProps } from "react";
 export const brandName = "Stackscroll";
 
 export function StackMark() {
-  return <svg className="stack-mark" viewBox="0 0 28 28" fill="none" aria-hidden="true" focusable="false">
-    <path d="M3 3h18v4H3zM7 12h18v4H7zM3 21h18v4H3z" fill="currentColor"/>
+  return <svg className="stack-mark" viewBox="0 0 32 32" fill="none" aria-hidden="true" focusable="false">
+    <path d="M3 22 18 15 29 19 14 26Z" fill="#ffb578"/>
+    <path d="M3 15 18 8 29 12 14 19Z" fill="#d6e575"/>
+    <path d="M3 8 18 1 29 5 23 8 21 7.3 18.5 8.5 20.5 9.2 14 12Z" fill="#80b4ff"/>
   </svg>;
 }
 
