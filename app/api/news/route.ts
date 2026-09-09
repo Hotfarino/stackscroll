@@ -2,9 +2,15 @@ import { curatedNews, type Card } from "../../content";
 import { parseNews, newsSources } from "../../news";
 import { discoverHN, discoverPapers } from "../../fresh-discoveries";
 let cache: {items:Card[];status:string;sources:{name:string;status:string;count:number}[];fetchedAt:string;expires:number}|undefined;
+let inFlight:Promise<void>|undefined;
 export async function GET(request?:Request) {
  const force=request?new URL(request.url).searchParams.get("refresh")==="1":false;
  if(cache&&cache.expires>Date.now()&&(!force||Date.now()-Date.parse(cache.fetchedAt)<60000))return Response.json(cache,{headers:{"Cache-Control":"private, no-store"}});
+ if(!inFlight)inFlight=refreshSources().finally(()=>{inFlight=undefined;});
+ await inFlight;
+ return Response.json(cache,{headers:{"Cache-Control":"private, no-store"}});
+}
+async function refreshSources(){
  const providers=[...newsSources.map(source=>source.name),"Hacker News","Hugging Face Papers"];
  const results=await Promise.allSettled([...newsSources.map(async(source)=>{
   const response=await fetch(source.url,{headers:{Accept:"application/rss+xml, application/xml, text/xml"},signal:AbortSignal.timeout(7000),redirect:"manual"});
@@ -19,5 +25,5 @@ export async function GET(request?:Request) {
  const unique=[...new Map(merged.map(item=>[item.source,item])).values()];
  const sources=results.map((r,i)=>({name:providers[i],status:r.status==="rejected"?"unavailable":r.value.partial?"partial":"live",count:r.status==="fulfilled"?r.value.items.length:0}));
  cache={sources,items:unique.length?unique:curatedNews,status:sources.every(s=>s.status==="live")?"live":successful.length?"partial":"curated",fetchedAt:new Date().toISOString(),expires:Date.now()+(successful.length?600000:60000)};
- return Response.json(cache,{headers:{"Cache-Control":"private, no-store"}});
+
 }

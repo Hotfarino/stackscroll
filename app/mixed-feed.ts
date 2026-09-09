@@ -11,7 +11,7 @@ export function preferenceScore(card:Card,feedback:TopicFeedback[],path:Topic[]=
 export function feedReason(card:Card,feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[]):string{
  const setting=feedback.find(item=>item.topic===card.topic)?.preference;
  const reasons=[setting==="more"?"You asked for more of this topic.":setting==="less"?"You asked for less of this topic; it is ranked lower, not hidden.":setting==="basic"?"Difficulty preference: more foundational material.":setting==="advanced"?"Difficulty preference: more advanced material.":"",path.includes(card.topic)?"Related to your career direction.":"",pinned.includes(card.topic)?"One of your pinned topics.":""].filter(Boolean);
- return (reasons.join(" ")||"A curated tech pick for exploring the field.")+" The mix also balances formats, recent topics, and publishers. Viewing time is not used.";
+ return (reasons.join(" ")||"A curated tech pick for exploring the field.")+" The mix also balances formats and publishers, with discovery slots outside your selected topics when available. Viewing time is not used.";
 }
 export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],now=Date.now()):Card[]{
  const ids=new Set<string>(),links=new Set<string>();
@@ -22,32 +22,55 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
   if(external&&links.has(url.href))return false;
   ids.add(card.id);if(external)links.add(url.href);return true;
  });
- const pools=new Map(feedRotation.map(kind=>[kind,candidates.filter(card=>card.kind===kind)]));
- const baseScores=new Map(candidates.map(card=>[card.id,preferenceScore(card,feedback,path,pinned)]));
+ // Cards sharing a topic, publisher and preference score have the same dynamic
+ // penalty. Rank each bucket once, then compare only its next available card.
  const dates=new Map(candidates.map(card=>[card.id,Date.parse(card.date||"")||0]));
- const output:Card[]=[];
- function pick(kind:Kind){
-  const pool=pools.get(kind)!;if(!pool.length)return;
-  const recent=output.slice(-3);
-  const recentTopics=new Map<Topic,number>();for(const card of recent)recentTopics.set(card.topic,(recentTopics.get(card.topic)||0)+1);
-  const recentPublishers=new Set(recent.map(card=>card.sourceName));
-  const score=(card:Card)=>baseScores.get(card.id)!-(recentTopics.get(card.topic)||0)*4-(recentPublishers.has(card.sourceName)?5:0);
-  // One scan preserves stable ties and avoids sorting the whole pool for each card.
-  let best=0,bestScore=score(pool[0]);
-  for(let i=1;i<pool.length;i++){
-   const candidateScore=score(pool[i]);
-   const newer=["news","video","podcast"].includes(kind)&&dates.get(pool[i].id)!>dates.get(pool[best].id)!;
-   if(candidateScore>bestScore||(candidateScore===bestScore&&newer)){best=i;bestScore=candidateScore;}
+ const interests=new Set([...path,...pinned,...feedback.filter(f=>f.preference==="more").map(f=>f.topic)]);
+ const less=new Set(feedback.filter(f=>f.preference==="less").map(f=>f.topic));
+ type Bucket={cards:Card[];offset:number;base:number};
+ const pools=new Map<Kind,Bucket[]>();
+ const remaining=new Map<Kind,number>();
+ for(const kind of feedRotation){
+  const groups=new Map<string,Bucket>();
+  for(const card of candidates.filter(card=>card.kind===kind)){
+   const base=preferenceScore(card,feedback,path,pinned),key=JSON.stringify([card.topic,card.sourceName,base]);
+   if(!groups.has(key))groups.set(key,{cards:[],offset:0,base});groups.get(key)!.cards.push(card);
   }
-  output.push(pool.splice(best,1)[0]);
+  if(["news","video","podcast"].includes(kind))for(const group of groups.values())group.cards.sort((a,b)=>dates.get(b.id)!-dates.get(a.id)!);
+  pools.set(kind,[...groups.values()]);remaining.set(kind,[...groups.values()].reduce((sum,g)=>sum+g.cards.length,0));
  }
- // Begin with a format sampler, then spread the remaining inventory through the
- // selection. Scarce formats should not all disappear at the top of a long feed.
+ const inputOrder=new Map(candidates.map((card,i)=>[card.id,i]));
+ const output:Card[]=[];
+ const kindHistory=new Map<Kind,Card[]>();
+ function pick(kind:Kind){
+  const groups=pools.get(kind)!;if(!remaining.get(kind))return;
+  const recent=output.slice(-3),sameKind=kindHistory.get(kind)||[];
+  const recentTopics=new Map<Topic,number>();for(const card of recent)recentTopics.set(card.topic,(recentTopics.get(card.topic)||0)+1);
+  const publishers=new Set([...recent,...sameKind].map(card=>card.sourceName));
+  const heads=groups.filter(g=>g.offset<g.cards.length);
+  // Every fifth slot may explore an unselected topic, when this format has one.
+  // Explicit "less" preferences are never used to fill the discovery slot.
+  const explore=interests.size>0&&(output.length+1)%5===0;
+  const outside=explore?heads.filter(g=>!interests.has(g.cards[g.offset].topic)&&!less.has(g.cards[g.offset].topic)):[];
+  const options=outside.length?outside:heads;
+  const score=(g:Bucket)=>g.base-(recentTopics.get(g.cards[g.offset].topic)||0)*4-(publishers.has(g.cards[g.offset].sourceName)?5:0);
+  let best=options[0],bestScore=score(best);
+  for(const candidate of options.slice(1)){
+   const candidateScore=score(candidate),a=candidate.cards[candidate.offset],b=best.cards[best.offset];
+   const chronological=["news","video","podcast"].includes(kind);
+   const dateDelta=chronological?dates.get(a.id)!-dates.get(b.id)!:0;
+   if(candidateScore>bestScore||(candidateScore===bestScore&&(dateDelta>0||(dateDelta===0&&inputOrder.get(a.id)!<inputOrder.get(b.id)!)))){best=candidate;bestScore=candidateScore;}
+  }
+  const card=best.cards[best.offset++];output.push(card);remaining.set(kind,remaining.get(kind)!-1);
+  kindHistory.set(kind,[...sameKind,card].slice(-3));
+ }
  for(const kind of feedRotation)pick(kind);
- const weights=new Map(feedRotation.map(kind=>[kind,pools.get(kind)!.length]));
+ // Sublinear weights prevent a prolific source/format from buying most slots
+ // merely by supplying more cards. Inventory still remains fully accessible.
+ const weights=new Map(feedRotation.map(kind=>[kind,Math.sqrt(remaining.get(kind)!)]));
  const credits=new Map(feedRotation.map(kind=>[kind,0]));
- while([...pools.values()].some(pool=>pool.length)){
-  const available=feedRotation.filter(kind=>pools.get(kind)!.length);
+ while([...remaining.values()].some(count=>count>0)){
+  const available=feedRotation.filter(kind=>remaining.get(kind)!>0);
   const total=available.reduce((sum,kind)=>sum+weights.get(kind)!,0);
   for(const kind of available)credits.set(kind,credits.get(kind)!+weights.get(kind)!);
   const last=output.at(-1)?.kind;

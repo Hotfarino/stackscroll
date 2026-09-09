@@ -27,7 +27,7 @@ export function feedCandidates(cards:Card[],memory:FeedMemory,now=Date.now(),rev
 // Rotate equal-priority cards reproducibly, without changing IDs or source dates.
 export function rotatedCandidates(cards:Card[],seed:number):Card[] {
  function hash(id:string){let h=2166136261;for(const c of `${seed}:${id}`){h^=c.charCodeAt(0);h=Math.imul(h,16777619);}h^=h>>>16;h=Math.imul(h,0x85ebca6b);h^=h>>>13;return h>>>0;}
- return [...cards].sort((a,b)=>hash(a.id)-hash(b.id));
+ return cards.map(card=>({card,rank:hash(card.id)})).sort((a,b)=>a.rank-b.rank).map(item=>item.card);
 }
 export function stableFeed(ids:string[],inventory:Card[]):Card[]{
  const available=new Map(inventory.map(card=>[card.id,card]));
