@@ -4,6 +4,14 @@ body {
   background-attachment: fixed;
 }
 body .app-main { background: transparent; }
+html[data-pull-refresh="true"], html[data-pull-refresh="true"] body { overscroll-behavior-y: contain; }
+body .header-refresh { margin-left: auto; min-height: 44px; flex-shrink: 0; }
+.pull-refresh-indicator { position: fixed; left: 50%; z-index: 30; display: flex; align-items: center; gap: 10px; padding: 13px 18px; background: var(--glass-solid); color: var(--foreground); border: 1px solid var(--glass-edge); box-shadow: 0 5px 18px var(--glass-shadow); font-size: .875rem; line-height: 1.5; pointer-events: none; will-change: transform; }
+@media (max-width: 767px) {
+  body .topbar { display: grid; grid-template-columns: minmax(0,1fr) auto; }
+  body .topbar > .topbar-right { grid-column: 1 / -1; width: 100%; justify-content: flex-end; margin-left: 0; }
+  body .header-refresh { min-width: 112px; }
+}
 .feed-toolbar { display: flex; align-items: center; flex-wrap: wrap; gap: 8px; }
 body .feed-refresh { min-width: 120px; justify-content: center; }
 .feed-refresh-status { min-height: 1.5em; margin: 0 0 12px; font-size: .875rem; line-height: 1.5; color: var(--copy); }
