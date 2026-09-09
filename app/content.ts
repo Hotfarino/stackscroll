@@ -67,10 +67,30 @@ export const coreCards: Card[] = [
 ];
 import { catalogCards } from "./catalog-records";
 export { catalogCards };
-export const cards: Card[] = [...coreCards, ...catalogCards];
+
+const curiosityCards: Card[] = [
+ {id:"curiosity-fact-moth",kind:"lesson",topic:"Development",level:"Foundation",title:"The bug was real. The word came first.",body:"In 1947, a moth was found in a Harvard Mark II relay and preserved in its logbook. Engineers already used the word ‘bug’ for faults. The famous moth story did not invent the term.",source:"https://www.computerhistory.org/tdih/september/9/",sourceName:"Computer History Museum · Tech history"},
+ {id:"curiosity-fact-birds",kind:"lesson",topic:"Networking",level:"Foundation",title:"There is an RFC for sending IP packets by bird.",body:"RFC 1149 describes IP datagrams carried by avian carriers. Published on April Fools’ Day in 1990, it is networking humor—not deployment advice.",source:"https://www.rfc-editor.org/info/rfc1149/",sourceName:"RFC Editor · Tech history"},
+ {id:"curiosity-fact-coffee",kind:"lesson",topic:"Development",level:"Foundation",title:"Your coffee pot got its own protocol proposal.",body:"The Hyper Text Coffee Pot Control Protocol appeared in RFC 2324 on April 1, 1998. This informational April Fools’ document explicitly does not specify an Internet standard.",source:"https://www.rfc-editor.org/info/rfc2324/",sourceName:"RFC Editor · Tech history"},
+ ...([
+ ["Networking","The network is fine.","Narrator: The DNS cache had requested legal representation."],
+ ["Cloud","Cloud cost optimization","Step one: discover the test server you named temporary three years ago."],
+ ["Agentic AI","My agent finished the task.","It also opened six follow-up tasks and promoted itself to project manager."],
+ ["Machine learning","Perfect training accuracy","My model has memorized the textbook and would prefer no follow-up questions."],
+ ["Data centers","A quiet day in the data center","The fans disagree with this description."],
+ ["Development","It works on my machine.","My machine has declined the invitation to production."],
+ ["Languages","Learning a second language","Now I can forget semicolons in two ecosystems."],
+ ["AI workflows","Automation saves time.","I spent the saved time naming the workflow final_final_really_final."],
+ ["CCNA","Subnetting confidence","I know exactly how many hosts fit. I just need everyone to stop watching me count."],
+ ["CompTIA","The troubleshooting process","First, identify the problem. The printer has identified me as the problem."],
+ ["Development","One small dependency","It brought its friends. All 842 of them."],
+ ["Agentic AI","Human in the loop","The human is currently in a loop asking why the agent is in a loop."]
+ ] as [Topic,string,string][]).map(([topic,title,body],i)=>({id:`curiosity-humor-${i+1}`,kind:"humor" as const,topic,level:"Foundation" as const,title,body,source:"https://stackscroll.bigdawgroof812178.chatgpt.site/terms",sourceName:"Stackscroll Originals · Fiction"}))
+];
+export const cards: Card[] = [...coreCards, ...catalogCards, ...curiosityCards];
 export const cardById = new Map(cards.map(card => [card.id, card]));
 export function resolveCatalogSaved(saved: Card[], resolveOther: (saved: Card[]) => Card[]): Card[] {
-  return saved.flatMap(card => card.id.startsWith("catalog-") ? (cardById.has(card.id) ? [cardById.get(card.id)!] : []) : resolveOther([card]));
+  return saved.flatMap(card => (card.id.startsWith("catalog-")||card.id.startsWith("curiosity-")) ? (cardById.has(card.id) ? [cardById.get(card.id)!] : []) : resolveOther([card]));
 }
 export const curatedNews:Card[]=[
   {
