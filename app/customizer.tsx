@@ -102,7 +102,7 @@ export function Customizer({ preferences: p, onChange, canSave }: {
         </section>
         <section className="custom-section">
           <div className="setting-heading"><h3>05 / Quick topics</h3><Pin size={15}/></div>
-          <p className="setting-note">Pinned topics help shape your stack recommendations. All topics stay available in Explore.</p>
+          <p className="setting-note">Pinned topics help shape your stack recommendations. All topics stay available in Radar.</p>
           <div className="pin-topics">{topics.map(topic => <label key={topic} className={p.pinnedTopics.includes(topic) ? "pinned" : ""}><Checkbox checked={p.pinnedTopics.includes(topic)} onCheckedChange={checked => set("pinnedTopics", checked === true ? [...p.pinnedTopics, topic] : p.pinnedTopics.filter(t => t !== topic))}/><span>{topic}</span></label>)}</div>
         </section>
       </div>
