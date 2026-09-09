@@ -95,7 +95,7 @@ export function createYouTubeSourceLoader({fetcher = fetch, now = Date.now, cach
             }
           } catch { /* Cache problems must not prevent a fresh source check. */ }
         }
-        const response = await fetcher(key, {headers:{Accept:"application/json"},redirect:"error",signal:AbortSignal.timeout(6000)});
+        const response = await fetcher(key, {headers:{Accept:"application/json"},redirect:"manual",signal:AbortSignal.timeout(6000)});
         if (!response.ok) { console.warn("youtube_oembed_unavailable",{videoId:video.id,status:response.status});await response.body?.cancel(); throw new Error("YouTube source unavailable"); }
         const metadata = parseMetadata(JSON.parse(new TextDecoder().decode(await readBounded(response, 32768))), video);
         const checkedAt = now();

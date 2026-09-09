@@ -32,9 +32,10 @@ export function createDiscovery({key,fetcher=fetch,clock=Date.now,cache=edgeCach
  let retryAt=0;
  async function api(path:string,params:Record<string,string>){
   const url=new URL(`https://www.googleapis.com/youtube/v3/${path}`);for(const [name,value]of Object.entries(params))url.searchParams.set(name,value);
-  // Credentials are server-only, in a header rather than URLs or logs.
-  const response=await fetcher(url.href,{headers:{Accept:"application/json","X-Goog-Api-Key":key},redirect:"error",signal:AbortSignal.timeout(6000)});
-  if(!response.ok){await response.body?.cancel();throw new Error(`YouTube API returned ${response.status}. Check API access and quota.`);}
+  // Workers supports manual redirects. Reject non-2xx below without following
+  // a Location header, so the server-only credential stays on this API host.
+  const response=await fetcher(url.href,{headers:{Accept:"application/json","X-Goog-Api-Key":key},redirect:"manual",signal:AbortSignal.timeout(6000)});
+  if(!response.ok){console.warn("youtube_api_unavailable",{method:path,status:response.status});await response.body?.cancel();throw new Error(`YouTube API returned ${response.status}. Check API access and quota.`);}
   return JSON.parse(new TextDecoder().decode(await readBounded(response,1024*1024)));
  }
  return async function load(refresh=false):Promise<DiscoveryResult>{

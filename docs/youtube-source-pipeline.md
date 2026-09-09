@@ -1,9 +1,11 @@
-# YouTube discovery experiment — connection pending
+# YouTube discovery experiment
 
-The importer is implemented but has not been verified against the live Data API:
-`YOUTUBE_API_KEY` is absent from the production runtime. Do not label discovery
-live or the continuous source experiment complete until an authenticated real
-request imports eligible uploads and the user can see their images.
+The owner has configured `YOUTUBE_API_KEY` as a production secret. The first live
+request exposed a hosting incompatibility: Workers rejects `redirect:"error"`
+before contacting YouTube. Source, discovery, thumbnail and news requests now use
+`redirect:"manual"` and reject non-2xx responses without following Location headers.
+Live video import, image delivery and player playback must be verified separately;
+a saved key or successful deployment alone does not prove they work.
 
 ## Activate
 

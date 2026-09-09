@@ -23,7 +23,7 @@ export async function GET(request: Request) {
       contentType = cached.headers.get("Content-Type") || "";
       bytes = await readBounded(cached, 1024 * 1024);
     } else {
-      const upstream = await fetch(video.thumbnail.originalUrl, {headers:{Accept:"image/jpeg,image/png,image/webp"},redirect:"error",signal:AbortSignal.timeout(6000)});
+      const upstream = await fetch(video.thumbnail.originalUrl, {headers:{Accept:"image/jpeg,image/png,image/webp"},redirect:"manual",signal:AbortSignal.timeout(6000)});
       contentType = upstream.headers.get("Content-Type")?.split(";")[0] || "";
       if (!upstream.ok || !["image/jpeg","image/png","image/webp"].includes(contentType)) { console.warn("youtube_thumbnail_unavailable",{videoId:video.id,status:upstream.status});await upstream.body?.cancel(); return missing(502); }
       bytes = await readBounded(upstream, 1024 * 1024);

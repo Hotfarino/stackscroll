@@ -33,6 +33,8 @@ const video = videoCatalog[0];
 function sourceMetadata(id, extra={}) {return {type:'video',provider_name:'YouTube',title:'Current official title',author_name:'Official creator',author_url:'https://www.youtube.com/@creator',thumbnail_url:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,thumbnail_width:480,thumbnail_height:360,...extra};}
 let upstreamCalls=[];
 globalThis.fetch=async(input,init)=>{
+ // Match the hosted runtime: redirect:"error" is unsupported at the edge.
+ if(init?.redirect==='error')throw new TypeError('Invalid redirect value');
  const url=new URL(String(input));upstreamCalls.push({url,init});
  if(url.hostname==='www.youtube.com'&&url.pathname==='/oembed')return Response.json(sourceMetadata(new URL(url.searchParams.get('url')).searchParams.get('v')));
  if(url.hostname==='i.ytimg.com')return new Response(new Uint8Array([255,216,255,217]),{headers:{'Content-Type':'image/jpeg'}});
@@ -149,7 +151,7 @@ test('source importer rejects foreign thumbnails, malformed responses, redirects
   new Response('x'.repeat(33000)),
   new Response(null,{status:302,headers:{Location:'https://attacker.example/'}})
  ]) {
-  const loader=createYouTubeSourceLoader({fetcher:async(_,options)=>{assert.equal(options.redirect,'error');return response;}});
+  const loader=createYouTubeSourceLoader({fetcher:async(_,options)=>{assert.equal(options.redirect,'manual');return response;}});
   assert.equal(await loader(video),null);
  }
 });
@@ -177,7 +179,13 @@ test('thumbnail proxy accepts curated IDs only, strips user headers, and respect
  assert.equal(response.status,200);assert.equal(response.headers.get('Content-Type'),'image/jpeg');
  assert.equal(response.headers.get('Cache-Control'),'private, no-store');
  assert.equal((await response.arrayBuffer()).byteLength,4);
- for(const call of upstreamCalls){assert.deepEqual(Object.keys(call.init.headers),['Accept']);assert.equal(call.init.redirect,'error');}
+ for(const call of upstreamCalls){assert.deepEqual(Object.keys(call.init.headers),['Accept']);assert.equal(call.init.redirect,'manual');}
+ const metadataFetch=globalThis.fetch;let redirectCalls=0;
+ try {
+  globalThis.fetch=async(input,init)=>{redirectCalls++;assert.equal(new URL(input).hostname,'i.ytimg.com');assert.equal(init.redirect,'manual');return new Response(null,{status:302,headers:{Location:'https://attacker.example/thumbnail.jpg'}});};
+  assert.equal((await thumbnails.GET(new Request(`https://stackscroll.test/api/videos/thumbnail?id=${video.id}`))).status,502);
+  assert.equal(redirectCalls,1);
+ } finally {globalThis.fetch=metadataFetch;}
  sqlite.prepare('INSERT OR REPLACE INTO video_moderation VALUES (?,?,?)').run(video.id,1,now);
  upstreamCalls=[];
  assert.equal((await thumbnails.GET(new Request(`https://stackscroll.test/api/videos/thumbnail?id=${video.id}`))).status,404);
@@ -206,7 +214,7 @@ test('discovery imports new uploads, refreshes after the quota guard and filters
  const {createDiscovery,parseDiscoveredVideo}=await imp('youtube-discovery');
  const channel='UC'+'a'.repeat(22);let clock=now,calls=0,newUpload=false;
  const make=id=>({id,snippet:{title:'Official upload',channelId:channel,channelTitle:'Creator',publishedAt:new Date(now-1000).toISOString(),liveBroadcastContent:'none',thumbnails:{high:{url:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,width:480,height:360}}},status:{privacyStatus:'public',embeddable:true,madeForKids:false},contentDetails:{duration:'PT2M3S'}});
- const fetcher=async(input,options)=>{calls++;const url=new URL(input);assert.equal(url.searchParams.has('key'),false);assert.equal(options.headers['X-Goog-Api-Key'],'test-key');assert.equal(options.redirect,'error');
+ const fetcher=async(input,options)=>{calls++;const url=new URL(input);assert.equal(url.searchParams.has('key'),false);assert.equal(options.headers['X-Goog-Api-Key'],'test-key');assert.equal(options.redirect,'manual');
   if(url.pathname.endsWith('/channels'))return Response.json({items:[{id:channel,contentDetails:{relatedPlaylists:{uploads:'UU'+'a'.repeat(22)}}}]});
   if(url.pathname.endsWith('/playlistItems'))return Response.json({items:[{contentDetails:{videoId:newUpload?'bbbbbbbbbbb':'aaaaaaaaaaa'}}]});
   return Response.json({items:[make(newUpload?'bbbbbbbbbbb':'aaaaaaaaaaa')]});
@@ -225,4 +233,14 @@ test('API access failures return an explicit unavailable status without exposing
  const {createDiscovery}=await imp('youtube-discovery');
  const result=await createDiscovery({key:'test-secret-value',fetcher:async()=>new Response(null,{status:403})})();
  assert.equal(result.status,'unavailable');assert.match(result.message,/403/);assert.doesNotMatch(JSON.stringify(result),/test-secret-value/);
+});
+
+test('API redirects fail closed without forwarding the key to another host',async()=>{
+ const {createDiscovery}=await imp('youtube-discovery');let calls=0;
+ const result=await createDiscovery({key:'test-secret-value',fetcher:async(input,options)=>{
+  calls++;assert.equal(new URL(input).hostname,'www.googleapis.com');assert.equal(options.redirect,'manual');
+  return new Response(null,{status:302,headers:{Location:'https://attacker.example/collect'}});
+ }})();
+ assert.equal(result.status,'unavailable');assert.match(result.message,/302/);assert.equal(calls,4);
+ assert.doesNotMatch(JSON.stringify(result),/test-secret-value|attacker/);
 });

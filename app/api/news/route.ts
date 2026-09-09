@@ -4,7 +4,7 @@ let cache: {items:Card[];status:string;fetchedAt:string;expires:number}|undefine
 export async function GET() {
  if(cache&&cache.expires>Date.now())return Response.json(cache,{headers:{"Cache-Control":"private, max-age=300"}});
  const results=await Promise.allSettled(newsSources.map(async(source)=>{
-  const response=await fetch(source.url,{headers:{Accept:"application/rss+xml, application/xml, text/xml"},signal:AbortSignal.timeout(7000),redirect:"error"});
+  const response=await fetch(source.url,{headers:{Accept:"application/rss+xml, application/xml, text/xml"},signal:AbortSignal.timeout(7000),redirect:"manual"});
   if(!response.ok||Number(response.headers.get("content-length")||0)>2000000)throw new Error("Feed unavailable");
   const reader=response.body?.getReader();if(!reader)throw new Error("Empty feed");
   const decoder=new TextDecoder();let xml="",bytes=0;
