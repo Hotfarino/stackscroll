@@ -1,0 +1,204 @@
+/* Faceted glass: readable panels, translucent chrome and tactile bevels. */
+body {
+  background-image: radial-gradient(ellipse at 88% 0%, color-mix(in srgb, var(--glass-tint) 12%, transparent), transparent 42%);
+  background-attachment: fixed;
+}
+body .app-main { background: transparent; }
+body .topbar {
+  background: var(--glass-nav);
+  border-bottom: 1px solid var(--glass-edge);
+  box-shadow: inset 0 -1px 0 var(--glass-highlight), 0 5px 22px var(--glass-shadow);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  backdrop-filter: blur(18px) saturate(145%);
+}
+body .app-sidebar [data-slot="sidebar-inner"] {
+  background: linear-gradient(160deg, var(--glass-solid), var(--sidebar) 65%);
+  border-right: 1px solid var(--glass-edge);
+  box-shadow: inset -1px 0 var(--glass-highlight);
+}
+body .brand .stack-mark { width: 31px; height: 31px; filter: drop-shadow(0 2px 0 var(--glass-shade)); }
+body .brand-wordmark { font-weight: 700; letter-spacing: -.045em; }
+body .page-heading h1 { font-weight: 650; }
+body .page-heading .eyebrow { color: var(--primary); }
+body .nav-item { min-height: 48px; border-radius: 2px; }
+body .nav-item[data-active="true"] {
+  color: var(--sidebar-accent-foreground);
+  background: linear-gradient(125deg, var(--glass-highlight), transparent 60%), var(--sidebar-accent);
+  border: 1px solid var(--glass-edge);
+  box-shadow: inset 3px 0 var(--primary), inset 0 1px var(--glass-highlight);
+}
+body .nav-item svg, body .mobile-bottom button svg { stroke-width: 1.7; stroke-linecap: square; stroke-linejoin: miter; }
+body .nav-item[data-active="true"] svg, body .mobile-bottom button.active svg { stroke-width: 2; }
+body .nav-count { border-radius: 2px; background: var(--glass-face); }
+
+/* Clip only self-contained controls. Inner focus rings remain inside the cut. */
+body :is(.stack-button, .customize-trigger, .mobile-trigger, .stack-expand-control, .stack-like) {
+  --control-cut: 7px;
+  clip-path: polygon(0 0, calc(100% - var(--control-cut)) 0, 100% var(--control-cut), 100% 100%, var(--control-cut) 100%, 0 calc(100% - var(--control-cut)));
+  border-radius: 0;
+  border: 1px solid var(--glass-edge);
+  min-height: 44px;
+  background: linear-gradient(125deg, var(--glass-highlight) 0%, transparent 35%, transparent 65%, var(--glass-shade) 100%), linear-gradient(180deg, var(--glass-face), var(--glass-solid));
+  color: var(--foreground);
+  box-shadow: inset 0 1px 0 var(--glass-highlight), inset 1px 0 0 var(--glass-highlight), inset 0 -2px 0 var(--glass-shade);
+  transition: background-position 350ms ease, border-color 180ms ease, box-shadow 180ms ease, transform 180ms ease;
+  background-size: 160% 100%, 100% 100%;
+  background-position: 60% 0, 0 0;
+}
+body .stack-button.primary-button {
+  border-color: color-mix(in srgb, var(--primary) 65%, var(--glass-highlight));
+  color: var(--glass-button-ink);
+  background: linear-gradient(115deg, #ffffff22 0%, #ffffff08 28%, transparent 55%, #ffffff22 100%), linear-gradient(180deg, var(--glass-button-start), var(--glass-button-end));
+  background-size: 170% 100%, 100% 100%;
+  background-position: 60% 0, 0 0;
+  box-shadow: inset 0 1px 0 #ffffff8a, inset 1px 0 0 #ffffff35, inset 0 -2px 0 #001f5440;
+  font-weight: 650;
+}
+body .stack-button.quiet-button { background: transparent; border-color: transparent; box-shadow: none; color: var(--primary); }
+body .stack-button.quiet-button:hover { background: var(--accent); }
+body .stack-button.primary-button:hover:not(:disabled) { background-position: 0 0, 0 0; background-color: var(--primary); }
+body .stack-button.secondary-button:hover:not(:disabled), body .customize-trigger:hover, body .stack-expand-control:hover { background-position: 0 0, 0 0; border-color: var(--primary); color: var(--foreground); }
+body .stack-button:active:not(:disabled), body .customize-trigger:active { transform: translateY(1px); box-shadow: inset 0 2px 3px var(--glass-shade); }
+body :is(.stack-button, .customize-trigger, .mobile-trigger, .stack-expand-control, .stack-like):focus-visible,
+body .learning-card .card-footer .icon-button:focus-visible,
+body .mobile-bottom button:focus-visible {
+  outline: 2px solid var(--ring);
+  outline-offset: 2px;
+  box-shadow: inset 0 0 0 2px var(--ring), inset 0 0 0 4px var(--card);
+}
+body .stack-like[aria-pressed="true"] { color: var(--primary); border-color: var(--primary); }
+
+/* Icon plates use the same reflective edges without obscuring icon silhouettes. */
+body .learning-card .topic-icon, body .learning-card .quote-symbol,
+body .learning-card .card-footer .icon-button,
+body .icon-button, body .small-avatar, body .sidebar-footer .avatar {
+  border-radius: 2px;
+  border: 1px solid var(--glass-edge);
+  background: linear-gradient(140deg, var(--glass-highlight), transparent 70%), var(--glass-solid);
+  box-shadow: inset 1px 1px 0 var(--glass-highlight), inset -1px -1px 0 var(--glass-shade);
+  color: var(--primary);
+}
+body .learning-card .topic-icon, body .learning-card .quote-symbol {
+  clip-path: polygon(0 0, 75% 0, 100% 25%, 100% 100%, 25% 100%, 0 75%);
+  width: 38px; height: 38px;
+}
+body .learning-card .topic-icon svg, body .learning-card .quote-symbol svg { stroke-linecap: square; stroke-linejoin: miter; stroke-width: 1.7; }
+body .icon-button, body .learning-card .card-footer .icon-button { min-width: 44px; min-height: 44px; }
+body .learning-card .card-footer .icon-button:hover { background: var(--accent); border-color: var(--primary); }
+body .learning-card .card-footer .icon-button.is-saved { background: var(--accent); border-color: var(--primary); color: var(--primary); }
+body .learning-card .kind-badge { border-radius: 2px; background: var(--tint); color: var(--primary); box-shadow: inset 0 1px var(--glass-highlight); }
+
+/* Reading faces stay nearly solid, while their perimeter carries the material. */
+body article.learning-card {
+  position: relative;
+  border-radius: 0;
+  clip-path: polygon(0 0, calc(100% - 13px) 0, 100% 13px, 100% 100%, 13px 100%, 0 calc(100% - 13px));
+  border: 1px solid var(--glass-edge);
+  background: linear-gradient(135deg, color-mix(in srgb, var(--glass-tint) 4%, var(--card)), var(--card) 38%);
+  box-shadow: inset 0 2px 0 var(--glass-highlight), inset 1px 0 0 var(--glass-highlight), inset 0 -2px 0 var(--glass-shade);
+}
+body .learning-card .card-footer { background: linear-gradient(180deg, var(--glass-face), var(--glass-solid)); border-top-color: var(--border); }
+body .learning-card .card-art, body .learning-card .art-compact .card-art-image,
+body .learning-card .original-player, body .learning-card .video-placeholder,
+body .learning-card .network-visual, body .learning-card .subnet-visual,
+body .learning-card .workflow-visual, body .learning-card .code-panel { border-radius: 2px; }
+body .learning-card .card-art-label, body .learning-card .card-art-credit { border-radius: 1px; }
+body .learning-card .card-art-link { border-radius: 2px; background: #f2fbfff0; box-shadow: inset 1px 1px white, inset -1px -1px #809bac40; }
+body .learning-card.catalog-card .catalog-open { border-radius: 2px; border-color: var(--glass-edge); color: var(--primary); background: linear-gradient(120deg, var(--glass-highlight), transparent 55%), var(--glass-solid); box-shadow: inset 0 1px var(--glass-highlight), inset 0 -1px var(--glass-shade); }
+body .learning-card.catalog-card .catalog-tags span { border-radius: 2px; }
+body .learning-card.quote-card .card-main blockquote { border-radius: 2px; background: var(--tint); box-shadow: 3px 3px 0 var(--glass-edge); }
+body .learning-card.quote-card .card-main blockquote::before { border-radius: 0; background: var(--primary); }
+body .learning-card .takeaway { border-radius: 0; background: var(--tint); border-left-color: var(--primary); }
+body .learning-card .flash-surface { border-radius: 2px; background: linear-gradient(140deg, var(--glass-highlight), transparent 70%), var(--tint); border-color: var(--glass-edge); box-shadow: inset 1px 1px var(--glass-highlight), inset -1px -2px var(--glass-shade); }
+body .learning-card .flash-surface.is-flipped { background: var(--card); border-top-color: var(--primary); }
+body .learning-card .recall-stack > span { border-radius: 2px; border-color: var(--glass-edge); }
+body .learning-card .recall-stack > span:nth-child(3) { background: linear-gradient(140deg, var(--glass-highlight), transparent 70%), var(--glass-solid); color: var(--primary); box-shadow: inset 1px 1px var(--glass-highlight), 0 3px 0 var(--glass-edge); }
+body .learning-card.kind-quiz .quiz-area { border-top-color: var(--primary); }
+body .learning-card.kind-quiz .quiz-option, body .learning-card.kind-quiz .option-letter { border-radius: 2px; }
+body .learning-card .quiz-option.selected:not(.correct):not(.incorrect) { background: var(--tint); border-color: var(--primary); }
+body .learning-card.catalog-humor .humor-scene { border-radius: 2px; }
+body .learning-card .listening-prompt { border-radius: 2px; }
+
+/* Search and choice controls remain crisp, including the existing theme chooser. */
+body :is(.content-search, .catalog-list-controls, .stack-search) input,
+body .customizer [data-slot="select-trigger"] {
+  border-radius: 2px;
+  border: 1px solid var(--glass-edge);
+  background: var(--glass-face);
+  box-shadow: inset 0 2px 3px var(--glass-shade), 0 1px 0 var(--glass-highlight);
+  color: var(--foreground);
+}
+body .content-search input { min-height: 48px; }
+body .stack-search input { padding: 12px; }
+body .chip { border-radius: 2px; min-height: 44px; background: var(--glass-face); border-color: var(--glass-edge); }
+body .chip.selected { background: var(--tint); border-color: var(--primary); color: var(--primary); }
+body .level-select { border-radius: 2px; border-color: var(--glass-edge); background: var(--glass-face); }
+body :is(.customizer, .stack-idea-sheet, .stack-builder-sheet)[data-slot="sheet-content"] { background: var(--background); border-left: 1px solid var(--glass-edge); box-shadow: inset 1px 0 var(--glass-highlight), -16px 0 70px var(--glass-shadow); }
+body .customizer-header[data-slot="sheet-header"], body .customizer-footer[data-slot="sheet-footer"] { background: var(--glass-solid); border-color: var(--glass-edge); }
+body .customizer-kicker { color: var(--primary); }
+body .customizer :is(.layout-choice, .segmented-setting label, .pin-topics label) { border-radius: 2px; }
+body .customizer .layout-choice { background: linear-gradient(140deg, var(--glass-highlight), transparent 80%), var(--glass-face); border-color: var(--glass-edge); box-shadow: inset 0 -1px var(--glass-shade); }
+body .customizer .layout-choice.chosen, body .customizer .segmented-setting label.chosen { background: var(--tint); border-color: var(--primary); color: var(--primary); box-shadow: inset 0 -2px var(--primary); }
+body .customizer .theme-swatch { border-radius: 2px; height: 84px; border: 1px solid #a9bed1; box-shadow: inset 1px 1px #ffffffd0, inset -1px -2px #66809b33; padding: 17px 12px; }
+body .customizer .swatch-signal { background: linear-gradient(140deg, #fff 5%, #d8f2ff 52%, #a0c9f0); color: #1249af; }
+body .customizer .swatch-signal > i { background: #85bce1; }
+body .customizer .swatch-signal > i:first-child { background: #1c59cb; }
+body .customizer .swatch-midnight { background: linear-gradient(140deg, #385366, #142b3d 55%, #0c1b2b); color: #a7f7e8; border-color: #38586e; box-shadow: inset 1px 1px #b4e8f94a, inset -1px -2px #000a1f; }
+body .customizer .swatch-midnight > i { background: #557d93; }
+body .customizer .swatch-midnight > i:first-child { background: #8de3d5; }
+body .customizer .swatch-daylight { background: linear-gradient(140deg, #fff 5%, #ede5fa 55%, #c9b9ed); color: #5a37ae; border-color: #bcb0d4; }
+body .customizer .swatch-daylight > i { background: #bbace0; }
+body .customizer .swatch-daylight > i:first-child { background: #6543bb; }
+body .customizer .theme-swatch > i:last-of-type { height: 17px; width: 36%; border: 1px solid #ffffff88; box-shadow: inset 0 1px #ffffffb3; border-radius: 1px; }
+body .customizer [data-slot="switch"] { border-radius: 3px; box-shadow: inset 0 1px 2px var(--glass-shade); }
+body .customizer [data-slot="switch-thumb"] { border-radius: 2px; }
+body [data-slot="checkbox"] { border-radius: 2px; }
+body .customizer :is(.layout-choice, .skin-choice):has(:focus-visible) { outline: 2px solid var(--ring); outline-offset: 4px; }
+
+/* Stack diagrams retain their transforms, order, hit targets and chosen skins. */
+body :is(.stack-explorer, .stack-builder-sheet) { --stack-action: var(--primary); --stack-action-ink: var(--primary-foreground); }
+body :is(.my-stack-card, .stack-discovery-card, .daily-card, .next-level, .path-card, .stack-session, .exam-track) { border-radius: 2px; border-color: var(--glass-edge); background: linear-gradient(140deg, var(--glass-face), var(--card) 60%); box-shadow: inset 1px 1px var(--glass-highlight), inset -1px -1px var(--glass-shade); }
+body :is(.builder-layer-row, .builder-topics label, .stack-skin-choice, .stack-layer-choice) { border-radius: 2px; }
+body .assembly-face { border-radius: 0; background-image: linear-gradient(135deg, #ffffff65 0%, #ffffff08 36%, transparent 62%, #15365212 100%); box-shadow: inset 1px 1px 0 #ffffffe0, inset -1px -2px 0 #32516b45; }
+body .assembly-trace { border-color: #ffffffb0; }
+body .assembly-label { font-weight: 600; }
+body .my-stack-actions > button:not(.stack-button), body .builder-close, body .stack-idea-close { border: 1px solid var(--glass-edge); border-radius: 2px; color: var(--foreground); background: var(--glass-face); min-height: 44px; min-width: 44px; box-shadow: inset 1px 1px var(--glass-highlight), inset 0 -1px var(--glass-shade); }
+body .stack-layer-choice[aria-pressed="true"] { background: var(--tint); border-color: var(--primary); }
+body .stack-skin-choice[data-selected="true"] { border-color: var(--primary); box-shadow: inset 0 -2px var(--primary); }
+body :is(.stack-browse-tabs, .stack-detail-tabs) [role="tab"][data-state="active"] { color: var(--primary); }
+
+/* Practice keeps answer states distinct from the surrounding glass controls. */
+body :is(.exam-age, .exam-option, .exam-code), body .exam-question-map button { border-radius: 2px; }
+body .exam-session-header, body .exam-session-footer { background: var(--glass-solid); border-color: var(--glass-edge); box-shadow: inset 0 1px var(--glass-highlight); }
+body .exam-option[data-selected="true"] { background: var(--tint); }
+body .exam-option:has(:focus-visible), body .exam-age:has(:focus-visible) { outline: 2px solid var(--ring); outline-offset: 3px; }
+body .learning-card .flip-hint { color: var(--primary); }
+
+/* Only navigation uses backdrop blur: bounded cost as the feed grows. */
+body .mobile-bottom { background: var(--glass-nav); border-top: 1px solid var(--glass-edge); box-shadow: inset 0 1px var(--glass-highlight), 0 -8px 28px var(--glass-shadow); -webkit-backdrop-filter: blur(18px) saturate(145%); backdrop-filter: blur(18px) saturate(145%); }
+body .mobile-bottom button { border-radius: 2px; min-height: 48px; }
+body .mobile-bottom button.active { background: linear-gradient(135deg, var(--glass-highlight), transparent 75%), var(--tint); color: var(--primary); border: 1px solid var(--glass-edge); box-shadow: inset 0 1px var(--glass-highlight), inset 0 -2px var(--primary); }
+@media (max-width: 767px) {
+  body { background-attachment: scroll; }
+  body .topbar { padding-block: 9px; }
+  body .mobile-trigger, body .customize-trigger { min-height: 44px; min-width: 44px; }
+  body .mobile-brand .stack-mark { width: 27px; height: 27px; }
+  body article.learning-card { clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px)); }
+  body .learning-card .card-top { padding-top: 17px; }
+}
+@media (prefers-reduced-transparency: reduce) {
+  body .topbar, body .mobile-bottom { background: var(--glass-solid); -webkit-backdrop-filter: none; backdrop-filter: none; }
+}
+@supports not ((backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px))) {
+  body .topbar, body .mobile-bottom { background: var(--glass-solid); }
+}
+@media (prefers-reduced-motion: reduce) {
+  body .stack-button:active:not(:disabled), body .customize-trigger:active { transform: none; }
+}
+html[data-motion="reduced"] .stack-button:active:not(:disabled), html[data-motion="reduced"] .customize-trigger:active { transform: none; }
+@media (forced-colors: active) {
+  body { background-image: none; }
+  body article.learning-card, body :is(.stack-button, .customize-trigger, .mobile-trigger, .stack-expand-control, .stack-like), body .learning-card .topic-icon { clip-path: none; }
+  body .topbar, body .mobile-bottom { background: Canvas; backdrop-filter: none; -webkit-backdrop-filter: none; }
+  body :is(.stack-button, .customize-trigger, .mobile-trigger, .icon-button, .stack-expand-control, .stack-like) { background: ButtonFace; color: ButtonText; border: 1px solid ButtonText; }
+}
