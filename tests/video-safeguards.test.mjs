@@ -6,17 +6,19 @@ import { pathToFileURL } from 'node:url';
 import { DatabaseSync } from 'node:sqlite';
 import ts from 'typescript';
 
+const originalFetch = globalThis.fetch;
 const temp = mkdtempSync(join(process.cwd(), '.video-test-'));
 const sqlite = new DatabaseSync(':memory:');
 sqlite.exec(readFileSync('drizzle/0000_hesitant_xorn.sql','utf8'));
-after(()=>{sqlite.close();rmSync(temp,{recursive:true,force:true});});
+after(()=>{globalThis.fetch=originalFetch;sqlite.close();rmSync(temp,{recursive:true,force:true});});
 function compile(source,name) {
  const code = ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText
-  .replaceAll('"cloudflare:workers"','"./env.mjs"').replaceAll('"../../video-server"','"./video-server.mjs"').replaceAll('"../../video-catalog"','"./video-catalog.mjs"');
+  .replaceAll('"cloudflare:workers"','"./env.mjs"')
+  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source)"/g, '"./$1.mjs"');
  writeFileSync(join(temp,name+'.mjs'),code);
 }
 writeFileSync(join(temp,'env.mjs'),'export const env = {};');
-compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');
+compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');compile('app/youtube-source.ts','youtube-source');compile('app/api/videos/thumbnail/route.ts','thumbnail');
 for(const route of ['videos','reports','moderation'])compile(`app/api/${route}/route.ts`,route);
 const imp = name=>import(pathToFileURL(join(temp,name+'.mjs')));
 const {env} = await imp('env');
@@ -28,6 +30,14 @@ env.DB=binding;
 const now = Date.now();
 for(const video of videoCatalog){video.rights.checkedAt=new Date(now-60000).toISOString();video.rights.recheckAfter=new Date(now+86400000).toISOString();}
 const video = videoCatalog[0];
+function sourceMetadata(id, extra={}) {return {type:'video',provider_name:'YouTube',title:'Current official title',author_name:'Official creator',author_url:'https://www.youtube.com/@creator',thumbnail_url:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,thumbnail_width:480,thumbnail_height:360,...extra};}
+let upstreamCalls=[];
+globalThis.fetch=async(input,init)=>{
+ const url=new URL(String(input));upstreamCalls.push({url,init});
+ if(url.hostname==='www.youtube.com'&&url.pathname==='/oembed')return Response.json(sourceMetadata(new URL(url.searchParams.get('url')).searchParams.get('v')));
+ if(url.hostname==='i.ytimg.com')return new Response(new Uint8Array([255,216,255,217]),{headers:{'Content-Type':'image/jpeg'}});
+ throw new Error('Unexpected upstream');
+};
 function request(path,body,{user='learner',email='learner@example.org',origin='https://stackscroll.test'}={}) {
  const headers={'Content-Type':'application/json'};
  if(user)headers['oai-authenticated-user-id']=user;
@@ -110,6 +120,69 @@ test('explicit unload invalidates pending loads and a replaced source needs a fr
  assert.notEqual(videoIdentity(video),videoIdentity(replaced));
  assert.equal(session.permits(fresh,replaced),false);
  assert.equal(session.permits(fresh,video),true);
+});
+
+test('source refresh uses official fields, coalesces requests and drops expired data on failure',async()=>{
+ const {createYouTubeSourceLoader,withYouTubeSource,YOUTUBE_REFRESH_MS}=await imp('youtube-source');
+ let clock=now,calls=0,fail=false;
+ const loader=createYouTubeSourceLoader({now:()=>clock,fetcher:async()=>{calls++;return fail?new Response(null,{status:404}):Response.json(sourceMetadata(video.youtubeId));}});
+ const [a,b]=await Promise.all([loader(video),loader(video)]);
+ assert.equal(calls,1);assert.equal(a,b);
+ const fresh=withYouTubeSource(video,a);
+ assert.equal(fresh.title,'Current official title');assert.equal(fresh.creator,'Official creator');
+ assert.equal(fresh.factualReview.status,'pending');assert.equal(canEmbed(fresh,clock),true);
+ assert.equal(fresh.thumbnail.url,`/api/videos/thumbnail?id=${video.id}`);
+ clock+=YOUTUBE_REFRESH_MS+1;fail=true;
+ assert.equal(await loader(video),null);assert.equal(calls,2);
+ assert.equal(await loader(video),null);assert.equal(calls,2);
+ assert.equal(canEmbed(fresh,clock),false);
+ clock+=60001;fail=false;assert.ok(await loader(video));assert.equal(calls,3);
+});
+
+test('source importer rejects foreign thumbnails, malformed responses, redirects and oversized bodies',async()=>{
+ const {createYouTubeSourceLoader}=await imp('youtube-source');
+ for(const response of [
+  Response.json(sourceMetadata(video.youtubeId,{thumbnail_url:'https://attacker.example/a.jpg'})),
+  Response.json(sourceMetadata('aaaaaaaaaaa')),
+  Response.json(sourceMetadata(video.youtubeId,{author_url:'https://attacker.example/channel'})),
+  Response.json({html:'<script>bad()</script>'}),
+  new Response('x'.repeat(33000)),
+  new Response(null,{status:302,headers:{Location:'https://attacker.example/'}})
+ ]) {
+  const loader=createYouTubeSourceLoader({fetcher:async(_,options)=>{assert.equal(options.redirect,'error');return response;}});
+  assert.equal(await loader(video),null);
+ }
+});
+
+test('cached sources retain their original check time and require refresh after expiry',async()=>{
+ const {createYouTubeSourceLoader,YOUTUBE_REFRESH_MS}=await imp('youtube-source');
+ let clock=now,calls=0;const stored=new Map();
+ const cache={async match(req){return stored.get(req.url)?.clone();},async put(req,response){stored.set(req.url,response.clone());}};
+ const opts={now:()=>clock,cache,fetcher:async()=>{calls++;return Response.json(sourceMetadata(video.youtubeId));}};
+ const first=await createYouTubeSourceLoader(opts)(video);
+ clock+=1000;
+ const second=await createYouTubeSourceLoader(opts)(video);
+ assert.equal(calls,1);assert.equal(first.checkedAt,second.checkedAt);
+ clock+=YOUTUBE_REFRESH_MS;
+ const third=await createYouTubeSourceLoader(opts)(video);
+ assert.equal(calls,2);assert.equal(third.checkedAt,clock);
+});
+
+test('thumbnail proxy accepts curated IDs only, strips user headers, and respects takedowns',async()=>{
+ const thumbnails=await imp('thumbnail');
+ upstreamCalls=[];
+ assert.equal((await thumbnails.GET(new Request('https://stackscroll.test/api/videos/thumbnail?id=https://attacker.example'))).status,404);
+ assert.equal(upstreamCalls.length,0);
+ const response=await thumbnails.GET(new Request(`https://stackscroll.test/api/videos/thumbnail?id=${video.id}`,{headers:{Cookie:'private=secret','X-Forwarded-For':'192.0.2.1'}}));
+ assert.equal(response.status,200);assert.equal(response.headers.get('Content-Type'),'image/jpeg');
+ assert.equal(response.headers.get('Cache-Control'),'private, no-store');
+ assert.equal((await response.arrayBuffer()).byteLength,4);
+ for(const call of upstreamCalls){assert.deepEqual(Object.keys(call.init.headers),['Accept']);assert.equal(call.init.redirect,'error');}
+ sqlite.prepare('INSERT OR REPLACE INTO video_moderation VALUES (?,?,?)').run(video.id,1,now);
+ upstreamCalls=[];
+ assert.equal((await thumbnails.GET(new Request(`https://stackscroll.test/api/videos/thumbnail?id=${video.id}`))).status,404);
+ assert.equal(upstreamCalls.length,0);
+ sqlite.prepare('DELETE FROM video_moderation WHERE video_id=?').run(video.id);
 });
 
 test('privacy requests stay available when all videos are hidden and can be deleted by the moderator',async()=>{

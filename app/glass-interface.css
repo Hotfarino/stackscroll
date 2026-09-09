@@ -167,6 +167,15 @@ body .stack-layer-choice[aria-pressed="true"] { background: var(--tint); border-
 body .stack-skin-choice[data-selected="true"] { border-color: var(--primary); box-shadow: inset 0 -2px var(--primary); }
 body :is(.stack-browse-tabs, .stack-detail-tabs) [role="tab"][data-state="active"] { color: var(--primary); }
 
+/* Source thumbnails remain uncropped, with attribution outside the image. */
+.youtube-preview { margin: 0 18px 20px; border: 1px solid var(--glass-edge); background: #09131e; border-radius: 2px; overflow: hidden; }
+.youtube-preview > img { display: block; width: 100%; height: auto; max-height: 340px; object-fit: contain; }
+.youtube-preview figcaption { display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 8px 14px; padding: 12px; background: var(--glass-solid); color: var(--foreground); font-size: .875rem; line-height: 1.5; }
+.youtube-preview figcaption > span { font-weight: 700; }
+.youtube-preview figcaption a { display: inline-flex; align-items: center; gap: 6px; min-height: 44px; text-decoration: underline; text-underline-offset: 3px; }
+.youtube-preview-fallback { min-height: 180px; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 12px; background: var(--secondary); color: var(--copy); font-size: .875rem; }
+.youtube-context-label { display: block; font-size: .875rem; font-weight: 600; color: var(--soft); margin-bottom: 4px; }
+
 /* Practice keeps answer states distinct from the surrounding glass controls. */
 body :is(.exam-age, .exam-option, .exam-code), body .exam-question-map button { border-radius: 2px; }
 body .exam-session-header, body .exam-session-footer { background: var(--glass-solid); border-color: var(--glass-edge); box-shadow: inset 0 1px var(--glass-highlight); }

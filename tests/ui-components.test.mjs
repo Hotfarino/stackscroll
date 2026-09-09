@@ -87,7 +87,7 @@ test("renders sidebar skeletons deterministically", async () => {
 test("video players make no embedded requests before a click and respect blocking and expiry", async () => {
   const { VideoCard } = await vite.ssrLoadModule("/app/video-card.tsx");
   const { videoCatalog, createPlaybackSession } = await vite.ssrLoadModule("/app/video-catalog.ts");
-  const video = {...videoCatalog[0],rights:{...videoCatalog[0].rights,checkedAt:new Date(Date.now()-1000).toISOString(),recheckAfter:new Date(Date.now()+86400000).toISOString()}};
+  const video = {...videoCatalog[0],thumbnail:{url:`/api/videos/thumbnail?id=${videoCatalog[0].id}`,width:480,height:360},rights:{...videoCatalog[0].rights,checkedAt:new Date(Date.now()-1000).toISOString(),recheckAfter:new Date(Date.now()+86400000).toISOString()}};
   const props={video,session:createPlaybackSession(),saved:false,blocked:false,active:false,onActivate(){},onUnload(){},onSave(){}};
   const render=extra=>renderToStaticMarkup(React.createElement(VideoCard,{...props,...extra}));
   const before=render({});
@@ -95,10 +95,13 @@ test("video players make no embedded requests before a click and respect blockin
   const coverImages = [...before.matchAll(/<img\b[^>]*>/g)].map(match=>match[0]);
   assert.ok(coverImages.length > 0);
   for (const image of coverImages) {
-    assert.match(image,/src="\/media\/cards\/[a-z-]+\.webp"/);
+    assert.match(image,/src="\/api\/videos\/thumbnail\?id=video-dion-osi"/);
     assert.doesNotMatch(image,/https?:|srcSet=/i);
   }
-  assert.match(before,/AI topic artwork/);
+  assert.doesNotMatch(before,/AI topic artwork/);
+  assert.match(before,/YouTube thumbnail/);
+  assert.doesNotMatch(render({blocked:true}),/<(?:img|iframe)\b/);
+  assert.doesNotMatch(render({video:{...video,thumbnail:{...video.thumbnail,url:"https://attacker.example/image"}}}),/<img\b/);
   assert.match(before,/Load YouTube player/);
   assert.match(before,/Factual review pending/);
   assert.doesNotMatch(before,/Mark learned/);
