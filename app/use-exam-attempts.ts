@@ -33,6 +33,14 @@ export function useExamAttempts() {
     if (!response.ok) { if (response.status === 409) retry.current = null; throw new Error(data.error || "Could not save practice."); }
     pending.current = null; return data;
   }
+  async function attest(adult: boolean) {
+    if (eligible) return true;
+    return run(async () => {
+      if (!adult) throw new Error("Confirm that you are 18 or older to start.");
+      await post({ operation: "attest", adult: true, policy: adultPolicy }, "/api/personal-stacks");
+      setEligible(true);
+    });
+  }
   async function start(examId: string, adult: boolean) {
     if (status !== "ready") return false;
     if (pendingStart.current?.examId !== examId) pendingStart.current = { examId, id: crypto.randomUUID() };
@@ -50,6 +58,6 @@ export function useExamAttempts() {
     retry.current = () => run(action); return run(action);
   }
   async function remove(value: AttemptSummary) { return run(async () => { await post({ operation: "delete", id: value.id, revision: value.revision }); setAttempts(current => current.filter(item => item.id !== value.id)); if (attempt?.id === value.id) setAttempt(null); }); }
-  return { attempts, attempt, status, eligible, busy, error, refresh, start, open, save, remove, retrySave: () => retry.current?.(), canRetry: !!retry.current, close: () => { if (!lock.current) { setAttempt(null); setError(""); retry.current = null; } } };
+  return { attempts, attempt, status, eligible, busy, error, refresh, attest, start, open, save, remove, retrySave: () => retry.current?.(), canRetry: !!retry.current, close: () => { if (!lock.current) { setAttempt(null); setError(""); retry.current = null; } } };
 }
 export type ExamModel = ReturnType<typeof useExamAttempts>;

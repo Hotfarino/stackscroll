@@ -97,3 +97,18 @@
 .exam-session-header [data-slot=sheet-title] {overflow-wrap:anywhere}
 .exam-session-header .exam-code {margin-bottom:8px}
 .exam-session-header .eyebrow {font-size:.875rem;line-height:1.5}
+
+/* Continual practice shares the Lab's accessible answer controls. */
+.practice-sections {flex-wrap:wrap;gap:8px 20px}
+.loop-controls {display:flex;flex-wrap:wrap;align-items:center;gap:12px;margin:20px 0}
+.loop-controls [data-slot=select-trigger] {min-height:48px;max-width:100%;font-size:1rem}
+.loop-controls p {font-size:.875rem;color:var(--copy)}
+.loop-question,.loop-summary {padding:20px;border:1px solid var(--border);background:var(--card);border-radius:6px}
+.loop-question h3,.loop-summary h3 {font-size:1.35rem;line-height:1.5;font-weight:550;margin:12px 0;overflow-wrap:anywhere}
+.loop-summary p,.loop-explanation p {font-size:1rem;line-height:1.65;margin:12px 0}
+.loop-explanation {margin-top:20px;padding:16px;border-left:2px solid var(--ring);background:var(--secondary)}
+.loop-explanation a {display:block;min-height:44px;padding:10px 0;font-size:.875rem;text-decoration:underline;overflow-wrap:anywhere}
+.loop-actions {display:flex;flex-wrap:wrap;gap:12px;margin-top:20px}
+.loop-question .exam-question-meta {flex-wrap:wrap}
+.loop-actions .stack-button,.loop-summary .stack-button {min-height:48px}
+@media(max-width:420px){.loop-question,.loop-summary {padding:14px}.practice-sections [role=tab]{font-size:.875rem}.loop-controls [data-slot=select-trigger]{width:100%}}
