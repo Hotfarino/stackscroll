@@ -1,57 +1,68 @@
-# YouTube: first integration
+# YouTube discovery experiment — connection pending
 
-The first batch uses the ten editorially selected IDs in `app/video-catalog.ts`.
-It does not discover new uploads or automatically publish new channels. The
-Rundown is a separate next source, with its own access and reuse rules.
+The importer is implemented but has not been verified against the live Data API:
+`YOUTUBE_API_KEY` is absent from the production runtime. Do not label discovery
+live or the continuous source experiment complete until an authenticated real
+request imports eligible uploads and the user can see their images.
 
-## Runtime
+## Activate
 
-- `/api/videos` reads moderation state, refreshes each approved video's public
-  YouTube oEmbed metadata when its six-hour cache expires, and returns current
-  titles, creator names, creator URLs and first-party thumbnail URLs.
-- Source responses are validated and size bounded. HTML returned by oEmbed is
-  discarded. The app constructs its existing privacy-enhanced player URL from
-  the curated video ID; it never executes provider HTML.
-- Metadata uses an in-memory cache plus the Workers edge cache when available.
-  Refresh happens on the first request after expiry, not on a background timer.
-  Concurrent requests in an isolate share the same pending lookup. Failed checks
-  back off for one minute; expired data is not served as current.
-- `/api/videos/thumbnail?id=...` accepts only IDs in the curated catalog. It checks
-  moderation and source freshness, retrieves the unchanged thumbnail from the
-  validated `i.ytimg.com` URL, and caches it at the edge for up to six hours.
-  Thumbnail responses to the browser use `private, no-store` so takedowns are
-  checked on subsequent requests. No account headers, cookies, IP forwarding
-  headers or referrer are sent upstream. Remote redirects are rejected.
-- The feed preserves the thumbnail's proportions and identifies YouTube and the
-  creator. An unavailable image gets a clearly labeled fallback. Privacy blocking
-  hides previews and prevents loading the external player.
-- Playback remains click-to-load, with a fresh moderation check. Playlist order,
-  the stop-at-end behavior, and learning/recall scoring remain independent.
+1. In the owner's Google Cloud project, enable **YouTube Data API v3**.
+2. Create an API key restricted to **YouTube Data API v3**. This is a server-side
+   integration; a key restricted to browser HTTP referrers will not work here.
+3. Store it in the Site's production environment as secret `YOUTUBE_API_KEY`,
+   then deploy the saved version to apply the environment revision. Do not put
+   the key in the browser, a URL, source control, or an ordinary chat message.
+4. Refresh the feed. Confirm a successful Data API status and real current uploads.
+   Verify thumbnails and playback separately. An API error is never proof of a
+   successful refresh.
 
-## Editorial and operational limits
+## What runs once connected
 
-A successful oEmbed lookup establishes current public embed metadata, not a clip
-license, universal playback availability, or factual correctness. Regional,
-account, age and device restrictions can still prevent playback. Users retain an
-original-source link. Source rechecks never advance factual-review status.
-Descriptions, topic/level assignments, and existing duration/publication labels
-are editorial catalog fields; oEmbed does not supply or refresh those fields.
+- Resolve the approved handles DionTraining, Fireship and statquest using
+  `channels.list`, then read up to twelve recent uploads per channel using
+  `playlistItems.list`. Include the original ten selected videos in the status check.
+- Deduplicate video IDs and call `videos.list` for current title, creator, image,
+  publication date, duration and playback status. Use only public, embeddable,
+  non-live videos explicitly marked not Made for Kids; omit region-restricted
+  and age-restricted records in this first experiment.
+- Each channel's topics and levels are Stackscroll labels. Source discovery is
+  automatic, but independent factual review stays pending. No claims of creator
+  partnership, clip licensing or exam-provider endorsement are made.
+- Responses are cached for fifteen minutes. Manual refresh requests an upstream
+  recheck after a one-minute minimum interval. Requests within the guard reuse
+  existing results; refresh does not guarantee a creator has uploaded anything new.
+- Checks run while the app is used, not on a scheduled background worker. This is
+  a rolling recent-upload window, not an indefinitely archived video catalog.
+  Scroll reveals more currently available cards; only source ingestion supplies
+  newly published content. Refresh messages distinguish those operations.
+- The browser reports how many video identifiers are new to its current feed.
+  Playback history and watch time are not used. Stacks, practice, bookmarks and
+  playlist order retain their existing behavior.
 
-To add a video, select its topic and source context, confirm its official YouTube
-ID and source, and add it to the curated catalog. Keep factual review pending
-until a separate review is recorded. Moderation can hide a video immediately.
+## Images and failures
 
-This phase needs no YouTube Data API key and adds no paid ingestion service.
-Normal hosting, request and bandwidth usage still apply. It uses no Google user
-OAuth and retrieves no private YouTube account data.
+The first-party thumbnail endpoint accepts only current curated/discovered records,
+checks moderation, validates the provider image host and path, and never forwards
+user headers upstream. Images keep their aspect ratio. A failed proxy request offers
+an explicit direct-image choice, which discloses the connection to Google first.
+External-video blocking disables both preview paths. Image permission is session-only.
+The official player still requires a separate click or a started playlist session.
 
-For ongoing new-upload discovery, the next YouTube step is the official Data API:
-approved channel upload playlists, private API credentials, bounded collection,
-video status checks (including Made for Kids), and an editorial candidate queue.
-That step is not enabled in this release.
+When no API key is configured, the original ten-video oEmbed path can still supply
+available starter records. It cannot discover uploads. Empty failed source checks now
+return HTTP 503 plus explicit setup/failure status, rather than a misleading successful
+empty catalog. Server diagnostics log the curated ID and upstream HTTP status, never
+credentials, request headers or user data.
+
+Tests cover new-upload discovery with simulated API responses, refresh caching,
+credential absence and API errors, playback exclusions, source/thumbnail validation,
+moderation, and privacy. These are behavioral tests, not evidence that live credentials
+or image delivery have been verified.
 
 References checked September 9, 2026:
-
-- [YouTube embedding guidance](https://support.google.com/youtube/answer/171780)
-- [YouTube developer policies](https://developers.google.com/youtube/terms/developer-policies)
-- [YouTube video resource](https://developers.google.com/youtube/v3/docs/videos)
+- [Getting started](https://developers.google.com/youtube/v3/getting-started)
+- [Channels](https://developers.google.com/youtube/v3/docs/channels/list)
+- [Upload playlists](https://developers.google.com/youtube/v3/docs/playlistItems/list)
+- [Videos](https://developers.google.com/youtube/v3/docs/videos)
+- [Developer policies](https://developers.google.com/youtube/terms/developer-policies)

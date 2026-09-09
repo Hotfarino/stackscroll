@@ -1,18 +1,16 @@
 import { z } from "zod";
 import { canEmbed, videoCatalog } from "../../video-catalog";
 import { blockedVideoIds, database, isModerator, json, readBody, writeAccess } from "../../video-server";
-import { loadYouTubeSource, withYouTubeSource } from "../../youtube-source";
+import {youtubeInventory,currentYouTubeVideo} from "../../youtube-feed-server";
 
 export async function GET(request: Request) {
   if (!isModerator(request)) return json({error:"This page is available to the workspace's content moderator."},403);
   try {
     const blocked = await blockedVideoIds();
     const reports = await database().prepare("SELECT id,user_id,video_id,category,details,status,created_at FROM content_reports ORDER BY CASE status WHEN 'open' THEN 0 ELSE 1 END, created_at DESC LIMIT 100").all();
-    const videos = await Promise.all(videoCatalog.map(async video => {
-      const source = await loadYouTubeSource(video);
-      const current = source ? withYouTubeSource(video, source) : video;
-      return {...current,hidden:blocked.has(video.id),eligible:!!source&&canEmbed(current)};
-    }));
+    const inventory=await youtubeInventory();
+    const combined=new Map(videoCatalog.map(video=>[video.id,video]));for(const video of inventory.items)combined.set(video.id,video);
+    const videos=[...combined.values()].map(video=>({...video,hidden:blocked.has(video.id),eligible:inventory.items.some(item=>item.id===video.id)&&canEmbed(video)}));
     return json({reports:reports.results,videos});
   } catch { return json({error:"The review queue could not be loaded. Please try again."},503); }
 }
@@ -27,12 +25,13 @@ export async function POST(request: Request) {
   const parsed = actionSchema.safeParse(value);
   if (!parsed.success) return json({error:"Invalid review action."},400);
   const {videoId,action,reportId} = parsed.data;
-  const video = videoCatalog.find(item => item.id === videoId);
-  if (!video && !(videoId === "privacy-request" && (action === "resolve" || action === "delete"))) return json({error:"Video not found."},404);
+  const video = videoCatalog.find(item => item.id === videoId)||(/^youtube-[\w-]{11}$/.test(videoId)?await currentYouTubeVideo(videoId):undefined);
+  const recorded= !video&&/^youtube-[\w-]{11}$/.test(videoId) ? await database().prepare("SELECT video_id FROM content_reports WHERE video_id=? LIMIT 1").bind(videoId).all() : null;
+  if (!video && !recorded?.results.length && !(videoId === "privacy-request" && (action === "resolve" || action === "delete"))) return json({error:"Video not found."},404);
   if ((action === "resolve" || action === "delete") && !reportId) return json({error:"Choose a report."},400);
   if (action === "restore") {
-    const source = video ? await loadYouTubeSource(video) : null;
-    if (!video || !source || !canEmbed(withYouTubeSource(video,source))) return json({error:"Recheck the source and permission record before restoring this video."},409);
+    const current = video ? await currentYouTubeVideo(video.id) : null;
+    if (!current || !canEmbed(current)) return json({error:"Recheck the source and permission record before restoring this video."},409);
   }
   try {
     if (action === "hide" || action === "restore") {

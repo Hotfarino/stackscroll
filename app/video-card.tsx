@@ -10,10 +10,13 @@ import { embedUrl, videoIdentity, type createPlaybackSession, type VideoRecord }
 
 function YouTubeThumbnail({video,blocked}:{video:VideoRecord;blocked:boolean}) {
   const [failed,setFailed] = useState(false);
-  useEffect(()=>setFailed(false),[video.id,video.rights.checkedAt]);
+  const [direct,setDirect] = useState(false);
+  useEffect(()=>{setFailed(false);setDirect(false);},[video.id,video.rights.checkedAt,blocked]);
   const safe = video.thumbnail?.url === `/api/videos/thumbnail?id=${encodeURIComponent(video.id)}`;
+  const original=video.thumbnail?.originalUrl;
+  const directSafe=!!original&&new RegExp(`^https://i\\.ytimg\\.com/vi(?:_webp)?/${video.youtubeId}/[a-zA-Z0-9_-]+\\.(?:jpg|webp|png)$`).test(original);
   return <figure className="youtube-preview">
-    {!blocked&&!failed&&safe&&video.thumbnail ? <img key={video.rights.checkedAt} src={video.thumbnail.url} width={video.thumbnail.width} height={video.thumbnail.height} alt={`YouTube thumbnail: ${video.title}`} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={()=>setFailed(true)}/> : <div className="youtube-preview-fallback"><Video size={30}/><span>{blocked?"YouTube preview blocked":"YouTube preview unavailable"}</span></div>}
+    {!blocked&&!failed&&safe&&video.thumbnail ? <img key={`${video.rights.checkedAt}-${direct}`} src={direct&&directSafe?original:video.thumbnail.url} width={video.thumbnail.width} height={video.thumbnail.height} alt={`YouTube thumbnail: ${video.title}`} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={()=>setFailed(true)}/> : <div className="youtube-preview-fallback"><Video size={30}/><span>{blocked?"YouTube preview blocked":"YouTube preview unavailable"}</span>{!blocked&&failed&&!direct&&directSafe&&<><p>The preview service couldn’t load this image. Loading it directly connects your browser to Google.</p><StackButton tone="secondary" onClick={()=>{setDirect(true);setFailed(false);}}>Load image from YouTube</StackButton></>}</div>}
     <figcaption><span>YouTube</span><a href={video.creatorUrl||video.sourceUrl} target="_blank" rel="noopener noreferrer">{video.creator} <ExternalLink size={13}/></a></figcaption>
   </figure>;
 }
@@ -90,7 +93,7 @@ export function VideoCard({video,saved,blocked,active,session,onActivate,onUnloa
       {error&&<p role="alert" className="form-error">{error}</p>}
       <p className="video-original"><a href={video.sourceUrl} target="_blank" rel="noopener noreferrer">Open original on YouTube <ExternalLink size={14}/></a><span>Playback availability is controlled by YouTube.</span></p>
       <Accordion type="single" collapsible className="video-provenance"><AccordionItem value="source"><AccordionTrigger>Source & permissions</AccordionTrigger><AccordionContent><dl>
-        <div><dt>Original title</dt><dd>{video.title}</dd></div><div><dt>Creator</dt><dd>{video.creator}</dd></div><div><dt>Sharing permission</dt><dd>Official player only. No download, editing, or sale of access.</dd></div><div><dt>Source check</dt><dd>{video.rights.checkedAt.slice(0,10)} · <a href={video.rights.evidenceUrl} target="_blank" rel="noopener noreferrer">Public embed metadata</a></dd></div><div><dt>Next source review</dt><dd>{video.rights.recheckAfter.slice(0,10)}</dd></div><div><dt>Factual review</dt><dd>{video.factualReview.status==="pending"?"Not independently reviewed by Stackscroll. Creator identity does not establish accuracy.":`Recorded ${video.factualReview.reviewedAt?.slice(0,10)}`}</dd></div>
+        <div><dt>Original title</dt><dd>{video.title}</dd></div><div><dt>Creator</dt><dd>{video.creator}</dd></div><div><dt>Sharing permission</dt><dd>Official player only. No download, editing, or sale of access.</dd></div><div><dt>Source check</dt><dd>{video.rights.checkedAt.slice(0,10)} · <a href={video.rights.evidenceUrl} target="_blank" rel="noopener noreferrer">YouTube source</a></dd></div><div><dt>Next source review</dt><dd>{video.rights.recheckAfter.slice(0,10)}</dd></div><div><dt>Factual review</dt><dd>{video.factualReview.status==="pending"?"Not independently reviewed by Stackscroll. Creator identity does not establish accuracy.":`Recorded ${video.factualReview.reviewedAt?.slice(0,10)}`}</dd></div>
       </dl><a href={video.contextUrl} target="_blank" rel="noopener noreferrer">Creator or topic reference <ExternalLink size={13}/></a><p>Featuring this video does not imply a partnership or endorsement. Watching earns no points or daily-goal credit.</p></AccordionContent></AccordionItem></Accordion>
     </div>
     <footer className="card-footer"><ReportVideo video={video}/><button className={`icon-button save-button ${saved?"is-saved":""}`} aria-label={`${saved?"Unsave":"Save"} ${video.title}`} aria-pressed={saved} onClick={onSave}><Bookmark size={18} fill={saved?"currentColor":"none"}/></button></footer>

@@ -69,13 +69,13 @@ export function createYouTubeSourceLoader({fetcher = fetch, now = Date.now, cach
 } = {}) {
   const memory = new Map<string, {value: YouTubeSource | null; expires: number}>();
   const pending = new Map<string, Promise<YouTubeSource | null>>();
-  return async function source(video: VideoRecord): Promise<YouTubeSource | null> {
+  return async function source(video: VideoRecord, refresh = false): Promise<YouTubeSource | null> {
     if (!/^[\w-]{11}$/.test(video.youtubeId) || video.sourceUrl !== `https://www.youtube.com/watch?v=${video.youtubeId}`
       || video.rights.status !== "available" || video.rights.canDownload || video.rights.canEdit || video.rights.canSellAccess
       || (video.rights.expiresAt !== null && !(Date.parse(video.rights.expiresAt) > now()))) return null;
     const key = youtubeMetadataUrl(video);
     const local = memory.get(key);
-    if (local && local.expires > now()) return local.value;
+    if (local && local.expires > now() && (!refresh || !local.value || now()-local.value.checkedAt<RETRY_MS)) return local.value;
     memory.delete(key);
     if (pending.has(key)) return pending.get(key)!;
     const work = (async () => {
@@ -86,7 +86,7 @@ export function createYouTubeSourceLoader({fetcher = fetch, now = Date.now, cach
             const cached = await cache.match(cacheKey);
             if (cached) {
               const checkedAt = Number(cached.headers.get("X-Source-Checked-At"));
-              if (checkedAt > 0 && checkedAt <= now() && checkedAt + YOUTUBE_REFRESH_MS > now()) {
+              if (checkedAt > 0 && checkedAt <= now() && checkedAt + (refresh?RETRY_MS:YOUTUBE_REFRESH_MS) > now()) {
                 const metadata = parseMetadata(JSON.parse(new TextDecoder().decode(await readBounded(cached, 32768))), video);
                 const value = {metadata, checkedAt};
                 memory.set(key, {value, expires: checkedAt + YOUTUBE_REFRESH_MS});
@@ -96,7 +96,7 @@ export function createYouTubeSourceLoader({fetcher = fetch, now = Date.now, cach
           } catch { /* Cache problems must not prevent a fresh source check. */ }
         }
         const response = await fetcher(key, {headers:{Accept:"application/json"},redirect:"error",signal:AbortSignal.timeout(6000)});
-        if (!response.ok) { await response.body?.cancel(); throw new Error("YouTube source unavailable"); }
+        if (!response.ok) { console.warn("youtube_oembed_unavailable",{videoId:video.id,status:response.status});await response.body?.cancel(); throw new Error("YouTube source unavailable"); }
         const metadata = parseMetadata(JSON.parse(new TextDecoder().decode(await readBounded(response, 32768))), video);
         const checkedAt = now();
         const value = {metadata, checkedAt};
@@ -106,7 +106,8 @@ export function createYouTubeSourceLoader({fetcher = fetch, now = Date.now, cach
           catch { /* A validated in-memory record is sufficient without edge storage. */ }
         }
         return value;
-      } catch {
+      } catch (error) {
+        console.warn("youtube_source_check_failed",{videoId:video.id,kind:error instanceof Error?error.name:"unknown"});
         // Expired data never masquerades as freshly verified. Back off briefly.
         memory.set(key, {value:null, expires:now() + RETRY_MS});
         return null;
@@ -118,16 +119,16 @@ export function createYouTubeSourceLoader({fetcher = fetch, now = Date.now, cach
 }
 
 let loader: ReturnType<typeof createYouTubeSourceLoader> | undefined;
-export function loadYouTubeSource(video: VideoRecord) {
+export function loadYouTubeSource(video: VideoRecord, refresh = false) {
   loader ??= createYouTubeSourceLoader({cache:edgeCache()});
-  return loader(video);
+  return loader(video,refresh);
 }
 
 export function withYouTubeSource(video: VideoRecord, source: YouTubeSource): VideoRecord {
   const {metadata, checkedAt} = source;
   return {
     ...video, title:metadata.title, creator:metadata.author_name, creatorUrl:metadata.author_url,
-    thumbnail:{url:`/api/videos/thumbnail?id=${encodeURIComponent(video.id)}`,width:metadata.thumbnail_width,height:metadata.thumbnail_height},
+    thumbnail:{url:`/api/videos/thumbnail?id=${encodeURIComponent(video.id)}`,originalUrl:metadata.thumbnail_url,width:metadata.thumbnail_width,height:metadata.thumbnail_height},
     rights:{...video.rights, evidenceUrl:youtubeMetadataUrl(video), checkedAt:new Date(checkedAt).toISOString(), recheckAfter:new Date(checkedAt + YOUTUBE_REFRESH_MS).toISOString()},
     // Rechecking metadata cannot certify any technical claim in the recording.
     factualReview:video.factualReview,

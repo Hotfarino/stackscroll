@@ -6,7 +6,7 @@ export type VideoRecord = {
   title: string;
   creator: string;
   creatorUrl?: string;
-  thumbnail?: {url:string; width:number; height:number};
+  thumbnail?: {url:string; originalUrl?:string; width:number; height:number};
   topic: Topic;
   level: Card["level"];
   sourceUrl: string;

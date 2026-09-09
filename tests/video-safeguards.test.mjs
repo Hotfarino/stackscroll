@@ -14,11 +14,11 @@ after(()=>{globalThis.fetch=originalFetch;sqlite.close();rmSync(temp,{recursive:
 function compile(source,name) {
  const code = ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText
   .replaceAll('"cloudflare:workers"','"./env.mjs"')
-  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source)"/g, '"./$1.mjs"');
+  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source|youtube-discovery|youtube-feed-server)"/g, '"./$1.mjs"');
  writeFileSync(join(temp,name+'.mjs'),code);
 }
 writeFileSync(join(temp,'env.mjs'),'export const env = {};');
-compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');compile('app/youtube-source.ts','youtube-source');compile('app/api/videos/thumbnail/route.ts','thumbnail');
+compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');compile('app/youtube-source.ts','youtube-source');compile('app/youtube-discovery.ts','youtube-discovery');compile('app/youtube-feed-server.ts','youtube-feed-server');compile('app/api/videos/thumbnail/route.ts','thumbnail');
 for(const route of ['videos','reports','moderation'])compile(`app/api/${route}/route.ts`,route);
 const imp = name=>import(pathToFileURL(join(temp,name+'.mjs')));
 const {env} = await imp('env');
@@ -194,4 +194,35 @@ test('privacy requests stay available when all videos are hidden and can be dele
  const deleted=await moderation.POST(request('/api/moderation',{videoId:'privacy-request',reportId:id,action:'delete'},{user:'moderator',email:'bigdawgroof@gmail.com'}));
  assert.equal(deleted.status,200);
  assert.equal(sqlite.prepare('SELECT id FROM content_reports WHERE id=?').get(id),undefined);
+});
+
+test('YouTube discovery requires configured access and never claims an active importer without it',async()=>{
+ const {createDiscovery}=await imp('youtube-discovery');let calls=0;
+ const result=await createDiscovery({key:'',fetcher:async()=>{calls++;throw new Error('must not fetch');}})();
+ assert.equal(result.status,'setup-required');assert.equal(calls,0);assert.equal(result.checkedAt,null);
+});
+
+test('discovery imports new uploads, refreshes after the quota guard and filters unsafe playback',async()=>{
+ const {createDiscovery,parseDiscoveredVideo}=await imp('youtube-discovery');
+ const channel='UC'+'a'.repeat(22);let clock=now,calls=0,newUpload=false;
+ const make=id=>({id,snippet:{title:'Official upload',channelId:channel,channelTitle:'Creator',publishedAt:new Date(now-1000).toISOString(),liveBroadcastContent:'none',thumbnails:{high:{url:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`,width:480,height:360}}},status:{privacyStatus:'public',embeddable:true,madeForKids:false},contentDetails:{duration:'PT2M3S'}});
+ const fetcher=async(input,options)=>{calls++;const url=new URL(input);assert.equal(url.searchParams.has('key'),false);assert.equal(options.headers['X-Goog-Api-Key'],'test-key');assert.equal(options.redirect,'error');
+  if(url.pathname.endsWith('/channels'))return Response.json({items:[{id:channel,contentDetails:{relatedPlaylists:{uploads:'UU'+'a'.repeat(22)}}}]});
+  if(url.pathname.endsWith('/playlistItems'))return Response.json({items:[{contentDetails:{videoId:newUpload?'bbbbbbbbbbb':'aaaaaaaaaaa'}}]});
+  return Response.json({items:[make(newUpload?'bbbbbbbbbbb':'aaaaaaaaaaa')]});
+ };
+ const loader=createDiscovery({key:'test-key',clock:()=>clock,fetcher});
+ const first=await loader();assert.equal(first.status,'live');assert.equal(first.items[0].id,'youtube-aaaaaaaaaaa');assert.equal(first.items[0].durationSeconds,123);assert.equal(first.items[0].factualReview.status,'pending');
+ const count=calls;newUpload=true;await loader(true);assert.equal(calls,count);
+ clock+=60001;const next=await loader(true);assert.equal(next.items[0].id,'youtube-bbbbbbbbbbb');assert.ok(calls>count);
+ const channels=new Map([[channel,'Development']]);
+ for(const status of [{privacyStatus:'private'},{embeddable:false},{madeForKids:true},{madeForKids:undefined}])assert.equal(parseDiscoveredVideo({...make('aaaaaaaaaaa'),status:{...make('aaaaaaaaaaa').status,...status}},channels,clock),null);
+ assert.equal(parseDiscoveredVideo({...make('aaaaaaaaaaa'),contentDetails:{duration:'PT1M',regionRestriction:{allowed:['US']}}},channels,clock),null);
+ assert.equal(parseDiscoveredVideo(make('aaaaaaaaaaa'),new Map(),clock),null);
+});
+
+test('API access failures return an explicit unavailable status without exposing credentials',async()=>{
+ const {createDiscovery}=await imp('youtube-discovery');
+ const result=await createDiscovery({key:'test-secret-value',fetcher:async()=>new Response(null,{status:403})})();
+ assert.equal(result.status,'unavailable');assert.match(result.message,/403/);assert.doesNotMatch(JSON.stringify(result),/test-secret-value/);
 });
