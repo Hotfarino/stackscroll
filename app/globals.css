@@ -921,3 +921,7 @@ button svg,a svg {flex-shrink:0}
 .feed-heading-actions .stack-button,.feed-heading-actions .text-control {min-height:44px;font-size:.875rem}
 .stack-outline .stack-button {white-space:normal;text-align:left;height:auto;min-height:44px}
 @media(max-width:767px) {.stack-workspace .page-heading .feed-heading-actions {margin-top:10px;width:100%;justify-content:space-between}}
+/* Feed rotation controls share the existing light glass surfaces. */
+.feed-revisit-label{font-size:.875rem;color:var(--muted-foreground);margin:.5rem 0;}
+.feed-end-controls{display:flex;flex-wrap:wrap;align-items:center;gap:1rem;padding:1.25rem 0;}
+.feed-end-controls p{flex:1 1 16rem;font-size:.95rem;}

@@ -1,8 +1,9 @@
 import { curatedNews, type Card } from "../../content";
 import { parseNews, newsSources } from "../../news";
 let cache: {items:Card[];status:string;fetchedAt:string;expires:number}|undefined;
-export async function GET() {
- if(cache&&cache.expires>Date.now())return Response.json(cache,{headers:{"Cache-Control":"private, max-age=300"}});
+export async function GET(request?:Request) {
+ const force=request?new URL(request.url).searchParams.get("refresh")==="1":false;
+ if(cache&&cache.expires>Date.now()&&(!force||Date.now()-Date.parse(cache.fetchedAt)<60000))return Response.json(cache,{headers:{"Cache-Control":"private, no-store"}});
  const results=await Promise.allSettled(newsSources.map(async(source)=>{
   const response=await fetch(source.url,{headers:{Accept:"application/rss+xml, application/xml, text/xml"},signal:AbortSignal.timeout(7000),redirect:"manual"});
   if(!response.ok||Number(response.headers.get("content-length")||0)>2000000)throw new Error("Feed unavailable");
@@ -15,5 +16,5 @@ export async function GET() {
  const merged=successful.flatMap(r=>r.value).sort((a,b)=>Date.parse(b.date!)-Date.parse(a.date!));
  const unique=[...new Map(merged.map(item=>[item.source,item])).values()];
  cache={items:unique.length?unique:curatedNews,status:successful.length===newsSources.length?"live":successful.length?"partial":"curated",fetchedAt:new Date().toISOString(),expires:Date.now()+(successful.length?600000:60000)};
- return Response.json(cache,{headers:{"Cache-Control":"private, max-age=60"}});
+ return Response.json(cache,{headers:{"Cache-Control":"private, no-store"}});
 }
