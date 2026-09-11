@@ -58,3 +58,7 @@ License source: https://raw.githubusercontent.com/rsms/inter/master/LICENSE.txt
 ## Foundation correction
 
 The application logo and principal navigation icons now use SVG viewports into the supplied reference artwork (`public/brand/ui-reference-artwork.png`), defined in `app/reference-icon.tsx`. Do not replace them with approximated line icons. These are raster-backed viewports at the reference resolution, not newly drawn vector masters. The original screenshot remains unchanged. The small favicon uses a contour traced in the same reference coordinates; full-size interface branding uses the actual raster mark. Button materials and Signal palette are consolidated in `app/reference-foundations.css`, loaded last.
+
+## Icon clarity and menu access
+
+Reference icons now use silhouette clips, brighter material and a white outline; rectangular screenshot backgrounds must never show on light surfaces. Preserve the supplied icon artwork inside the silhouette. Desktop navigation stays expanded. The logo/menu control opens the matching left drawer on mobile; bottom navigation remains available. The sidebar uses the reference's angled right edge, tall identity block, separated navigation rows and cyan active edge.
