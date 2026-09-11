@@ -1,6 +1,7 @@
 "use client";
 import { useState } from "react";
-import { Bookmark, BookOpen, ExternalLink, Headphones, Play, Smile, Sparkles, ArrowRight, Code2 } from "lucide-react";
+import {BookOpen, ExternalLink, Headphones, Play, Smile, Sparkles, ArrowRight, Code2} from "lucide-react";
+import {Bookmark} from "./reference-bookmark";
 import { StackButton } from "./brand";
 import type { Card } from "./content";
 import { CardArt } from "./card-art";

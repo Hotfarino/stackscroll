@@ -1,6 +1,7 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { Bookmark, ExternalLink, Flag, Play, Shield, Video, X } from "lucide-react";
+import {ExternalLink, Flag, Play, Shield, Video, X} from "lucide-react";
+import {Bookmark} from "./reference-bookmark";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogTrigger } from "@/components/ui/dialog";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Textarea } from "@/components/ui/textarea";

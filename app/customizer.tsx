@@ -7,6 +7,7 @@ import { Switch } from "@/components/ui/switch";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
 import { topics } from "./content";
+import { ReferenceIcon } from "./reference-icon";
 import { StackButton } from "./brand";
 import { defaultPreferences, preferenceKey, readPreferences, type Preferences } from "./preferences";
 
@@ -16,7 +17,13 @@ export function useDisplayPreferences() {
   const [canSave, setCanSave] = useState(true);
   const warned = useRef(false);
   useEffect(() => {
-    try { setPreferences(readPreferences(localStorage.getItem(preferenceKey))); }
+    try {
+      const previous=readPreferences(localStorage.getItem(preferenceKey));
+      if(localStorage.getItem("stackscroll-reference-palette-v1")!=="applied") {
+        setPreferences({...previous,skin:"signal"});
+        localStorage.setItem("stackscroll-reference-palette-v1","applied");
+      } else setPreferences(previous);
+    }
     catch { setCanSave(false); }
     setLoaded(true);
   }, []);
@@ -43,7 +50,7 @@ export function Customizer({ preferences: p, onChange, canSave }: {
 }) {
   function set<K extends keyof Preferences>(key: K, value: Preferences[K]) { onChange(current => ({ ...current, [key]: value })); }
   return <Sheet>
-    <SheetTrigger asChild><button className="customize-trigger" aria-label="Customize your interface"><SlidersHorizontal size={17}/><span>Customize</span></button></SheetTrigger>
+    <SheetTrigger asChild><button className="customize-trigger" aria-label="Customize your interface"><ReferenceIcon name="settings" size={30}/><span>Customize</span></button></SheetTrigger>
     <SheetContent className="customizer" aria-describedby="customizer-description">
       <SheetHeader className="customizer-header">
         <span className="customizer-kicker">STACKSCROLL / YOUR SPACE</span>

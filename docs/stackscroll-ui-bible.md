@@ -53,3 +53,8 @@ Semantic tokens are in `app/globals.css`. Shared material foundations are in `ap
 
 Inter source: https://raw.githubusercontent.com/rsms/inter/master/docs/font-files/InterVariable.woff2
 License source: https://raw.githubusercontent.com/rsms/inter/master/LICENSE.txt
+
+
+## Foundation correction
+
+The application logo and principal navigation icons now use SVG viewports into the supplied reference artwork (`public/brand/ui-reference-artwork.png`), defined in `app/reference-icon.tsx`. Do not replace them with approximated line icons. These are raster-backed viewports at the reference resolution, not newly drawn vector masters. The original screenshot remains unchanged. The small favicon uses a contour traced in the same reference coordinates; full-size interface branding uses the actual raster mark. Button materials and Signal palette are consolidated in `app/reference-foundations.css`, loaded last.

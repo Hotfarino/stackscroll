@@ -1,3 +1,4 @@
+import {ReferenceIcon} from "./reference-icon";
 import { Button } from "@/components/ui/button";
 import type { ComponentProps } from "react";
 
@@ -5,13 +6,7 @@ import type { ComponentProps } from "react";
 export const brandName = "Stackscroll";
 
 export function StackMark() {
-  return <svg className="stack-mark" viewBox="0 0 48 56" fill="none" aria-hidden="true" focusable="false">
-    <g strokeWidth="2.4" strokeLinejoin="round" strokeLinecap="round">
-      <path d="M7 18 24 8 41 18 33 23M7 18l26 15 8-5-26-15" stroke="var(--mark-top)"/>
-      <path d="m7 26 26 15 8-5-26-15" stroke="var(--mark-middle)"/>
-      <path d="m7 34 17 10 17-10M7 41l17 10 17-10" stroke="var(--mark-bottom)"/>
-    </g>
-  </svg>;
+  return <ReferenceIcon name="logo" size={48} className="stack-mark"/>;
 }
 
 export function Brand() {

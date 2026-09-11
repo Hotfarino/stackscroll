@@ -1,6 +1,7 @@
 "use client";
 import {useState} from "react";
-import {Network,Cpu,Cloud,Code2,Terminal,Bot,BrainCircuit,Workflow,BookOpen,CircleHelp,Layers,Rss,Radio,Laptop,Server,RotateCcw,Target,CheckCircle2,ArrowRight,Lightbulb,Check,ExternalLink,Bookmark,Quote,Clapperboard,Headphones} from "lucide-react";
+import {Network, Cpu, Cloud, Code2, Terminal, Bot, BrainCircuit, Workflow, BookOpen, CircleHelp, Layers, Rss, Radio, Laptop, Server, RotateCcw, Target, CheckCircle2, ArrowRight, Lightbulb, Check, ExternalLink, Quote, Clapperboard, Headphones} from "lucide-react";
+import {Bookmark} from "./reference-bookmark";
 import {RadioGroup,RadioGroupItem} from "@/components/ui/radio-group";
 import {StackButton} from "./brand";
 import type {Card} from "./content";

@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
-import {ArrowRight,ArrowLeft,Bookmark,Check,CheckCircle2,ExternalLink,Lightbulb,Terminal,Clock3,Network,Laptop,Database} from "lucide-react";
+import {ArrowRight, ArrowLeft, Check, CheckCircle2, ExternalLink, Lightbulb, Terminal, Clock3, Network, Laptop, Database} from "lucide-react";
+import {Bookmark} from "./reference-bookmark";
 import {RadioGroup,RadioGroupItem} from "@/components/ui/radio-group";
 import {Progress} from "@/components/ui/progress";
 import {StackButton} from "./brand";

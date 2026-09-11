@@ -1,6 +1,7 @@
 "use client";
 import {useEffect,useRef,useState} from "react";
-import {Bookmark,ExternalLink,Quote,Clapperboard,ArrowRight} from "lucide-react";
+import {ExternalLink, Quote, Clapperboard, ArrowRight} from "lucide-react";
+import {Bookmark} from "./reference-bookmark";
 import {Accordion,AccordionItem,AccordionTrigger,AccordionContent} from "@/components/ui/accordion";
 import {StackButton} from "./brand";
 import "./card-visuals.css";

@@ -1,5 +1,6 @@
 "use client";
-import {Bookmark,BookOpen,Headphones,ExternalLink} from "lucide-react";
+import {BookOpen, Headphones, ExternalLink} from "lucide-react";
+import {Bookmark} from "./reference-bookmark";
 import {Accordion,AccordionItem,AccordionTrigger,AccordionContent} from "@/components/ui/accordion";
 import {CardArt} from "./card-art";
 import type {Card} from "./content";
