@@ -14,12 +14,14 @@ after(()=>{globalThis.fetch=originalFetch;sqlite.close();rmSync(temp,{recursive:
 function compile(source,name) {
  const code = ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText
   .replaceAll('"cloudflare:workers"','"./env.mjs"')
-  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source|youtube-discovery|youtube-feed-server)"/g, '"./$1.mjs"');
+  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source|youtube-discovery|youtube-feed-server|content|catalog-records|youtube-link)"/g, '"./$1.mjs"');
  writeFileSync(join(temp,name+'.mjs'),code);
 }
 writeFileSync(join(temp,'env.mjs'),'export const env = {};');
 compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');compile('app/youtube-source.ts','youtube-source');compile('app/youtube-discovery.ts','youtube-discovery');compile('app/youtube-feed-server.ts','youtube-feed-server');compile('app/api/videos/thumbnail/route.ts','thumbnail');
 for(const route of ['videos','reports','moderation'])compile(`app/api/${route}/route.ts`,route);
+for(const name of ['content','catalog-records','youtube-link'])compile(`app/${name}.ts`,name);
+compile('app/api/catalog/thumbnail/route.ts','catalog-thumbnail');
 const imp = name=>import(pathToFileURL(join(temp,name+'.mjs')));
 const {env} = await imp('env');
 const {videoCatalog,canEmbed,embedUrl,resolveSavedVideos,videoAsCard} = await imp('video-catalog');
@@ -243,4 +245,27 @@ test('API redirects fail closed without forwarding the key to another host',asyn
  }})();
  assert.equal(result.status,'unavailable');assert.match(result.message,/302/);assert.equal(calls,4);
  assert.doesNotMatch(JSON.stringify(result),/test-secret-value|attacker/);
+});
+
+test('catalog thumbnails resolve short YouTube links, reject arbitrary targets and honor takedowns',async()=>{
+ const {catalogCards}=await imp('content');const {youtubeLinkId}=await imp('youtube-link');
+ const route=await imp('catalog-thumbnail');
+ const card=catalogCards.find(c=>c.kind==='video'&&youtubeLinkId(c.source));
+ const id=youtubeLinkId(card.source);
+ assert.equal(youtubeLinkId('https://youtube.com.evil.test/watch?v='+id),null);
+ assert.equal(youtubeLinkId('https://user@youtu.be/'+id),null);
+ assert.equal((await route.GET(new Request('https://stackscroll.test/api/catalog/thumbnail?id=https://evil.test'))).status,404);
+ const prior=globalThis.fetch;let imageCalls=0;
+ globalThis.fetch=async(input,init)=>{
+  assert.equal(init.redirect,'manual');assert.equal(init.headers.Cookie,undefined);
+  if(new URL(input).hostname==='www.youtube.com')return Response.json(sourceMetadata(id));
+  assert.equal(new URL(input).hostname,'i.ytimg.com');imageCalls++;
+  return new Response(new Uint8Array([255,216,255,217]),{headers:{'Content-Type':'image/jpeg'}});
+ };
+ try{
+  const result=await route.GET(new Request('https://stackscroll.test/api/catalog/thumbnail?id='+card.id));
+  assert.equal(result.status,200);assert.equal(result.headers.get('Content-Type'),'image/jpeg');assert.equal(imageCalls,1);
+  sqlite.prepare("INSERT OR REPLACE INTO video_moderation VALUES (?, ?, ?)").run('youtube-'+id,1,Date.now());
+  assert.equal((await route.GET(new Request('https://stackscroll.test/api/catalog/thumbnail?id='+card.id))).status,404);
+ }finally{globalThis.fetch=prior;sqlite.prepare('DELETE FROM video_moderation WHERE video_id = ?').run('youtube-'+id);}
 });

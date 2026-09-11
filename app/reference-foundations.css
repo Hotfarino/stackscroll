@@ -73,3 +73,24 @@ body .mobile-brand.brand-home > svg.lucide { stroke:#E8EAED; flex-shrink:0; }
 
 body .sidebar-mobile-close { display:none; }
 @media(max-width:767px) { body .reference-sidebar-shell .sidebar-head { position:relative; } body .sidebar-mobile-close { display:grid; place-items:center; position:absolute; right:4px; top:4px; width:44px; height:44px; color:#E8EAED; } }
+
+/* Source thumbnails retain the locked graphite frame and a stable image area. */
+.source-thumbnail-state { display:flex; flex-direction:column; align-items:center; justify-content:center; gap:8px; width:100%; min-height:120px; height:100%; padding:12px; color:var(--muted-foreground); text-align:center; font-size:13px; }
+.source-thumbnail-state button { display:inline-flex; align-items:center; gap:6px; min-height:44px; padding:6px 10px; border:1px solid #52616A; background:#1A1F24; color:#E8EAED; border-radius:3px; }
+.catalog-video-thumbnail { aspect-ratio:16/9; overflow:hidden; background:#0B0D10; border-block:1px solid #252B31; }
+.catalog-video-thumbnail img { width:100%; height:100%; object-fit:contain; }
+body .preview-image img { object-fit:cover; }
+body .repo-nav-icon { color:#E8EAED; stroke-width:2; filter:drop-shadow(0 1px 2px #00D9FF66); flex-shrink:0; }
+.repo-filters { display:flex; flex-wrap:wrap; gap:8px; margin:16px 0; }
+.repository-browser > p { margin:16px 0; color:var(--muted-foreground); }
+.repository-list { display:grid; gap:14px; }
+.repository-card { padding:20px; }
+.repo-identity { display:flex; gap:14px; align-items:center; min-width:0; }
+.repo-identity h2 { margin:6px 0; font-size:20px; overflow-wrap:anywhere; }
+.repo-identity a,.repository-card footer a { display:inline-flex; align-items:center; gap:8px; }
+.repository-card > p { margin:16px 0; line-height:1.6; }
+.repository-card details { margin:16px 0; }
+.repository-card summary { cursor:pointer; min-height:44px; padding:10px 0; }
+.repository-card footer { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:16px 0; }
+.repository-card > small { font-size:12px; color:var(--muted-foreground); }
+@media(max-width:767px){body .mobile-bottom { grid-template-columns:repeat(6,minmax(0,1fr)); }body .mobile-bottom button { min-width:0; padding-inline:2px; }body .mobile-bottom button span { font-size:12px; }.repository-card { padding:16px; }.repo-identity h2 { font-size:18px; }}

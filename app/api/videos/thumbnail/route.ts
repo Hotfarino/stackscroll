@@ -1,6 +1,6 @@
 import { canEmbed, videoCatalog } from "../../../video-catalog";
 import { blockedVideoIds } from "../../../video-server";
-import { edgeCache, readBounded, YOUTUBE_REFRESH_MS } from "../../../youtube-source";
+import { edgeCache, loadYouTubeSource, withYouTubeSource, readBounded, YOUTUBE_REFRESH_MS } from "../../../youtube-source";
 import {currentYouTubeVideo} from "../../../youtube-feed-server";
 
 const missing = (status = 404) => new Response(null, {status,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
@@ -9,7 +9,9 @@ export async function GET(request: Request) {
   if (!id || (!videoCatalog.some(item=>item.id===id)&&!/^youtube-[\w-]{11}$/.test(id))) return missing();
   try {
     if ((await blockedVideoIds()).has(id)) return missing();
-    const video = await currentYouTubeVideo(id);
+    const seed=videoCatalog.find(video=>video.id===id);
+    const source=seed?await loadYouTubeSource(seed):null;
+    const video = seed?(source?withYouTubeSource(seed,source):null):await currentYouTubeVideo(id);
     if (!video || !canEmbed(video)||!video.thumbnail?.originalUrl) return missing();
     // The only upstream URL comes from validated metadata for a curated ID.
     // Never forward user headers, cookies, IP addresses or query strings.
