@@ -191,3 +191,17 @@ test("content search matches multiple terms, creator names and original transcri
  assert.ok(mediaCards().some(card=>cardMatchesSearch(card,"resolver cache")));
  assert.equal(matchesSearch("<script>",["safe text"]),false);
 });
+
+test("compact feed previews preserve source links and respect video thumbnail privacy",async()=>{
+ const {FeedPreview}=await vite.ssrLoadModule("/app/feed-preview.tsx");
+ const {coreCards}=await vite.ssrLoadModule("/app/content.ts");
+ const {videoCatalog,videoAsCard}=await vite.ssrLoadModule("/app/video-catalog.ts");
+ const render=(card,extra={})=>renderToStaticMarkup(React.createElement(FeedPreview,{card,blocked:false,saved:false,onSave(){},onToggle(){},...extra},React.createElement('span',null,'FULL_CONTENT_NOT_OPEN')));
+ const native=render(coreCards[0]);assert.ok(native.includes(coreCards[0].source));assert.doesNotMatch(native,/FULL_CONTENT_NOT_OPEN|<iframe/);
+ const v={...videoCatalog[0],thumbnail:{url:`/api/videos/thumbnail?id=${encodeURIComponent(videoCatalog[0].id)}`,width:480,height:360}};
+ const card=videoAsCard(v);
+ assert.match(render(card,{video:v}),/src="\/api\/videos\/thumbnail/);
+ assert.doesNotMatch(render(card,{video:v,blocked:true}),/<img|<iframe/);
+ assert.doesNotMatch(render(card,{video:{...v,thumbnail:{...v.thumbnail,url:'https://untrusted.example/image.jpg'}}}),/<img|<iframe/);
+ assert.doesNotMatch(render(card),/<img|<iframe/);
+});

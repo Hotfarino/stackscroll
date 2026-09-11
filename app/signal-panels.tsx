@@ -1,4 +1,4 @@
-import { ArrowUpRight, Radar } from "lucide-react";
+import { ArrowUpRight, Radar, SlidersHorizontal } from "lucide-react";
 import type { CSSProperties } from "react";
 import { topics, type Card, type Topic } from "./content";
 
@@ -12,7 +12,7 @@ const radarTopics: { topic: Topic; label: string; x: number; y: number }[] = [
 ];
 
 export function TopicRadar({ selected, onSelect }: { selected: Topic | "all"; onSelect: (topic: Topic | "all") => void }) {
-  return <section className="topic-radar" aria-labelledby="topic-radar-title">
+  return <><section className="topic-radar" aria-labelledby="topic-radar-title">
     <header><h2 id="topic-radar-title"><Radar size={17}/>Tech radar</h2><span>Browse topics</span></header>
     <div className="radar-map" role="group" aria-label="Choose a topic">
       <svg viewBox="0 0 280 260" aria-hidden="true" focusable="false">
@@ -22,10 +22,11 @@ export function TopicRadar({ selected, onSelect }: { selected: Topic | "all"; on
       {radarTopics.map(item => <button type="button" key={item.topic} aria-pressed={selected === item.topic} onClick={() => onSelect(item.topic)} style={{ "--radar-x": `${item.x}%`, "--radar-y": `${item.y}%` } as CSSProperties}><i aria-hidden="true"/><span>{item.label}</span></button>)}
     </div>
     <p>Follow an interest into the feed.</p>
+  </section><section className="quick-filter-panel"><h2><SlidersHorizontal size={17}/>Quick filters</h2>
     <div className="radar-filters" role="group" aria-label="All topic filters">
       {(["all", ...topics] as const).map(topic => <button type="button" key={topic} aria-pressed={selected === topic} onClick={() => onSelect(topic)}>{topic === "all" ? "All topics" : topic}</button>)}
     </div>
-  </section>;
+  </section></>;
 }
 
 export function FeaturedFind({ card }: { card: Card }) {

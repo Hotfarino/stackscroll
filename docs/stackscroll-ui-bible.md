@@ -1,5 +1,9 @@
 # Stackscroll UI bible
 
+## Exact-reference directive — September 11, 2026
+
+The user reaffirmed that this is the EXACT intended design, including colors, shapes and layout. `docs/design/stackscroll-ui-bible-exact.png` is the latest supplied reference. Do not treat it as loose inspiration. Preserve its three-column desktop proportions, compact horizontal cards with right thumbnails, beveled graphite panels, cyan selected edges, restrained silver/cyan icons, outlined stack identity, and separate radar and pill-filter panels. Mobile adapts the same visual language to a narrow screen. Full content opens immediately from a short preview; do not discard explanations or sources to achieve density. Illustrative popularity numbers remain prohibited without real data.
+
 The user-supplied reference in `docs/design/stackscroll-ui-bible.jpeg` is the visual authority for Stackscroll. Preserve this direction when adding screens; extend the existing tokens and components instead of introducing another visual system.
 
 ## Identity and color
