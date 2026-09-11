@@ -1,0 +1,128 @@
+/* Stackscroll's card language: light surfaces, crisp topic color, original artwork. */
+.learning-card {
+  --art-accent: #00758a;
+  --art-tint: #e8f8fc;
+  border-radius: 18px;
+  border-color: color-mix(in srgb, var(--border) 85%, var(--cyan));
+  box-shadow: 0 5px 24px -18px #244e7555;
+}
+.learning-card:is([data-topic="Development"], [data-topic="Languages"]) { --art-accent: #5841be; --art-tint: #f0edff; }
+.learning-card:is([data-topic="Agentic AI"], [data-topic="Machine learning"], [data-topic="AI workflows"]) { --art-accent: #2454d8; --art-tint: #edf2ff; }
+.learning-card[data-topic="CompTIA"] { --art-accent: #3f651e; --art-tint: #eff8e2; }
+.learning-card .card-top { padding-top: 18px; gap: 10px; }
+.learning-card .topic-icon, .learning-card .quote-symbol { width: 38px; height: 38px; border: 1px solid color-mix(in srgb, var(--art-accent) 18%, transparent); border-radius: 11px 11px 5px 11px; color: var(--art-accent); background: var(--art-tint); }
+.learning-card .card-author { flex: 1; }
+.learning-card .kind-badge { color: var(--art-accent); background: var(--art-tint); border: 0; border-radius: 5px; font-weight: 600; padding: 6px 8px; font-size: .75rem; }
+.learning-card .card-main h2 { font-weight: 700; line-height: 1.32; letter-spacing: -.025em; }
+.learning-card .card-footer { background: color-mix(in srgb, var(--background) 45%, var(--card)); }
+.learning-card .card-footer .icon-button { background: var(--card); border-color: var(--border); border-radius: 10px; }
+.learning-card .card-footer .is-saved { background: var(--art-tint); color: var(--art-accent); border-color: var(--art-accent); }
+
+/* Every image is local. Covers describe a topic, never an actual source or person. */
+.learning-card .card-art { position: relative; display: block; overflow: hidden; isolation: isolate; margin: 18px var(--card-space) 0; border-radius: 12px; background: #d6edfc; color: #183653; }
+.card-art .card-art-image { display: block; width: 100%; height: 100%; object-fit: cover; object-position: center 48%; transition: transform 450ms cubic-bezier(.2,.65,.3,1); }
+.learning-card .art-cover { aspect-ratio: 2.55; }
+.card-art .card-art-label { position: absolute; top: 12px; left: 12px; display: inline-flex; align-items: center; gap: 7px; max-width: calc(100% - 24px); padding: 7px 9px; background: #f9fdfff2; color: #183653; border-radius: 5px; font-size: .75rem; line-height: 1.3; font-weight: 650; }
+.card-art .card-art-credit { position: absolute; right: 10px; bottom: 10px; padding: 4px 7px; border-radius: 4px; color: #244057; background: #f8fcfff0; font-size: .75rem; line-height: 1.3; }
+.card-art .card-art-link { position: absolute; right: 12px; top: 12px; display: grid; place-items: center; width: 38px; height: 38px; background: #f9fdff; color: #183653; border: 1px solid #ffffff; border-radius: 50%; box-shadow: 0 2px 8px #2342631a; transition: transform 220ms ease; }
+a.card-art .card-art-label { max-width: calc(100% - 76px); }
+a.card-art:focus-visible { outline: 3px solid var(--ring); outline-offset: 4px; }
+.learning-card .art-compact { height: 120px; background: var(--art-tint); }
+.art-compact .card-art-image { position: absolute; right: 0; width: 53%; object-position: center 48%; border-radius: 0 12px 12px 0; }
+.art-compact .card-art-label { top: 18px; left: 16px; max-width: 40%; padding: 0; background: none; color: var(--art-accent); flex-direction: column; align-items: flex-start; font-size: .875rem; line-height: 1.45; }
+.art-compact .card-art-label svg { width: 22px; height: 22px; margin-bottom: 2px; }
+.learning-card .art-podcast { height: 184px; background: #163754; }
+.art-podcast .card-art-image { position: absolute; right: 0; width: 48%; height: 100%; object-position: 50% 50%; border-radius: 0; }
+.art-podcast .card-art-label { top: 20px; left: 20px; padding: 0; width: 38%; max-width: 38%; align-items: flex-start; flex-direction: column; background: none; color: #f0f7ff; font-size: 1rem; font-weight: 600; line-height: 1.4; }
+.art-podcast .card-art-label svg { width: 25px; height: 25px; margin-bottom: 6px; color: #c8f542; }
+.card-art-wave { position: absolute; bottom: 24px; left: 20px; width: 36%; height: 48px; display: flex; align-items: center; gap: 4px; overflow: hidden; }
+.card-art-wave i { flex: 1; min-width: 2px; max-width: 5px; background: #a9e8f3; border-radius: 4px; }
+.card-art-wave i:nth-child(3n) { background: #c8f542; }
+.learning-card .art-humor { aspect-ratio: 1.95; margin: 18px -20px; border-radius: 0; }
+.art-humor .card-art-image { object-position: center 48%; }
+.art-humor .card-art-label { display: none; }
+
+/* Source cards feel like collected field notes, with an obvious next action. */
+.learning-card.catalog-card .catalog-excerpt { border-left: 2px solid var(--art-accent); padding: 4px 0 4px 14px; margin: 17px 0; }
+.learning-card.catalog-card .catalog-excerpt > span { font-size: .75rem; letter-spacing: .06em; color: var(--art-accent); font-weight: 600; }
+.learning-card.catalog-card .catalog-excerpt p { font-size: 1rem; color: var(--copy); line-height: 1.65; }
+.learning-card.catalog-card .catalog-tags { gap: 7px; margin: 18px 0; }
+.learning-card.catalog-card .catalog-tags span { font-size: .75rem; padding: 5px 8px; border: 0; border-radius: 5px; background: var(--secondary); color: var(--copy); }
+.learning-card.catalog-card .catalog-open { font-size: .875rem; min-height: 48px; padding: 12px 14px; border: 1px solid color-mix(in srgb, var(--art-accent) 20%, transparent); background: var(--art-tint); color: var(--art-accent); border-radius: 9px; }
+.learning-card.catalog-card .catalog-open:hover { border-color: var(--art-accent); }
+.learning-card.catalog-card .catalog-open svg { flex-shrink: 0; }
+.learning-card.catalog-card .catalog-next summary { min-height: 44px; font-size: .875rem; color: var(--copy); }
+.learning-card.catalog-card .catalog-next summary::after { content: "+"; margin-left: auto; font-size: 1.125rem; color: var(--art-accent); }
+.learning-card.catalog-card .catalog-next[open] summary::after { content: "−"; }
+.learning-card.catalog-card .catalog-next p { font-size: 1rem; }
+.learning-card.catalog-card .catalog-next > a { font-size: .875rem; min-height: 44px; }
+.learning-card.catalog-card .catalog-provenance { margin-inline: var(--card-space); }
+.learning-card.catalog-card .catalog-provenance > button { min-height: 44px; gap: 12px; font-size: .75rem; letter-spacing: 0; }
+.learning-card.catalog-card .catalog-provenance p, .learning-card.catalog-card .catalog-publisher, .learning-card.catalog-card .catalog-publication { font-size: .75rem; }
+.catalog-status .catalog-format-counts > span { font-size: .75rem; }
+
+/* Original humor: setup, illustration, punchline. All captions stay real text. */
+.learning-card.catalog-humor .humor-scene { border: 0; border-radius: 12px; padding: 16px 20px 20px; background: #112e46; color: #eef7ff; }
+.learning-card.catalog-humor .humor-terminal-head { padding-bottom: 18px; }
+.learning-card.catalog-humor .humor-terminal-head > span { width: 6px; height: 6px; }
+.learning-card.catalog-humor .humor-terminal-head small { font-size: .75rem; color: #bbd0e3; }
+.learning-card.catalog-humor .humor-setup { font-size: 1.125rem; color: #d9ecfa; font-weight: 550; line-height: 1.5; }
+.learning-card.catalog-humor .humor-punchline { font-size: clamp(1.25rem, 3.8vw, 1.625rem); color: #f3f9ff; margin: 18px 0 22px; line-height: 1.4; }
+.learning-card.catalog-humor .humor-signature { font-size: .75rem; color: #a9cee2; }
+.learning-card.catalog-humor .humor-scene pre { font-size: .875rem; color: #c4eaff; }
+
+/* Quotes and recall get typography and stack geometry, without invented portraits. */
+.learning-card.quote-card { border-color: color-mix(in srgb, var(--art-accent) 24%, var(--border)); }
+.learning-card.quote-card .card-main blockquote { position: relative; margin: 0 0 20px; padding: 27px 23px 23px; border: 0; border-radius: 12px 12px 4px 12px; background: var(--art-tint); box-shadow: 4px 4px 0 color-mix(in srgb, var(--art-accent) 16%, var(--card)); }
+.learning-card.quote-card .card-main blockquote::before { content: ""; display: block; height: 5px; width: 34px; background: var(--art-accent); margin-bottom: 18px; border-radius: 3px; }
+.learning-card.quote-card .card-main blockquote p { font-size: clamp(1.5rem, 2.7vw, 2rem); font-weight: 650; letter-spacing: -.035em; line-height: 1.4; margin: 0; text-wrap: pretty; }
+.learning-card.quote-card .card-main cite { font-size: .875rem; margin-top: 18px; }
+.learning-card .flash-surface { min-height: 248px; background: var(--art-tint); border-color: color-mix(in srgb, var(--art-accent) 24%, transparent); border-radius: 12px; padding: 24px 18px; gap: 15px; }
+.learning-card .flash-surface .flip-hint { color: var(--art-accent); }
+.learning-card .flash-surface.is-flipped { background: var(--card); border-top: 3px solid var(--art-accent); }
+.recall-stack { display: block; position: relative; width: 100px; height: 76px; margin-bottom: 4px; }
+.recall-stack > span { position: absolute; width: 78px; height: 50px; left: 11px; top: 21px; background: color-mix(in srgb, var(--art-accent) 13%, var(--card)); border: 1px solid color-mix(in srgb, var(--art-accent) 35%, var(--card)); border-radius: 10px; transform: rotate(-12deg); }
+.recall-stack > span:nth-child(2) { top: 11px; background: color-mix(in srgb, var(--art-accent) 7%, var(--card)); transform: rotate(-5deg); }
+.recall-stack > span:nth-child(3) { top: 0; display: grid; place-items: center; background: var(--card); color: var(--art-accent); transform: rotate(4deg); box-shadow: 0 5px 12px #143d6714; transition: transform 250ms ease; }
+.learning-card.kind-quiz .quiz-area { border-top: 3px solid var(--art-accent); margin-top: 20px; }
+.learning-card.kind-quiz .quiz-option { font-size: 1rem; border-radius: 9px; }
+.learning-card.kind-quiz .option-letter { border-radius: 6px; }
+.learning-card.kind-quiz .quiz-option.selected:not(.correct):not(.incorrect) { background: var(--art-tint); border-color: var(--art-accent); }
+.learning-card .network-visual, .learning-card .subnet-visual { background: var(--network-bg); border-color: var(--network-edge); border-radius: 12px; }
+.learning-card .workflow-visual { background: var(--art-tint); border-color: color-mix(in srgb, var(--art-accent) 20%, var(--card)); border-radius: 12px; }
+.learning-card .workflow-visual .diagram-label, .learning-card .workflow-visual > p { color: var(--art-accent); }
+.learning-card .takeaway { background: var(--art-tint); border-color: var(--art-accent); border-radius: 0 9px 9px 0; }
+.learning-card .takeaway svg { color: var(--art-accent); }
+.learning-card.editorial-card .listening-prompt { background: var(--art-tint); border-left: 3px solid var(--art-accent); }
+.learning-card.kind-video .video-placeholder { background: var(--background); border: 1px solid var(--border); border-radius: 12px; padding: 20px; }
+.learning-card.kind-video .video-placeholder > svg { display: none; }
+.learning-card.kind-video .video-placeholder > strong { font-size: 1rem; }
+.learning-card.explainer-card .original-player { border-radius: 12px; border-color: color-mix(in srgb, var(--art-accent) 30%, var(--border)); }
+
+:root[data-skin="midnight"] .learning-card { --art-accent: #92e3ef; --art-tint: #213c4d; box-shadow: none; }
+:root[data-skin="midnight"] .learning-card:is([data-topic="Development"], [data-topic="Languages"]) { --art-accent: #d1b4ff; --art-tint: #302845; }
+:root[data-skin="midnight"] .learning-card:is([data-topic="Agentic AI"], [data-topic="Machine learning"], [data-topic="AI workflows"]) { --art-accent: #afc7ff; --art-tint: #263950; }
+:root[data-skin="midnight"] .learning-card[data-topic="CompTIA"] { --art-accent: #c8e795; --art-tint: #2b3c25; }
+[data-density="compact"] .learning-card .art-cover { aspect-ratio: 3; }
+[data-density="compact"] .learning-card .art-podcast { height: 168px; }
+[data-density="compact"] .learning-card .art-compact { height: 110px; }
+@media (hover: hover) and (prefers-reduced-motion: no-preference) {
+  :root:not([data-motion="reduced"]) a.card-art:hover .card-art-image { transform: scale(1.035); }
+  :root:not([data-motion="reduced"]) a.card-art:hover .card-art-link { transform: translate(2px, -2px); }
+  :root:not([data-motion="reduced"]) .flash-surface:hover .recall-stack > span:nth-child(3) { transform: translateY(-3px) rotate(7deg); }
+}
+@media (max-width: 600px) {
+  .learning-card { border-radius: 15px; }
+  .learning-card .card-top { gap: 8px; }
+  .learning-card .card-author { flex-basis: 44%; }
+  .learning-card .kind-badge { white-space: normal; }
+  .learning-card .art-cover { aspect-ratio: 2.1; }
+  .learning-card .art-podcast { height: 184px; }
+  .art-podcast .card-art-label { left: 15px; top: 16px; }
+  .card-art-wave { left: 15px; bottom: 22px; gap: 3px; }
+  .learning-card .art-humor { aspect-ratio: 1.7; }
+  .learning-card.quote-card .card-main blockquote { padding: 22px 18px; }
+  .learning-card.catalog-humor .humor-scene { padding-inline: 16px; }
+  .learning-card.catalog-humor .art-humor { margin-inline: -16px; }
+  [data-density="compact"] .learning-card .art-cover { aspect-ratio: 2.4; }
+}

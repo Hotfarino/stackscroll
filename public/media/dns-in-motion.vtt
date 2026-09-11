@@ -1,0 +1,29 @@
+WEBVTT
+
+1
+00:00:00.000 --> 00:00:04.000
+Your app needs an address for a name before it connects.
+
+2
+00:00:04.000 --> 00:00:08.000
+The client sends the question to its configured DNS resolver.
+
+3
+00:00:08.000 --> 00:00:12.000
+The resolver may already have a usable answer in its cache.
+
+4
+00:00:12.000 --> 00:00:16.000
+If needed, it asks other DNS servers to find the answer.
+
+5
+00:00:16.000 --> 00:00:20.000
+If found, the resolver replies with the requested address.
+
+6
+00:00:20.000 --> 00:00:24.000
+Use nslookup to query a name and inspect the DNS response. Example command: nslookup app.example.com.
+
+7
+00:00:24.000 --> 00:00:28.000
+Name resolution failure is not proof the app server is broken.

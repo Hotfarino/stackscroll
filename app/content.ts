@@ -1,16 +1,23 @@
-import { cultureCards } from "./culture";
-
-export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows" | "Philosophy";
-export const contentKinds = ["lesson", "quiz", "flashcard", "news", "humor", "anecdote", "fact"] as const;
-export type Kind = typeof contentKinds[number];
+export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows" | "Data centers";
+export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer" | "story" | "podcast" | "resource" | "humor";
+export type CatalogMetadata = {
+  edition: "launch-1000";
+  delivery: "source" | "native";
+  format: "guide" | "reference" | "article" | "repository" | "podcast" | "video" | "humor" | "practice";
+  checkedAt: string;
+  review: "publisher-linked" | "original-review-pending" | "original-humor";
+  rights: "link-only" | "original";
+  tags: string[];
+  prompt?: string;
+  excerpt?: string;
+};
 export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
   body?: string; takeaway?: string; code?: string; language?: string; visual?: "network" | "subnet" | "workflow";
   options?: string[]; answer?: number; explanation?: string; back?: string;
-  source: string; sourceName: string; date?: string; minutes?: number;
-  sourceNote?: string; reviewedAt?: string;
+  source: string; sourceName: string; date?: string; minutes?: number; catalog?: CatalogMetadata;
 };
-export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Philosophy"];
+export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Data centers"];
 const refs = {
   network: ["https://www.rfc-editor.org/rfc/rfc826", "IETF · ARP"],
   subnet: ["https://www.rfc-editor.org/rfc/rfc4632", "IETF · CIDR"],
@@ -21,7 +28,11 @@ const refs = {
   agent: ["https://www.anthropic.com/engineering/building-effective-agents", "Anthropic · Engineering"],
 };
 function c(data: Omit<Card,"source"|"sourceName">, ref: string[]): Card {return {...data,source:ref[0],sourceName:ref[1]};}
-export const studyCards: Card[] = [
+export const coreCards: Card[] = [
+ c({id:"dc-airflow",kind:"lesson",topic:"Data centers",level:"Foundation",title:"Cooling starts with the path of the air.",body:"In a hot-aisle/cold-aisle arrangement, server intakes face the cold aisle and exhausts face the hot aisle. The goal is to reduce mixing between cool supply air and hot exhaust. This is an airflow concept; changes to a live room need coordination with its facilities team.",takeaway:"When reading a rack layout, identify the intake side, exhaust side, and return-air path.",minutes:2},["https://www.energystar.gov/products/data_center_equipment/16-more-ways-cut-energy-waste-data-center/move-hot-aislecold-aisle-layout","ENERGY STAR · Hot and cold aisles"]),
+ c({id:"dc-ai-fabrics",kind:"lesson",topic:"Data centers",level:"Foundation",title:"An AI cluster has more than one network job.",body:"NVIDIA's DGX BasePOD NDR400 reference architecture describes a compute network, an Ethernet network for system management and storage, and an out-of-band management network. These roles help explain why training communication, data access, and administration are considered separately. This is one reference design, not a rule for every data center.",takeaway:"Read a cluster diagram by asking what each network carries and which devices it connects.",minutes:2},["https://docs.nvidia.com/dgx-basepod/reference-architecture-infrastructure-foundation-enterprise-ai/latest/reference-architectures.html","NVIDIA · DGX BasePOD reference architecture"]),
+ c({id:"dc-gpu-health",kind:"lesson",topic:"Data centers",level:"Foundation",title:"GPU operations includes health, not just workloads.",body:"NVIDIA Data Center GPU Manager (DCGM) supports GPU behavior monitoring, configuration, policy oversight, health checks, diagnostics, and process statistics. These capabilities give infrastructure teams a way to observe and manage the GPUs supporting AI workloads.",takeaway:"Connect the software running on a GPU with the infrastructure tools used to monitor and maintain it.",minutes:2},["https://docs.nvidia.com/datacenter/dcgm/latest/user-guide/index.html","NVIDIA · DCGM overview"]),
+
  c({id:"net-mac",kind:"lesson",topic:"Networking",level:"Foundation",title:"IP finds the destination.\nMAC finds the next hop.",body:"Sending to another network? Your computer addresses the Ethernet frame to the gateway’s MAC address, while the IP packet still targets the remote host.",visual:"network",takeaway:"At each routed Ethernet hop, the link-layer addresses change. Without NAT, the source and destination IP addresses stay the same.",minutes:2},refs.network),
  c({id:"quiz-dns",kind:"quiz",topic:"CompTIA",level:"Foundation",title:"An IP address works. The hostname doesn’t. What do you check?",body:"A workstation reaches a server by IP address but cannot resolve its fully qualified domain name. Which service is the most likely problem?",options:["DHCP","DNS","NTP","SSH"],answer:1,explanation:"DNS resolves names to addresses. Reaching the server by IP makes name resolution the strongest clue. DHCP supplies network settings, NTP synchronizes clocks, and SSH provides remote access."},["https://www.rfc-editor.org/rfc/rfc1034","IETF · Domain names"]),
  c({id:"flash-cidr",kind:"flashcard",topic:"CCNA",level:"Foundation",title:"How many usable host addresses are in a /26 IPv4 subnet?",back:"62 usable hosts",explanation:"32 − 26 = 6 host bits. 2⁶ = 64 total addresses. In a conventional subnet, subtract the network and broadcast addresses: 64 − 2 = 62."},refs.subnet),
@@ -54,17 +65,72 @@ export const studyCards: Card[] = [
  c({id:"bash-pipe",kind:"quiz",topic:"Languages",level:"Foundation",title:"What does the pipe symbol do in a shell command?",body:"Consider: cat access.log | wc -l",options:["Runs commands on different servers","Sends standard output into the next command’s standard input","Redirects all errors into access.log","Encrypts the log"],answer:1,explanation:"A pipe connects standard output to the next command’s standard input. Here wc -l counts newline characters from the log. Standard error is not included by the plain | operator."},["https://www.gnu.org/software/bash/manual/html_node/Pipelines.html","GNU Bash · Pipelines"]),
  c({id:"workflow-eval",kind:"flashcard",topic:"AI workflows",level:"Advanced",title:"What stays constant when comparing two prompt versions?",back:"A representative evaluation set and scoring criteria.",explanation:"Run both versions on the same cases, including edge cases. Compare correctness, tool behavior, latency, and cost. Keep holdout cases to avoid overfitting your evaluation set."},refs.agent),
 ];
-// One culture card after each three study cards; retain every original stable ID.
-export const cards: Card[] = studyCards.flatMap((card, index) => {
-  const extra = (index + 1) % 3 === 0 ? cultureCards[Math.floor(index / 3)] : undefined;
-  return extra ? [card, extra] : [card];
-});
-cards.push(...cultureCards.slice(Math.floor(studyCards.length / 3)));
+import { catalogCards } from "./catalog-records";
+export { catalogCards };
 
-export const curatedNews: Card[] = [
- {id:"news-copilot-aug",kind:"news",topic:"Agentic AI",level:"Intermediate",title:"Copilot adds more controls for agents and code review",body:"GitHub’s August Visual Studio update introduces organization-level custom agents, adjustable thinking effort for supported models, and Git-agent reviews of uncommitted changes or commits.",takeaway:"Learning connection: write a scoped agent brief, then compare automated review findings with the actual diff.",source:"https://github.blog/changelog/2026-08-28-github-copilot-in-visual-studio-august-update-2/",sourceName:"GitHub Changelog",date:"2026-08-28"},
- {id:"news-aws-interconnect",kind:"news",topic:"Cloud",level:"Intermediate",title:"AWS Interconnect brings managed last-mile connectivity",body:"AWS announced Interconnect – last mile with Lumen in the US. It automates network configuration, including BGP peering and VLAN setup, for private connectivity to AWS.",takeaway:"Learning connection: review BGP, VLANs, and Direct Connect before evaluating managed connectivity.",source:"https://aws.amazon.com/about-aws/whats-new/2026/04/aws-announces-ga-AWS-interconnect-last-mile/",sourceName:"AWS What's New",date:"2026-04-13"},
+const curiosityCards: Card[] = [
+ {id:"curiosity-fact-moth",kind:"lesson",topic:"Development",level:"Foundation",title:"The bug was real. The word came first.",body:"In 1947, a moth was found in a Harvard Mark II relay and preserved in its logbook. Engineers already used the word ‘bug’ for faults. The famous moth story did not invent the term.",source:"https://www.computerhistory.org/tdih/september/9/",sourceName:"Computer History Museum · Tech history"},
+ {id:"curiosity-fact-birds",kind:"lesson",topic:"Networking",level:"Foundation",title:"There is an RFC for sending IP packets by bird.",body:"RFC 1149 describes IP datagrams carried by avian carriers. Published on April Fools’ Day in 1990, it is networking humor—not deployment advice.",source:"https://www.rfc-editor.org/info/rfc1149/",sourceName:"RFC Editor · Tech history"},
+ {id:"curiosity-fact-coffee",kind:"lesson",topic:"Development",level:"Foundation",title:"Your coffee pot got its own protocol proposal.",body:"The Hyper Text Coffee Pot Control Protocol appeared in RFC 2324 on April 1, 1998. This informational April Fools’ document explicitly does not specify an Internet standard.",source:"https://www.rfc-editor.org/info/rfc2324/",sourceName:"RFC Editor · Tech history"},
+ ...([
+ ["Networking","The network is fine.","Narrator: The DNS cache had requested legal representation."],
+ ["Cloud","Cloud cost optimization","Step one: discover the test server you named temporary three years ago."],
+ ["Agentic AI","My agent finished the task.","It also opened six follow-up tasks and promoted itself to project manager."],
+ ["Machine learning","Perfect training accuracy","My model has memorized the textbook and would prefer no follow-up questions."],
+ ["Data centers","A quiet day in the data center","The fans disagree with this description."],
+ ["Development","It works on my machine.","My machine has declined the invitation to production."],
+ ["Languages","Learning a second language","Now I can forget semicolons in two ecosystems."],
+ ["AI workflows","Automation saves time.","I spent the saved time naming the workflow final_final_really_final."],
+ ["CCNA","Subnetting confidence","I know exactly how many hosts fit. I just need everyone to stop watching me count."],
+ ["CompTIA","The troubleshooting process","First, identify the problem. The printer has identified me as the problem."],
+ ["Development","One small dependency","It brought its friends. All 842 of them."],
+ ["Agentic AI","Human in the loop","The human is currently in a loop asking why the agent is in a loop."]
+ ] as [Topic,string,string][]).map(([topic,title,body],i)=>({id:`curiosity-humor-${i+1}`,kind:"humor" as const,topic,level:"Foundation" as const,title,body,source:"https://stackscroll.bigdawgroof812178.chatgpt.site/terms",sourceName:"Stackscroll Originals · Fiction"}))
 ];
+export const cards: Card[] = [...coreCards, ...catalogCards, ...curiosityCards];
+export const cardById = new Map(cards.map(card => [card.id, card]));
+export function resolveCatalogSaved(saved: Card[], resolveOther: (saved: Card[]) => Card[]): Card[] {
+  return saved.flatMap(card => (card.id.startsWith("catalog-")||card.id.startsWith("curiosity-")) ? (cardById.has(card.id) ? [cardById.get(card.id)!] : []) : resolveOther([card]));
+}
+export const curatedNews:Card[]=[
+  {
+    "id": "news-linux-2027-preview",
+    "kind": "news",
+    "topic": "Cloud",
+    "level": "Intermediate",
+    "title": "Amazon Linux 2027 is now available in public preview",
+    "body": "AWS opened an early release of its next Linux distribution for application testing and feedback. It includes newer development tools, SELinux enforcement by default, and images for both major processor architectures.",
+    "takeaway": "Preview release: test compatibility in a lab before planning production changes.",
+    "source": "https://aws.amazon.com/about-aws/whats-new/2026/09/announcing-amazon-linux-2027/",
+    "sourceName": "AWS · What’s New",
+    "date": "2026-09-03"
+  },
+  {
+    "id": "news-bedrock-sync",
+    "kind": "news",
+    "topic": "AI workflows",
+    "level": "Intermediate",
+    "title": "Amazon Bedrock Managed Knowledge Base now supports automatic sync scheduling for data source connectors",
+    "body": "Teams can schedule source refreshes at daily, weekly, or monthly intervals. The feature reduces manual work and custom scheduling infrastructure for retrieval systems that depend on changing enterprise documents.",
+    "takeaway": "A retrieval workflow needs a freshness policy as well as a good model.",
+    "source": "https://aws.amazon.com/about-aws/whats-new/2026/09/amazon-bedrock-managed-knowledge-base-automatic-sync-scheduling-data-source-connectors/",
+    "sourceName": "AWS · What’s New",
+    "date": "2026-09-04"
+  },
+  {
+    "id": "news-cloudflare-cache",
+    "kind": "news",
+    "topic": "Networking",
+    "level": "Intermediate",
+    "title": "How we could save petabytes of cache storage with Zstandard and Pingora",
+    "body": "Cloudflare tested compressing eligible cached content to reduce disk use and transfers between data centers. Results from a limited test corpus suggest substantial savings for modest CPU overhead; broader evaluation remains planned.",
+    "takeaway": "Engineering experiment: distinguish a prototype result from a completed production rollout.",
+    "source": "https://blog.cloudflare.com/cache-transcoding/",
+    "sourceName": "Cloudflare · Engineering",
+    "date": "2026-09-01"
+  }
+];
+
 export const paths = [
  {id:"foundation",name:"IT foundations",eyebrow:"BUILD YOUR BASE",description:"Hardware, support, networking, and security fundamentals.",topics:["CompTIA","Networking"] as Topic[],steps:["CompTIA A+ concepts","Network+ fundamentals","Security fundamentals"]},
  {id:"network",name:"Network → Cloud",eyebrow:"CONNECT THE DOTS",description:"From packets and VLANs to routing and cloud infrastructure.",topics:["CCNA","Networking","Cloud"] as Topic[],steps:["IP addressing & switching","CCNA routing concepts","Cloud networking"]},

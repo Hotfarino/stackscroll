@@ -1,0 +1,121 @@
+{
+  "slug": "dns-in-motion",
+  "duration_seconds": 28,
+  "width": 720,
+  "height": 900,
+  "fps": 20,
+  "audio": false,
+  "authorship": "Original AI-authored technical animation for Stackscroll",
+  "sources_checked": "2026-09-08",
+  "sources": [
+    {
+      "title": "Microsoft Learn — Troubleshoot DNS client name resolution issues",
+      "url": "https://learn.microsoft.com/en-us/troubleshoot/windows-client/networking/troubleshoot-dns-client-resolution-issues",
+      "supports": "Resolution failure can arise from client, DNS server or intermediate network problems."
+    },
+    {
+      "title": "Microsoft Learn — nslookup",
+      "url": "https://learn.microsoft.com/en-us/windows-server/administration/windows-commands/nslookup",
+      "supports": "Single-name lookup uses the default DNS server when a server is not specified; DNS lookup and error inspection."
+    }
+  ],
+  "scenes": [
+    {
+      "start": 0,
+      "end": 4,
+      "heading": "Start with a name.",
+      "caption": "Your app needs an address for a name before it connects.",
+      "accessible_transcript": "Your app needs an address for a name before it connects.",
+      "diagram_text": [
+        "app.example.com",
+        "Which address?"
+      ]
+    },
+    {
+      "start": 4,
+      "end": 8,
+      "heading": "Ask the resolver.",
+      "caption": "The client sends the question to its configured DNS resolver.",
+      "accessible_transcript": "The client sends the question to its configured DNS resolver.",
+      "diagram_text": [
+        "Client",
+        "Configured DNS resolver"
+      ]
+    },
+    {
+      "start": 8,
+      "end": 12,
+      "heading": "A cached answer?",
+      "caption": "The resolver may already have a usable answer in its cache.",
+      "accessible_transcript": "The resolver may already have a usable answer in its cache.",
+      "diagram_text": [
+        "DNS resolver",
+        "Cached answer",
+        "Other DNS servers",
+        "OR"
+      ]
+    },
+    {
+      "start": 12,
+      "end": 16,
+      "heading": "Or do a lookup.",
+      "caption": "If needed, it asks other DNS servers to find the answer.",
+      "accessible_transcript": "If needed, it asks other DNS servers to find the answer.",
+      "diagram_text": [
+        "DNS resolver",
+        "Cached answer",
+        "Other DNS servers",
+        "OR"
+      ]
+    },
+    {
+      "start": 16,
+      "end": 20,
+      "heading": "Return an address.",
+      "caption": "If found, the resolver replies with the requested address.",
+      "accessible_transcript": "If found, the resolver replies with the requested address.",
+      "diagram_text": [
+        "DNS resolver",
+        "203.0.113.42",
+        "Example address",
+        "Client"
+      ]
+    },
+    {
+      "start": 20,
+      "end": 24,
+      "heading": "Check name resolution.",
+      "caption": "Use nslookup to query a name and inspect the DNS response.",
+      "accessible_transcript": "Use nslookup to query a name and inspect the DNS response. Example command: nslookup app.example.com.",
+      "diagram_text": [
+        "EXAMPLE COMMAND",
+        "nslookup app.example.com",
+        "Inspect the returned answer",
+        "or error before concluding."
+      ]
+    },
+    {
+      "start": 24,
+      "end": 28,
+      "heading": "A failure is a clue.",
+      "caption": "Name resolution failure is not proof the app server is broken.",
+      "accessible_transcript": "Name resolution failure is not proof the app server is broken.",
+      "diagram_text": [
+        "Client configuration",
+        "Network path",
+        "DNS service",
+        "Different causes. Investigate."
+      ]
+    }
+  ],
+  "title": "DNS, in motion",
+  "summary": "A simplified DNS flow: client, configured resolver, cached answer or lookup, address reply if found.",
+  "example_command": "nslookup app.example.com",
+  "scope_note": "Simplified flow. Local hosts files, client caches, record types, referrals and transport details are omitted. The example address is illustrative.",
+  "persistent_text": [
+    "Stackscroll",
+    "AI-authored animation",
+    "Simplified DNS flow"
+  ],
+  "transcript": "Your app needs an address for a name before it connects. The client sends the question to its configured DNS resolver. The resolver may already have a usable answer in its cache. If needed, it asks other DNS servers to find the answer. If found, the resolver replies with the requested address. Use nslookup to query a name and inspect the DNS response. Example command: nslookup app.example.com. Name resolution failure is not proof the app server is broken."
+}

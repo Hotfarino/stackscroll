@@ -1,0 +1,128 @@
+{
+  "slug": "agent-feedback-loop",
+  "duration_seconds": 32,
+  "width": 720,
+  "height": 900,
+  "fps": 20,
+  "audio": false,
+  "authorship": "Original AI-authored technical animation for Stackscroll",
+  "sources_checked": "2026-09-08",
+  "sources": [
+    {
+      "title": "Anthropic — Building effective agents",
+      "url": "https://www.anthropic.com/engineering/building-effective-agents",
+      "supports": "Tools and environmental feedback form an agent loop; coding agents use tests; stopping conditions and human checkpoints preserve control."
+    }
+  ],
+  "scenes": [
+    {
+      "start": 0,
+      "end": 4,
+      "heading": "The coding-agent loop.",
+      "caption": "A coding agent makes progress by checking what its tools did.",
+      "accessible_transcript": "A coding agent makes progress by checking what its tools did.",
+      "diagram_text": [
+        "Bounded task",
+        "Tool action",
+        "Check results",
+        "Revise",
+        "Finish"
+      ]
+    },
+    {
+      "start": 4,
+      "end": 8,
+      "heading": "Define the boundary.",
+      "caption": "Start with a bounded task and a clear success condition.",
+      "accessible_transcript": "Start with a bounded task and a clear success condition.",
+      "diagram_text": [
+        "TASK",
+        "Fix input validation",
+        "Success condition",
+        "Empty input is rejected.",
+        "Scope: one component"
+      ]
+    },
+    {
+      "start": 8,
+      "end": 12,
+      "heading": "Take a tool action.",
+      "caption": "Use a tool to inspect code, make an edit, or run a check.",
+      "accessible_transcript": "Use a tool to inspect code, make an edit, or run a check.",
+      "diagram_text": [
+        "Bounded task",
+        "Inspect · edit · run"
+      ]
+    },
+    {
+      "start": 12,
+      "end": 16,
+      "heading": "Check the evidence.",
+      "caption": "Choose tests that check the intended behavior.",
+      "accessible_transcript": "Choose tests that check the intended behavior.",
+      "diagram_text": [
+        "Intended behavior",
+        "Relevant tests",
+        "Observed results"
+      ]
+    },
+    {
+      "start": 16,
+      "end": 20,
+      "heading": "Revise with feedback.",
+      "caption": "Read failures, revise the change, and run relevant checks again.",
+      "accessible_transcript": "Read failures, revise the change, and run relevant checks again.",
+      "diagram_text": [
+        "Check failed",
+        "Revise the change",
+        "Run the check again"
+      ]
+    },
+    {
+      "start": 20,
+      "end": 24,
+      "heading": "Finish with evidence.",
+      "caption": "Finish when the task is met. Report checks and remaining limits.",
+      "accessible_transcript": "Finish when the task is met. Report checks and remaining limits.",
+      "diagram_text": [
+        "Bounded task",
+        "Tool action",
+        "Check results",
+        "Revise",
+        "Finish"
+      ]
+    },
+    {
+      "start": 24,
+      "end": 28,
+      "heading": "Pause at the boundary.",
+      "caption": "Ask for authorization before consequential production actions.",
+      "accessible_transcript": "Ask for authorization before consequential production actions.",
+      "diagram_text": [
+        "Production action",
+        "Ask for authorization"
+      ]
+    },
+    {
+      "start": 28,
+      "end": 32,
+      "heading": "Confidence ≠ evidence.",
+      "caption": "Confident text is not a passed check.",
+      "accessible_transcript": "Confident text is not a passed check.",
+      "diagram_text": [
+        "“Looks correct.”",
+        "≠",
+        "A check actually passed"
+      ]
+    }
+  ],
+  "title": "The coding-agent feedback loop",
+  "summary": "Bounded task, tool action, result check and revision or completion.",
+  "editorial_guidance": "Relevant behavior tests and explicit authorization for consequential production actions are Stackscroll recommendations informed by source principles.",
+  "persistent_text": [
+    "Stackscroll",
+    "AI-authored animation",
+    "Coding agents"
+  ],
+  "transcript": "A coding agent makes progress by checking what its tools did. Start with a bounded task and a clear success condition. Use a tool to inspect code, make an edit, or run a check. Choose tests that check the intended behavior. Read failures, revise the change, and run relevant checks again. Finish when the task is met. Report checks and remaining limits. Ask for authorization before consequential production actions. Confident text is not a passed check."
+}

@@ -11,6 +11,7 @@ export const preferencesSchema = z.object({
   showActivity: z.boolean().catch(true),
   expandSources: z.boolean().catch(false),
   reduceMotion: z.boolean().catch(false),
+  blockExternalVideos: z.boolean().catch(false),
   pinnedTopics: z.array(topicSchema).max(topics.length).transform(items => [...new Set(items)]).catch([]),
 });
 export type Preferences = z.infer<typeof preferencesSchema>;
