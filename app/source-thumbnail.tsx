@@ -6,6 +6,7 @@ import {Play,RotateCcw} from "lucide-react";
 export function SourceThumbnail({src,title,blocked=false,revision=""}:{src?:string;title:string;blocked?:boolean;revision?:string}){
  const [failed,setFailed]=useState(false),[attempt,setAttempt]=useState(0);
  useEffect(()=>{setFailed(false);setAttempt(0);},[src,revision,blocked]);
+ useEffect(()=>{if(!failed||blocked||attempt!==0)return;const timer=setTimeout(()=>{setAttempt(1);setFailed(false);},1200);return()=>clearTimeout(timer);},[failed,blocked,attempt]);
  if(blocked)return <span className="source-thumbnail-state"><Play size={24}/>Preview blocked</span>;
  if(!src||failed)return <span className="source-thumbnail-state"><Play size={24}/><span>{src?"Thumbnail unavailable":"Watch at source"}</span>{src&&<button type="button" onClick={()=>{setAttempt(n=>n+1);setFailed(false);}}><RotateCcw size={14}/>Retry image</button>}</span>;
  return <img key={`${src}-${revision}-${attempt}`} src={`${src}${src.includes("?")?"&":"?"}attempt=${attempt}`} alt={`Video thumbnail: ${title}`} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={()=>setFailed(true)}/>;

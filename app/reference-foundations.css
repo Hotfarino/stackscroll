@@ -94,3 +94,13 @@ body .repo-nav-icon { color:#E8EAED; stroke-width:2; filter:drop-shadow(0 1px 2p
 .repository-card footer { display:flex; flex-wrap:wrap; align-items:center; gap:12px; margin:16px 0; }
 .repository-card > small { font-size:12px; color:var(--muted-foreground); }
 @media(max-width:767px){body .mobile-bottom { grid-template-columns:repeat(6,minmax(0,1fr)); }body .mobile-bottom button { min-width:0; padding-inline:2px; }body .mobile-bottom button span { font-size:12px; }.repository-card { padding:16px; }.repo-identity h2 { font-size:18px; }}
+
+/* Let the source imagery lead on small screens without changing the desktop bible. */
+@media(max-width:640px){
+ body .media-preview .preview-row { display:flex; flex-direction:column; padding:0; gap:0; }
+ body .media-preview .preview-image { order:-1; width:100%; height:auto; min-height:0; aspect-ratio:16/9; flex:none; border-radius:0; border-bottom:1px solid #34434B; background:#0B0D10; overflow:hidden; }
+ body .media-preview .preview-image img { width:100%; height:100%; object-fit:contain; }
+ body .media-preview .preview-copy { width:100%; padding:16px; }
+ body .media-preview .preview-image small { right:10px; bottom:10px; }
+}
+@media(prefers-reduced-motion:no-preference){body .preview-image img { transition:filter .2s ease; }body .preview-image:hover img { filter:brightness(1.08); }}
