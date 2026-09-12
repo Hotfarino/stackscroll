@@ -46,3 +46,13 @@ test('editorial bookmarks resolve against curated records, retaining source and 
  assert.deepEqual(resolveEditorialMedia([{...original,id:'removed'}]),[]);
  for(const item of editorialCards)assert.ok(eligibleCard(item,now));
 });
+
+test('active Stack emphasis changes relevance while retaining discovery and unique cards',()=>{
+ const pool=Array.from({length:24},(_,i)=>({...card,id:`layer-${i}`,topic:i%3===0?'Agentic AI':i%3===1?'Data centers':'Cloud',sourceName:`Publisher ${i%4}`}));
+ const layers=[{topic:'Agentic AI',emphasis:3},{topic:'Data centers',emphasis:1}];
+ const result=mixedFeed(pool,[],[],[],now,layers);
+ assert.equal(result[0].topic,'Agentic AI');
+ assert.equal(result[4].topic,'Cloud');
+ assert.equal(new Set(result.map(c=>c.id)).size,pool.length);
+ assert.ok(preferenceScore({...card,topic:'Agentic AI'},[],[],[],layers)>preferenceScore({...card,topic:'Data centers'},[],[],[],layers));
+});

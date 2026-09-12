@@ -19,3 +19,11 @@ test('50 simultaneous refreshes share one fetch batch and retain surviving sourc
  await GET(new Request('https://example.com/api/news?refresh=1'));assert.equal(calls,5,'Rapid repeat refresh must reuse cache');
  }finally{globalThis.fetch=original;}
 });
+
+test('a later full source outage retains last-good dated news and reports stale status',async()=>{
+ const previousFetch=globalThis.fetch,clock=Date.now;
+ const future=clock()+610000;
+ Date.now=()=>future;globalThis.fetch=async()=>{throw new Error('Provider outage');};
+ try{const response=await GET(new Request('https://example.com/api/news?refresh=1'));const data=await response.json();assert.equal(data.status,'stale');assert.equal(data.items.length,3);assert.ok(data.sources.every(source=>source.status==='unavailable'));}
+ finally{globalThis.fetch=previousFetch;Date.now=clock;}
+});

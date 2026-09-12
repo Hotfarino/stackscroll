@@ -2,8 +2,13 @@ import { curatedNews, type Card } from "../../content";
 import { parseNews, newsSources } from "../../news";
 import { discoverHN, discoverPapers } from "../../fresh-discoveries";
 let cache: {items:Card[];status:string;sources:{name:string;status:string;count:number}[];fetchedAt:string;expires:number}|undefined;
+type NewsSnapshot=NonNullable<typeof cache>;
 let inFlight:Promise<void>|undefined;
+const sharedKey=new Request("https://stackscroll-cache.invalid/news/last-good-v1");
+function sharedCache(){return typeof caches==="undefined"?undefined:(caches as CacheStorage&{default?:Cache}).default;}
 export async function GET(request?:Request) {
+ if(!cache)try{const stored=await sharedCache()?.match(sharedKey);if(stored){const value=await stored.json() as NewsSnapshot;if(Array.isArray(value.items)&&Number.isFinite(value.expires))cache=value;}}catch{}
+
  const force=request?new URL(request.url).searchParams.get("refresh")==="1":false;
  if(cache&&cache.expires>Date.now()&&(!force||Date.now()-Date.parse(cache.fetchedAt)<60000))return Response.json(cache,{headers:{"Cache-Control":"private, no-store"}});
  if(!inFlight)inFlight=refreshSources().finally(()=>{inFlight=undefined;});
@@ -22,8 +27,10 @@ async function refreshSources(){
  }),discoverHN(),discoverPapers()]);
  const successful=results.filter((r):r is PromiseFulfilledResult<{items:Card[];partial:boolean}>=>r.status==="fulfilled");
  const merged=successful.flatMap(r=>r.value.items).sort((a,b)=>Date.parse(b.date!)-Date.parse(a.date!));
- const unique=[...new Map(merged.map(item=>[item.source,item])).values()];
+ const recentPrevious=(cache?.items||[]).filter(item=>item.date&&Date.parse(item.date)>Date.now()-7*86400000);
+ const unique=[...new Map([...recentPrevious,...merged].map(item=>[item.source,item])).values()].sort((a,b)=>Date.parse(b.date!)-Date.parse(a.date!)).slice(0,200);
  const sources=results.map((r,i)=>({name:providers[i],status:r.status==="rejected"?"unavailable":r.value.partial?"partial":"live",count:r.status==="fulfilled"?r.value.items.length:0}));
- cache={sources,items:unique.length?unique:curatedNews,status:sources.every(s=>s.status==="live")?"live":successful.length?"partial":"curated",fetchedAt:new Date().toISOString(),expires:Date.now()+(successful.length?600000:60000)};
+ cache={sources,items:unique.length?unique:curatedNews,status:sources.every(s=>s.status==="live")?"live":successful.length?"partial":recentPrevious.length?"stale":"curated",fetchedAt:new Date().toISOString(),expires:Date.now()+(successful.length?600000:60000)};
+ if(unique.length)try{await sharedCache()?.put(sharedKey,Response.json(cache,{headers:{"Cache-Control":"public, max-age=86400"}}));}catch{}
 
 }

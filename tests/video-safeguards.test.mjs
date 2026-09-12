@@ -14,11 +14,11 @@ after(()=>{globalThis.fetch=originalFetch;sqlite.close();rmSync(temp,{recursive:
 function compile(source,name) {
  const code = ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText
   .replaceAll('"cloudflare:workers"','"./env.mjs"')
-  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source|youtube-discovery|youtube-feed-server|content|catalog-records|youtube-link)"/g, '"./$1.mjs"');
+  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source|youtube-discovery|youtube-feed-server|content|catalog-records|youtube-link|thumbnail-source)"/g, '"./$1.mjs"');
  writeFileSync(join(temp,name+'.mjs'),code);
 }
 writeFileSync(join(temp,'env.mjs'),'export const env = {};');
-compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');compile('app/youtube-source.ts','youtube-source');compile('app/youtube-discovery.ts','youtube-discovery');compile('app/youtube-feed-server.ts','youtube-feed-server');compile('app/api/videos/thumbnail/route.ts','thumbnail');
+compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');compile('app/youtube-source.ts','youtube-source');compile('app/youtube-discovery.ts','youtube-discovery');compile('app/youtube-feed-server.ts','youtube-feed-server');compile('app/api/videos/thumbnail/route.ts','thumbnail');compile('app/thumbnail-source.ts','thumbnail-source');
 for(const route of ['videos','reports','moderation'])compile(`app/api/${route}/route.ts`,route);
 for(const name of ['content','catalog-records','youtube-link'])compile(`app/${name}.ts`,name);
 compile('app/api/catalog/thumbnail/route.ts','catalog-thumbnail');
@@ -268,4 +268,21 @@ test('catalog thumbnails resolve short YouTube links, reject arbitrary targets a
   sqlite.prepare("INSERT OR REPLACE INTO video_moderation VALUES (?, ?, ?)").run('youtube-'+id,1,Date.now());
   assert.equal((await route.GET(new Request('https://stackscroll.test/api/catalog/thumbnail?id='+card.id))).status,404);
  }finally{globalThis.fetch=prior;sqlite.prepare('DELETE FROM video_moderation WHERE video_id = ?').run('youtube-'+id);}
+});
+
+test('thumbnail metadata uses the configured API, coalesces requests and never follows redirects',async()=>{
+ const {thumbnailVideo}=await imp('thumbnail-source');
+ const priorKey=env.YOUTUBE_API_KEY,priorFetch=globalThis.fetch;
+ env.YOUTUBE_API_KEY='test-only-key';let calls=0;
+ const video={...videoCatalog[0],id:'thumbnail-api-unit'};
+ globalThis.fetch=async(input,init)=>{
+  calls++;assert.equal(new URL(input).hostname,'www.googleapis.com');assert.equal(init.redirect,'manual');assert.equal(init.headers['X-Goog-Api-Key'],'test-only-key');
+  return Response.json({items:[{id:video.youtubeId,status:{privacyStatus:'public',embeddable:true,madeForKids:false},snippet:{thumbnails:{high:{url:`https://i.ytimg.com/vi/${video.youtubeId}/hqdefault.jpg`,width:480,height:360}}},contentDetails:{}}]});
+ };
+ try{
+  const [a,b]=await Promise.all([thumbnailVideo(video),thumbnailVideo(video)]);
+  assert.equal(calls,1);assert.equal(a.thumbnail.originalUrl,b.thumbnail.originalUrl);
+  await thumbnailVideo(video);assert.equal(calls,1);
+  assert.equal(await thumbnailVideo({...video,rights:{...video.rights,status:'revoked'}}),null);
+ }finally{env.YOUTUBE_API_KEY=priorKey;globalThis.fetch=priorFetch;}
 });

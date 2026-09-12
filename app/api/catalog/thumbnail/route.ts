@@ -1,3 +1,4 @@
+import {thumbnailVideo} from "../../../thumbnail-source";
 import {catalogCards} from "../../../content";
 import {videoCatalog} from "../../../video-catalog";
 import {blockedVideoIds} from "../../../video-server";
@@ -16,11 +17,15 @@ export async function GET(request:Request){
   // This record is used for oEmbed thumbnail metadata only, never playback approval.
   const seed=videoCatalog.find(v=>v.youtubeId===youtubeId);
   const lookup=seed??{...videoCatalog[0],id:card.id,youtubeId,sourceUrl:`https://www.youtube.com/watch?v=${youtubeId}`};
-  const source=await loadYouTubeSource(lookup);if(!source)return missing(502);
-  const cache=edgeCache(),key=new Request(`https://stackscroll-cache.invalid/catalog-thumb/${youtubeId}?checked=${source.checkedAt}`);
+  const approved=await thumbnailVideo(lookup);if(!approved?.thumbnail?.originalUrl)return missing(502);
+  if(new URL(request.url).searchParams.get("metadata")==="1"){
+   const current=await blockedVideoIds();if(aliases.some(id=>current.has(id)))return missing();
+   return Response.json({url:approved.thumbnail.originalUrl},{headers:{"Cache-Control":"no-store"}});
+  }
+  const cache=edgeCache(),key=new Request(`https://stackscroll-cache.invalid/catalog-thumb/${youtubeId}?checked=${Math.floor(Date.parse(approved.rights.checkedAt)/900000)}`);
   let response:Response|undefined;try{response=await cache?.match(key);}catch{}
   if(!response){
-   const upstream=await fetch(source.metadata.thumbnail_url,{headers:{Accept:"image/jpeg,image/png,image/webp"},redirect:"manual",signal:AbortSignal.timeout(6000)});
+   const upstream=await fetch(approved.thumbnail.originalUrl,{headers:{Accept:"image/jpeg,image/png,image/webp"},redirect:"manual",signal:AbortSignal.timeout(6000)});
    const type=upstream.headers.get("Content-Type")?.split(";")[0]||"";
    if(!upstream.ok||!["image/jpeg","image/png","image/webp"].includes(type)){await upstream.body?.cancel();return missing(502);}
    const bytes=await readBounded(upstream,1024*1024);if(!bytes.length)return missing(502);

@@ -5,8 +5,8 @@ import type {TopicFeedback} from "./stacks";
 import {mixedFeed} from "./mixed-feed";
 import {FEED_MEMORY_KEY,emptyFeedMemory,parseFeedMemory,feedCandidates,rotatedCandidates,stableFeed} from "./feed-memory";
 
-export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[]) {
- const memory=useRef(emptyFeedMemory()),latest=useRef({inventory,feedback,path,pinned});latest.current={inventory,feedback,path,pinned};
+export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[]) {
+ const memory=useRef(emptyFeedMemory()),latest=useRef({inventory,feedback,path,pinned,layers});latest.current={inventory,feedback,path,pinned,layers};
  const writable=useRef(true),baseline=useRef(new Set<string>());
  const [ready,setReady]=useState(false),[storageOk,setStorageOk]=useState(true),[revision,setRevision]=useState(0);
  const [snapshot,setSnapshot]=useState<{ids:string[];revisited:Set<string>}>({ids:[],revisited:new Set()});
@@ -15,15 +15,24 @@ export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Top
  useEffect(()=>{try{memory.current=parseFeedMemory(localStorage.getItem(FEED_MEMORY_KEY));}catch{writable.current=false;setStorageOk(false);}setReady(true);},[]);
  useEffect(()=>{
   if(!ready)return;
-  const {inventory,feedback,path,pinned}=latest.current;
+  const {inventory,feedback,path,pinned,layers}=latest.current;
   memory.current.seed=(memory.current.seed+1)%2147483647;
   const pool=rotatedCandidates(feedCandidates(inventory,memory.current,Date.now(),revisit.current),memory.current.seed);
   const unseen=pool.filter(card=>!memory.current.seen[card.id]),seen=pool.filter(card=>!!memory.current.seen[card.id]);
-  const rank=(cards:Card[])=>mixedFeed(cards,feedback,path,pinned);
+  const rank=(cards:Card[])=>mixedFeed(cards,feedback,path,pinned,Date.now(),layers);
   const result=[...rank(unseen),...rank(seen)];
   baseline.current=new Set(inventory.map(card=>card.id));
   setSnapshot({ids:result.map(card=>card.id),revisited:new Set(seen.map(card=>card.id))});persist();
  },[ready,revision,persist]);
+ // New source arrivals append to the current session; they never move existing cards.
+ useEffect(()=>{
+  if(!ready)return;
+  const arrivals=feedCandidates(inventory,memory.current).filter(card=>!baseline.current.has(card.id));
+  if(!arrivals.length)return;
+  const ranked=mixedFeed(arrivals,feedback,path,pinned,Date.now(),layers);
+  for(const card of ranked)baseline.current.add(card.id);
+  setSnapshot(current=>{const existing=new Set(current.ids);return {...current,ids:[...current.ids,...ranked.filter(card=>!existing.has(card.id)).map(card=>card.id)]};});
+ },[inventory,ready,feedback,path,pinned,layers]);
  const rotate=useCallback((allowRecent=false)=>{revisit.current=allowRecent;setRevision(value=>value+1);},[]);
  const markSeen=useCallback((id:string)=>{memory.current.seen[id]=Date.now();persist();},[persist]);
  const dismiss=useCallback((id:string)=>{
