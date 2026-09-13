@@ -9,7 +9,7 @@ import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/
 import { StackButton } from "./brand";
 import { embedUrl, videoIdentity, type createPlaybackSession, type VideoRecord } from "./video-catalog";
 
-function YouTubeThumbnail({video,blocked}:{video:VideoRecord;blocked:boolean}) {
+function YouTubeThumbnail({video,blocked,onPlay,loading}:{video:VideoRecord;blocked:boolean;onPlay:()=>void;loading:boolean}) {
   const [failed,setFailed] = useState(false);
   const [direct,setDirect] = useState(false);
   useEffect(()=>{setFailed(false);setDirect(false);},[video.id,video.rights.checkedAt,blocked]);
@@ -17,7 +17,7 @@ function YouTubeThumbnail({video,blocked}:{video:VideoRecord;blocked:boolean}) {
   const original=video.thumbnail?.originalUrl;
   const directSafe=!!original&&new RegExp(`^https://i\\.ytimg\\.com/vi(?:_webp)?/${video.youtubeId}/[a-zA-Z0-9_-]+\\.(?:jpg|webp|png)$`).test(original);
   return <figure className="youtube-preview">
-    {!blocked&&!failed&&safe&&video.thumbnail ? <img key={`${video.rights.checkedAt}-${direct}`} src={direct&&directSafe?original:video.thumbnail.url} width={video.thumbnail.width} height={video.thumbnail.height} alt={`YouTube thumbnail: ${video.title}`} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={()=>setFailed(true)}/> : <div className="youtube-preview-fallback"><Video size={30}/><span>{blocked?"YouTube preview blocked":"YouTube preview unavailable"}</span>{!blocked&&failed&&<StackButton tone="secondary" onClick={()=>{setDirect(false);setFailed(false);}}>Retry thumbnail</StackButton>}{!blocked&&failed&&!direct&&directSafe&&<><p>The preview service couldn’t load this image. Loading it directly connects your browser to Google.</p><StackButton tone="secondary" onClick={()=>{setDirect(true);setFailed(false);}}>Load image from YouTube</StackButton></>}</div>}
+    {!blocked&&!failed&&safe&&video.thumbnail ? <button type="button" className="thumbnail-action" aria-label={`Load player for ${video.title}`} disabled={loading} aria-busy={loading} onClick={onPlay}><img key={`${video.rights.checkedAt}-${direct}`} src={direct&&directSafe?original:video.thumbnail.url} width={video.thumbnail.width} height={video.thumbnail.height} alt={`YouTube thumbnail: ${video.title}`} loading="lazy" decoding="async" referrerPolicy="no-referrer" onError={()=>setFailed(true)}/><span className="thumbnail-play" aria-hidden="true"><Play size={26}/></span></button> : <div className="youtube-preview-fallback"><Video size={30}/><span>{blocked?"YouTube preview blocked":"YouTube preview unavailable"}</span>{!blocked&&failed&&<StackButton tone="secondary" onClick={()=>{setDirect(false);setFailed(false);}}>Retry thumbnail</StackButton>}{!blocked&&failed&&!direct&&directSafe&&<><p>The preview service couldn’t load this image. Loading it directly connects your browser to Google.</p><StackButton tone="secondary" onClick={()=>{setDirect(true);setFailed(false);}}>Load image from YouTube</StackButton></>}</div>}
     <figcaption><span>YouTube</span><a href={video.creatorUrl||video.sourceUrl} target="_blank" rel="noopener noreferrer">{video.creator} <ExternalLink size={13}/></a></figcaption>
   </figure>;
 }
@@ -81,7 +81,7 @@ export function VideoCard({video,saved,blocked,active,session,onActivate,onUnloa
   }
   return <article className={`learning-card kind-video ${video.format==="short"?"creator-short":""}`} data-topic={video.topic}>
     <div className="card-top"><div className="topic-icon"><Video size={20}/></div><div className="card-author"><strong>{video.creator}</strong><span>{video.topic} <b>·</b> {video.level}</span></div><span className="kind-badge"><Play size={13}/>{video.format==="short"?"Clip":"Video"}{video.durationSeconds&&<> · {Math.floor(video.durationSeconds/60)}:{String(video.durationSeconds%60).padStart(2,"0")}</>}</span></div>
-    {!(active&&!blocked&&src)&&<YouTubeThumbnail video={video} blocked={blocked}/>}
+    {!(active&&!blocked&&src)&&<YouTubeThumbnail video={video} blocked={blocked} loading={loading} onPlay={()=>void loadPlayer()}/>}
     <div className="card-main"><h2>{video.title}</h2>{video.description&&<p className="creator-description"><span className="youtube-context-label">Stackscroll context</span>{video.description}</p>}{video.publishedAt&&<p className="creator-date">Published {new Date(video.publishedAt).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric",timeZone:"UTC"})}</p>}
       <div className="video-review-status"><span>Official embed</span><span>{video.factualReview.status==="reviewed"?"Factual review recorded":"Factual review pending"}</span></div>
       {active&&!blocked&&src ? <div className="loaded-video">
