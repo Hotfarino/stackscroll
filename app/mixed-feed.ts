@@ -4,16 +4,21 @@ export const feedRotation:Kind[]=["video","quote","story","explainer","news","le
 export function eligibleCard(card:Card,now=Date.now()):boolean {
  try{const url=new URL(card.source);return !!card.id&&!!card.title&&topics.includes(card.topic)&&feedRotation.includes(card.kind)&&url.protocol==="https:"&&!url.username&&!url.password&&!url.port&&(!card.date||(Number.isFinite(Date.parse(card.date))&&Date.parse(card.date)<=now));}catch{return false;}
 }
-export function preferenceScore(card:Card,feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[]):number{
- const setting=feedback.find(item=>item.topic===card.topic)?.preference;
- return (layers.find(layer=>layer.topic===card.topic)?.emphasis||0)*6+(path.includes(card.topic)?5:0)+(pinned.includes(card.topic)?3:0)+(setting==="more"?8:setting==="less"?-12:0)+(setting==="basic"?(card.level==="Foundation"?5:-5):setting==="advanced"?(card.level!=="Foundation"?5:-5):0);
+export function savedTopicSignals(saved:Card[]):Partial<Record<Topic,number>> {
+ const result:Partial<Record<Topic,number>>={};
+ for(const card of new Map(saved.map(card=>[card.id,card])).values())if(topics.includes(card.topic))result[card.topic]=Math.min(6,(result[card.topic]||0)+2);
+ return result;
 }
-export function feedReason(card:Card,feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[]):string{
+export function preferenceScore(card:Card,feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}):number{
  const setting=feedback.find(item=>item.topic===card.topic)?.preference;
- const reasons=[layers.some(layer=>layer.topic===card.topic)?"Matches a topic in your selected Stack.":"",setting==="more"?"You asked for more of this topic.":setting==="less"?"You asked for less of this topic; it is ranked lower, not hidden.":setting==="basic"?"Difficulty preference: more foundational material.":setting==="advanced"?"Difficulty preference: more advanced material.":"",path.includes(card.topic)?"Related to your career direction.":"",pinned.includes(card.topic)?"One of your pinned topics.":""].filter(Boolean);
+ return (setting==="less"?0:Math.max(0,Math.min(6,affinity[card.topic]||0)))+(layers.find(layer=>layer.topic===card.topic)?.emphasis||0)*6+(path.includes(card.topic)?5:0)+(pinned.includes(card.topic)?3:0)+(setting==="more"?8:setting==="less"?-12:0)+(setting==="basic"?(card.level==="Foundation"?5:-5):setting==="advanced"?(card.level!=="Foundation"?5:-5):0);
+}
+export function feedReason(card:Card,feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}):string{
+ const setting=feedback.find(item=>item.topic===card.topic)?.preference;
+ const reasons=[affinity[card.topic]&&setting!=="less"?"Related to topics in your saved cards on this device.":"",layers.some(layer=>layer.topic===card.topic)?"Matches a topic in your selected Stack.":"",setting==="more"?"You asked for more of this topic.":setting==="less"?"You asked for less of this topic; it is ranked lower, not hidden.":setting==="basic"?"Difficulty preference: more foundational material.":setting==="advanced"?"Difficulty preference: more advanced material.":"",path.includes(card.topic)?"Related to your career direction.":"",pinned.includes(card.topic)?"One of your pinned topics.":""].filter(Boolean);
  return (reasons.join(" ")||"A curated tech pick for exploring the field.")+" The mix also balances formats and publishers, with discovery slots outside your selected topics when available. Viewing time is not used.";
 }
-export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],now=Date.now(),layers:{topic:Topic;emphasis:number}[]=[]):Card[]{
+export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],now=Date.now(),layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}):Card[]{
  const ids=new Set<string>(),links=new Set<string>();
  const candidates=cards.filter(card=>{
   if(!eligibleCard(card,now)||ids.has(card.id))return false;
@@ -25,7 +30,7 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
  // Cards sharing a topic, publisher and preference score have the same dynamic
  // penalty. Rank each bucket once, then compare only its next available card.
  const dates=new Map(candidates.map(card=>[card.id,Date.parse(card.date||"")||0]));
- const interests=new Set([...layers.map(layer=>layer.topic),...path,...pinned,...feedback.filter(f=>f.preference==="more").map(f=>f.topic)]);
+ const interests=new Set([...topics.filter(topic=>(affinity[topic]||0)>0),...layers.map(layer=>layer.topic),...path,...pinned,...feedback.filter(f=>f.preference==="more").map(f=>f.topic)]);
  const less=new Set(feedback.filter(f=>f.preference==="less").map(f=>f.topic));
  type Bucket={cards:Card[];offset:number;base:number};
  const pools=new Map<Kind,Bucket[]>();
@@ -33,7 +38,7 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
  for(const kind of feedRotation){
   const groups=new Map<string,Bucket>();
   for(const card of candidates.filter(card=>card.kind===kind)){
-   const base=preferenceScore(card,feedback,path,pinned,layers),key=JSON.stringify([card.topic,card.sourceName,base]);
+   const base=preferenceScore(card,feedback,path,pinned,layers,affinity),key=JSON.stringify([card.topic,card.sourceName,base]);
    if(!groups.has(key))groups.set(key,{cards:[],offset:0,base});groups.get(key)!.cards.push(card);
   }
   if(["news","video","podcast"].includes(kind))for(const group of groups.values())group.cards.sort((a,b)=>dates.get(b.id)!-dates.get(a.id)!);

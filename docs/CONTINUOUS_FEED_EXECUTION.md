@@ -26,3 +26,12 @@ Customer sign-in expansion, invitations and cohort rollout come last. Preserve c
 - Transient refresh failure retains recent content and reports its freshness accurately.
 - Thumbnail API requests do not expose keys, follow redirects or bypass moderation; identical requests coalesce.
 - Production delivery is a separate gate from passing mocked tests/builds.
+
+
+## September 20: source expansion and explicit-interest learning
+
+Added Kubernetes Blog (Atom) and Microsoft Engineering (RSS) to GitHub Changelog, AWS, Hacker News and Hugging Face Papers. Each publisher contributes up to 24 dated headlines within seven days; aggregate news remains capped at 200. Empty valid feeds are healthy even without recent posts. Cloudflare RSS returned HTTP 403 during validation and was not enabled. Full articles and publisher media are not copied.
+
+Saved-card topics now add 2 points per unique bookmark, capped at 6 per topic. Explicit less disables that boost; more adds 8; Stack emphasis adds 6 per emphasis unit. Existing publisher/topic diversity penalties, format rotation, hidden-card exclusion and outside-interest slots remain. Saved influence applies at refresh without moving current cards, can be disabled in Tune my feed, and is disabled by Reset interests. It is derived from existing local bookmarks, not a new analytics stream. Video completion remains distinct from learning/recall.
+
+This is an explainable heuristic recommender, not trained collaborative filtering or a replication of TikTok. Background durable ingestion, wider approved creator inventory, source health monitoring and evaluation with real adult testers remain next steps. Refresh checks do not guarantee new publisher content.

@@ -10,7 +10,7 @@ for(const name of ['catalog-records','content','mixed-feed','editorial-content',
  const code=ts.transpileModule(readFileSync(`app/${name}.ts`,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText.replaceAll('"./content"','"./content.mjs"').replaceAll('"./catalog-records"','"./catalog-records.mjs"');writeFileSync(join(temp,name+'.mjs'),code);
 }
 const load=name=>import(pathToFileURL(join(temp,name+'.mjs')));
-const {mixedFeed,eligibleCard,preferenceScore,feedReason}=await load('mixed-feed');
+const {mixedFeed,eligibleCard,preferenceScore,feedReason,savedTopicSignals}=await load('mixed-feed');
 const {editorialCards,resolveEditorialMedia}=await load('editorial-content');
 const {stateSchema,initialState}=await load('learning');
 const now=Date.parse('2026-09-08T12:00:00Z');
@@ -55,4 +55,17 @@ test('active Stack emphasis changes relevance while retaining discovery and uniq
  assert.equal(result[4].topic,'Cloud');
  assert.equal(new Set(result.map(c=>c.id)).size,pool.length);
  assert.ok(preferenceScore({...card,topic:'Agentic AI'},[],[],[],layers)>preferenceScore({...card,topic:'Data centers'},[],[],[],layers));
+});
+
+test('saved interests are bounded, reversible and subordinate to explicit less feedback',()=>{
+ const saved=Array.from({length:100},(_,i)=>({...card,id:`saved-${i}`}));
+ const affinity=savedTopicSignals(saved);
+ assert.equal(affinity.Cloud,6);
+ assert.equal(savedTopicSignals([card,card]).Cloud,2);
+ assert.deepEqual(savedTopicSignals([]),{});
+ const pool=[{...card,id:'network',topic:'Networking'},card];
+ assert.equal(mixedFeed(pool,[],[],[],now,[],affinity)[0].id,'a');
+ assert.equal(mixedFeed(pool,[{topic:'Cloud',preference:'less'}],[],[],now,[],affinity)[0].id,'network');
+ assert.match(feedReason(card,[],[],[],[],affinity),/saved cards/);
+ assert.equal(preferenceScore(card,[],[],[],[{topic:'Cloud',emphasis:2}]),12);
 });

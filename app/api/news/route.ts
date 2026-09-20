@@ -23,7 +23,7 @@ async function refreshSources(){
   const reader=response.body?.getReader();if(!reader)throw new Error("Empty feed");
   const decoder=new TextDecoder();let xml="",bytes=0;
   try{while(true){const {done,value}=await reader.read();if(done)break;bytes+=value.byteLength;if(bytes>2000000){await reader.cancel();throw new Error("Feed too large");}xml+=decoder.decode(value,{stream:true});}xml+=decoder.decode();}finally{reader.releaseLock();}
-  const parsed=parseNews(xml,source);if(!parsed.length)throw new Error("No dated headlines");return {items:parsed,partial:false};
+  const parsed=parseNews(xml,source);if(!parsed.length&&!/<(?:rss|feed)\b/i.test(xml))throw new Error("Invalid publisher feed");return {items:parsed,partial:false};
  }),discoverHN(),discoverPapers()]);
  const successful=results.filter((r):r is PromiseFulfilledResult<{items:Card[];partial:boolean}>=>r.status==="fulfilled");
  const merged=successful.flatMap(r=>r.value.items).sort((a,b)=>Date.parse(b.date!)-Date.parse(a.date!));

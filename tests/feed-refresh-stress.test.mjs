@@ -15,8 +15,8 @@ test('50 simultaneous refreshes share one fetch batch and retain surviving sourc
   if(url.includes('/item/'))return Response.json({id:123,type:'story',title:'Show HN: Python debugger',time:Math.floor(Date.parse(date)/1000)});
   return Response.json([{paper:{id:'2609.01234',title:'Agent evaluation',publishedAt:date}}]);
  };
- try{const results=await Promise.all(Array.from({length:50},async()=>{const r=await GET(new Request('https://example.com/api/news?refresh=1'));return r.json();}));assert.equal(calls,5);for(const r of results){assert.equal(r.status,'partial');assert.equal(r.items.length,3);assert.equal(r.sources.find(s=>s.name==="AWS What's New").status,'unavailable');}
- await GET(new Request('https://example.com/api/news?refresh=1'));assert.equal(calls,5,'Rapid repeat refresh must reuse cache');
+ try{const results=await Promise.all(Array.from({length:50},async()=>{const r=await GET(new Request('https://example.com/api/news?refresh=1'));return r.json();}));assert.equal(calls,7);for(const r of results){assert.equal(r.status,'partial');assert.equal(r.items.length,3);assert.equal(r.sources.find(s=>s.name==="AWS What's New").status,'unavailable');}
+ await GET(new Request('https://example.com/api/news?refresh=1'));assert.equal(calls,7,'Rapid repeat refresh must reuse cache');
  }finally{globalThis.fetch=original;}
 });
 
