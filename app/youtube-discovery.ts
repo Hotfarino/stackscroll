@@ -7,6 +7,12 @@ export const discoveryChannels = [
  {handle:"DionTraining",topic:"CompTIA"},
  {handle:"Fireship",topic:"Development"},
  {handle:"statquest",topic:"Machine learning"},
+ {handle:"NetworkChuck",topic:"Networking"},
+ {handle:"davidbombal",topic:"CCNA"},
+ {handle:"JeffGeerling",topic:"Data centers"},
+ {handle:"TechWorldwithNana",topic:"Cloud"},
+ {handle:"Computerphile",topic:"Development"},
+ {handle:"freecodecamp",topic:"Languages"},
 ] as const;
 const TTL=15*60*1000, MIN_REFRESH=60*1000;
 const thumb=z.object({url:z.string(),width:z.number().optional(),height:z.number().optional()});
@@ -45,25 +51,28 @@ export function createDiscovery({key,fetcher=fetch,clock=Date.now,cache=edgeCach
   if(latest?.checkedAt&&clock()-latest.checkedAt<age)return latest;
   if(clock()<retryAt)return {items:[],status:"unavailable",checkedAt:null,message:"YouTube is temporarily unavailable. Retry in a minute."};
   pending=(async()=>{
-   const cacheKey=new Request("https://stackscroll-cache.invalid/youtube/discovery-v1");
+   const cacheKey=new Request("https://stackscroll-cache.invalid/youtube/discovery-v2");
    try {
     try {const stored=await cache?.match(cacheKey);if(stored){const result=await stored.json() as DiscoveryResult;if(result.checkedAt&&result.checkedAt<=clock()&&clock()-result.checkedAt<age&&Array.isArray(result.items)){latest=result;return result;}}}catch{}
     const channelResults=await Promise.allSettled(discoveryChannels.map(async source=>{
      const result=await api("channels",{part:"contentDetails",forHandle:source.handle});
      const channel=result.items?.[0];const uploads=channel?.contentDetails?.relatedPlaylists?.uploads;
      if(!/^UC[\w-]{22}$/.test(channel?.id||"")||typeof uploads!=="string")throw new Error("Channel unavailable");
-     const list=await api("playlistItems",{part:"contentDetails",playlistId:uploads,maxResults:"12"});
+     const list=await api("playlistItems",{part:"contentDetails",playlistId:uploads,maxResults:"20"});
      if(!Array.isArray(list.items))throw new Error("Uploads unavailable");
      return {id:channel.id as string,topic:source.topic,ids:list.items.map((item:{contentDetails?:{videoId?:string}})=>item.contentDetails?.videoId).filter((id:unknown):id is string=>typeof id==="string"&&/^[\w-]{11}$/.test(id))};
     }));
     const good=channelResults.flatMap(result=>result.status==="fulfilled"?[result.value]:[]);
     const channels=new Map<string,VideoRecord["topic"]>(good.map(value=>[value.id,value.topic]));
-    const ids=[...new Set([...good.flatMap(value=>value.ids),...videoCatalog.map(video=>video.youtubeId)])].slice(0,50);
-    const result=await api("videos",{part:"snippet,status,contentDetails",id:ids.join(",")});
-    if(!Array.isArray(result.items))throw new Error("YouTube returned invalid video data.");
+    const ids=[...new Set([...videoCatalog.map(video=>video.youtubeId),...good.flatMap(value=>value.ids)])];
+    const batches=[];for(let start=0;start<ids.length;start+=50)batches.push(ids.slice(start,start+50));
+    const checked=await Promise.allSettled(batches.map(async batch=>{const result=await api("videos",{part:"snippet,status,contentDetails",id:batch.join(",")});if(!Array.isArray(result.items))throw new Error("YouTube returned invalid video data.");return result.items;}));
+    if(checked.every(result=>result.status==="rejected"))throw checked[0].reason;
+    const result={items:checked.flatMap(result=>result.status==="fulfilled"?result.value:[])};
     const checkedAt=clock();
     const items=result.items.flatMap((item:unknown)=>{const video=parseDiscoveredVideo(item,channels,checkedAt);return video?[video]:[];}).sort((a:VideoRecord,b:VideoRecord)=>Date.parse(b.publishedAt!)-Date.parse(a.publishedAt!));
-    latest={items,status:good.length===discoveryChannels.length?"live":good.length?"partial":"unavailable",checkedAt,message:good.length===discoveryChannels.length?"Latest uploads checked across three tech channels.":"Some YouTube channels could not be checked."};
+    const complete=good.length===discoveryChannels.length&&checked.every(result=>result.status==="fulfilled");
+    latest={items,status:complete?"live":good.length?"partial":"unavailable",checkedAt,message:complete?`Latest uploads checked across ${discoveryChannels.length} tech channels.`:"Some YouTube channels or video batches could not be checked."};
     if(latest.status!=="live")retryAt=clock()+MIN_REFRESH;
     try{await cache?.put(cacheKey,Response.json(latest,{headers:{"Cache-Control":`public, max-age=${(latest.status==="live"?TTL:MIN_REFRESH)/1000}`}}));}catch{}
     return latest;

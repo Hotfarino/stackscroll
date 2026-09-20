@@ -231,6 +231,19 @@ test('discovery imports new uploads, refreshes after the quota guard and filters
  assert.equal(parseDiscoveredVideo(make('aaaaaaaaaaa'),new Map(),clock),null);
 });
 
+test('expanded discovery checks every channel in batches of at most 50 videos',async()=>{
+ const {createDiscovery,discoveryChannels}=await imp('youtube-discovery');
+ const requested=[];const channel='UC'+'a'.repeat(22);
+ const fetcher=async input=>{const url=new URL(input);
+  if(url.pathname.endsWith('/channels'))return Response.json({items:[{id:channel,contentDetails:{relatedPlaylists:{uploads:url.searchParams.get('forHandle')}}}]});
+  if(url.pathname.endsWith('/playlistItems')){const index=discoveryChannels.findIndex(c=>c.handle===url.searchParams.get('playlistId'));return Response.json({items:Array.from({length:20},(_,i)=>({contentDetails:{videoId:String(index*20+i).padStart(11,'0')}}))});}
+  const ids=url.searchParams.get('id').split(',');assert.ok(ids.length<=50);requested.push(...ids);return Response.json({items:ids.filter(id=>/^\d{11}$/.test(id)).map(id=>({id,snippet:{title:'Creator upload',channelId:channel,channelTitle:'Creator',publishedAt:new Date(now-1000).toISOString(),thumbnails:{high:{url:`https://i.ytimg.com/vi/${id}/hqdefault.jpg`}}},status:{privacyStatus:'public',embeddable:true,madeForKids:false},contentDetails:{duration:'PT2M'}}))});
+ };
+ const result=await createDiscovery({key:'test-key',fetcher,clock:()=>now,cache:undefined})();
+ assert.equal(result.status,'live');assert.equal(result.items.length,discoveryChannels.length*20);
+ assert.ok(requested.includes(String(discoveryChannels.length*20-1).padStart(11,'0')));
+});
+
 test('API access failures return an explicit unavailable status without exposing credentials',async()=>{
  const {createDiscovery}=await imp('youtube-discovery');
  const result=await createDiscovery({key:'test-secret-value',fetcher:async()=>new Response(null,{status:403})})();
@@ -238,12 +251,12 @@ test('API access failures return an explicit unavailable status without exposing
 });
 
 test('API redirects fail closed without forwarding the key to another host',async()=>{
- const {createDiscovery}=await imp('youtube-discovery');let calls=0;
+ const {createDiscovery,discoveryChannels}=await imp('youtube-discovery');let calls=0;
  const result=await createDiscovery({key:'test-secret-value',fetcher:async(input,options)=>{
   calls++;assert.equal(new URL(input).hostname,'www.googleapis.com');assert.equal(options.redirect,'manual');
   return new Response(null,{status:302,headers:{Location:'https://attacker.example/collect'}});
  }})();
- assert.equal(result.status,'unavailable');assert.match(result.message,/302/);assert.equal(calls,4);
+ assert.equal(result.status,'unavailable');assert.match(result.message,/302/);assert.equal(calls,discoveryChannels.length+1);
  assert.doesNotMatch(JSON.stringify(result),/test-secret-value|attacker/);
 });
 

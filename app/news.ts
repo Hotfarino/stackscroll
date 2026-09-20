@@ -18,8 +18,23 @@ export const newsSources = [
  {url:"https://openai.com/news/rss.xml",name:"OpenAI News",host:"openai.com",topic:"Agentic AI" as Topic},
  {url:"https://azure.microsoft.com/en-us/blog/feed/",name:"Azure Blog",host:"azure.microsoft.com",topic:"Cloud" as Topic},
  {url:"https://www.redhat.com/en/rss/blog/channel/red-hat-enterprise-linux",name:"Red Hat Enterprise Linux",host:"www.redhat.com",topic:"Cloud" as Topic},
+ {url:"https://aws.amazon.com/blogs/architecture/feed/",name:"AWS Architecture",host:"aws.amazon.com",topic:"Cloud" as Topic},
+ {url:"https://aws.amazon.com/blogs/security/feed/",name:"AWS Security",host:"aws.amazon.com",topic:"Networking" as Topic},
+ {url:"https://aws.amazon.com/blogs/machine-learning/feed/",name:"AWS Machine Learning",host:"aws.amazon.com",topic:"Machine learning" as Topic},
+ {url:"https://aws.amazon.com/blogs/compute/feed/",name:"AWS Compute",host:"aws.amazon.com",topic:"Cloud" as Topic},
+ {url:"https://aws.amazon.com/blogs/containers/feed/",name:"AWS Containers",host:"aws.amazon.com",topic:"Cloud" as Topic},
+ {url:"https://aws.amazon.com/blogs/networking-and-content-delivery/feed/",name:"AWS Networking",host:"aws.amazon.com",topic:"Networking" as Topic},
+ {url:"https://aws.amazon.com/blogs/storage/feed/",name:"AWS Storage",host:"aws.amazon.com",topic:"Data centers" as Topic},
+ {url:"https://devblogs.microsoft.com/typescript/feed/",name:"TypeScript",host:"devblogs.microsoft.com",topic:"Languages" as Topic},
+ {url:"https://devblogs.microsoft.com/dotnet/feed/",name:".NET Blog",host:"devblogs.microsoft.com",topic:"Development" as Topic},
+ {url:"https://devblogs.microsoft.com/python/feed/",name:"Python at Microsoft",host:"devblogs.microsoft.com",topic:"Languages" as Topic},
+ {url:"https://huggingface.co/blog/feed.xml",name:"Hugging Face Blog",host:"huggingface.co",topic:"Machine learning" as Topic},
+ {url:"https://blog.jupyter.org/feed",name:"Jupyter Blog",host:"blog.jupyter.org",topic:"Machine learning" as Topic},
+ {url:"https://blogs.cisco.com/networking/feed",name:"Cisco Networking",host:"blogs.cisco.com",topic:"CCNA" as Topic},
+ {url:"https://github.blog/engineering/feed/",name:"GitHub Engineering",host:"github.blog",topic:"Development" as Topic},
+ {url:"https://github.blog/security/feed/",name:"GitHub Security",host:"github.blog",topic:"Development" as Topic},
 ];
-export const NEWS_PER_SOURCE=40;
+export const NEWS_PER_SOURCE=80;
 function clean(value:string) {
  return value.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,"$1").replace(/<[^>]*>/g,"").replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi,(_,entity:string)=>{
   const named:Record<string,string>={amp:"&",lt:"<",gt:">",quot:'"',apos:"'",nbsp:" "};
@@ -36,8 +51,11 @@ export function parseNews(xml:string,source:typeof newsSources[number],now=Date.
   try {
    const url=new URL(link);const time=Date.parse(date);
    if(url.protocol!=="https:"||url.hostname!==source.host||url.username||url.password||url.port||!title||!Number.isFinite(time)||time>now||time<now-7*86400000)continue;
-   const ai=/copilot|agent|\bai\b|model|machine learning|bedrock/i.test(title);
-   items.push({id:`rss-${url.href}`,kind:"news",topic:ai?"Agentic AI":source.topic,level:"Intermediate",title:title.slice(0,240),body:`Publisher headline from ${source.name}. Open the original for context, evidence, and implementation details. Publisher claims have not been independently verified.`,source:url.href,sourceName:source.name,date:new Date(time).toISOString()});
+   const topic:Topic=/\bagents?\b|copilot|agentic/i.test(title)?"Agentic AI":/\brag\b|workflow|bedrock/i.test(title)?"AI workflows":/machine learning|\bllm\b|neural|model training/i.test(title)?"Machine learning":source.topic;
+   const description=(field(item,"description")||field(item,"summary")).replace(/<[^>]*>/g,"").trim();
+   const words=description.split(/\s+/).filter(Boolean);
+   const preview=words.slice(0,24).join(" ").slice(0,320);
+   items.push({id:`rss-${url.href}`,kind:"news",topic,level:"Intermediate",title:title.slice(0,240),body:preview?`Publisher preview: ${preview}${words.length>24?"…":""}`:`Latest from ${source.name}. Read the original for details.`,source:url.href,sourceName:source.name,date:new Date(time).toISOString()});
   }catch{continue;}
   if(items.length>=NEWS_PER_SOURCE)break;
  }
