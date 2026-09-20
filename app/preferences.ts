@@ -10,6 +10,7 @@ export const preferencesSchema = z.object({
   showRail: z.boolean().catch(true),
   showActivity: z.boolean().catch(true),
   expandSources: z.boolean().catch(false),
+  personalizeFromSaves: z.boolean().catch(true),
   reduceMotion: z.boolean().catch(false),
   blockExternalVideos: z.boolean().catch(false),
   pinnedTopics: z.array(topicSchema).max(topics.length).transform(items => [...new Set(items)]).catch([]),

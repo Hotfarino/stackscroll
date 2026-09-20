@@ -60,3 +60,11 @@ test('publisher RSS is decoded, dated, and restricted to its source host',()=>{
  assert.equal(items[0].date,'2026-09-07T08:00:00.000Z');
  assert.deepEqual(parseNews('<rss/>',newsSources[0]),[]);
 });
+
+test('Atom news accepts alternate publisher links and rejects stale or foreign entries',()=>{
+ const now=Date.parse('2026-09-07T12:00:00Z');
+ const source=newsSources.find(s=>s.name==='Kubernetes Blog');
+ const entry=(link,date)=>`<entry><title>Cluster networking</title><link rel="self" href="https://kubernetes.io/feed.xml"/><link rel="alternate" href="${link}"/><published>${date}</published></entry>`;
+ const items=parseNews(`<feed>${entry('https://kubernetes.io/blog/networking/','2026-09-06')}${entry('https://evil.example/x','2026-09-06')}${entry('https://kubernetes.io/blog/old/','2025-01-01')}</feed>`,source,now);
+ assert.equal(items.length,1);assert.equal(items[0].source,'https://kubernetes.io/blog/networking/');
+});

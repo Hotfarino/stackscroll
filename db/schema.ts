@@ -71,3 +71,11 @@ export const examAttempts = sqliteTable("exam_attempts", {
   updatedAt: integer("updated_at").notNull(),
   submittedAt: integer("submitted_at"),
 }, table => [index("exam_attempts_user_updated").on(table.userId, table.updatedAt)]);
+
+export const feedIngestion = sqliteTable("feed_ingestion", {
+ id: text("id").primaryKey(),
+ payload: text("payload"),
+ updatedAt: integer("updated_at").notNull().default(0),
+ leaseUntil: integer("lease_until").notNull().default(0),
+ leaseToken: text("lease_token"),
+});

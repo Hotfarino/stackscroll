@@ -205,3 +205,27 @@ test("compact feed previews preserve source links and respect video thumbnail pr
  assert.doesNotMatch(render(card,{video:{...v,thumbnail:{...v.thumbnail,url:'https://untrusted.example/image.jpg'}}}),/<img|<iframe/);
  assert.doesNotMatch(render(card),/<img|<iframe/);
 });
+
+test("catalog video previews request real thumbnails and suppress them when blocked", async () => {
+ const {FeedPreview}=await vite.ssrLoadModule('/app/feed-preview.tsx');
+ const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
+ const card=catalogCards.find(card=>card.kind==='video'&&card.source.startsWith('https://youtu.be/'));
+ const props={card,blocked:false,saved:false,onSave(){},onToggle(){},children:null};
+ const html=renderToStaticMarkup(React.createElement(FeedPreview,props));
+ assert.match(html,/\/api\/catalog\/thumbnail\?id=/);
+ assert.doesNotMatch(html,/src="https:\/\//);
+ const blocked=renderToStaticMarkup(React.createElement(FeedPreview,{...props,blocked:true}));
+ assert.doesNotMatch(blocked,/<img/);assert.match(blocked,/Preview blocked/);
+});
+
+test("repository browser exposes curated projects, search results and source links", async () => {
+ const {RepositoryBrowser}=await vite.ssrLoadModule('/app/repository-browser.tsx');
+ const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
+ const props={cards:catalogCards,query:'',saved:[],onSave(){},onBuild(){}};
+ const html=renderToStaticMarkup(React.createElement(RepositoryBrowser,props));
+ assert.match(html,/GitHub Repos/);assert.match(html,/39 repositories/);assert.match(html,/https:\/\/github.com\/netbox-community\/netbox/);
+ const filtered=renderToStaticMarkup(React.createElement(RepositoryBrowser,{...props,query:'netbox community'}));
+ assert.match(filtered,/1 repositories/);assert.doesNotMatch(filtered,/href="https:\/\/github.com\/ansible/);
+ const empty=renderToStaticMarkup(React.createElement(RepositoryBrowser,{...props,query:'no-such-repo-xyz'}));
+ assert.match(empty,/No repositories match/);
+});

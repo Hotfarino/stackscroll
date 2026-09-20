@@ -1,0 +1,43 @@
+# Stack-driven continuous feed: execution baseline
+
+Customer sign-in expansion, invitations and cohort rollout come last. Preserve current private access and the locked graphite/cyan UI.
+
+## Implemented in this pass
+
+- Discover selects the latest activated personal Stack by default; the user can choose another active Stack or All tech. Saved drafts do not affect ranking.
+- Layer emphasis adds relevance weight; excluded IDs stay excluded. Existing format/publisher diversity and occasional outside-interest discovery remain. The UI names the driving Stack and Why this explains topic matches.
+- New eligible source arrivals append to the active session without reordering existing cards. More cards reveal through the existing scroll sentinel. Provider checks run every two minutes while the page is visible; upstream cache windows still apply. Changing Stack or explicitly refreshing starts a new mix.
+- Existing named playlists and frozen Stack editions remain finite. If no eligible unseen material remains, the UI tells the truth and offers explicitly labeled revisits rather than inventing new content.
+- Temporary video request failure preserves the loaded inventory; playback still revalidates eligibility and moderation. Recent news can survive provider failure/cold starts through a shared edge cache, with stale status and unchanged publication dates. Edge cache is best effort, not a database or guaranteed durable queue.
+- Thumbnails use configured YouTube API metadata first, then validated oEmbed fallback. Lookups coalesce and cache; explicit revoked/unavailable items fail closed. Metadata-failure backoff and automatic UI retry now align. A proxy failure can expose a current moderation-checked direct image URL only after server approval; browser-to-Google loading requires an explicit click.
+
+## Next infrastructure work, before external rollout
+
+1. Verify live thumbnail results from the actual application on the owner's devices. Current local upstream timeouts prevent claiming a production success rate. Track metadata/DB/image failures separately; preserve privacy blocking and takedowns.
+2. Add scheduled server ingestion and a database-backed inventory with source cursors, versioned records, error/backoff state, last-good timestamps and a health view. The current active-session polling is not an always-running ingestion service.
+3. Expand vetted sources for agentic coding, AI systems, data centers and networking. Increase reviewed, relevant content; avoid generating filler to simulate novelty.
+4. Measure feed relevance, duplicate exposure, image success, response time and interruption behavior. Keep consumption separate from quiz performance and later recall. Do not add behavioral analytics silently.
+5. Review pilot content and operational readiness; only then implement customer access and cohort rollout.
+
+## Verification gates
+
+- Activated Stack emphasis changes early rank; outside-interest exploration survives and IDs stay unique.
+- Background arrivals do not reset the viewport or shuffle existing session IDs.
+- Transient refresh failure retains recent content and reports its freshness accurately.
+- Thumbnail API requests do not expose keys, follow redirects or bypass moderation; identical requests coalesce.
+- Production delivery is a separate gate from passing mocked tests/builds.
+
+
+## September 20: source expansion and explicit-interest learning
+
+Added Kubernetes Blog (Atom) and Microsoft Engineering (RSS) to GitHub Changelog, AWS, Hacker News and Hugging Face Papers. Each publisher contributes up to 24 dated headlines within seven days; aggregate news remains capped at 200. Empty valid feeds are healthy even without recent posts. Cloudflare RSS returned HTTP 403 during validation and was not enabled. Full articles and publisher media are not copied.
+
+Saved-card topics now add 2 points per unique bookmark, capped at 6 per topic. Explicit less disables that boost; more adds 8; Stack emphasis adds 6 per emphasis unit. Existing publisher/topic diversity penalties, format rotation, hidden-card exclusion and outside-interest slots remain. Saved influence applies at refresh without moving current cards, can be disabled in Tune my feed, and is disabled by Reset interests. It is derived from existing local bookmarks, not a new analytics stream. Video completion remains distinct from learning/recall.
+
+This is an explainable heuristic recommender, not trained collaborative filtering or a replication of TikTok. Background durable ingestion, wider approved creator inventory, source health monitoring and evaluation with real adult testers remain next steps. Refresh checks do not guarantee new publisher content.
+
+## Durable background news ingestion
+
+`/api/feed-ingestion` exposes moderator-only POST collection and GET health. Same-origin JSON checks and platform-authenticated identity are required. One D1 row stores the bounded 200-card snapshot, per-source status and last collection time. A two-minute token-owned lease excludes overlapping jobs across worker instances; a ten-minute interval limits repeated triggers. Source failure retains recent last-good cards. News requests read the database and retain a request-time recovery path when no job has run in an hour. No full article bodies or third-party media are stored.
+
+The hosting interface does not expose infrastructure cron configuration. The selected scheduler is an hourly ChatGPT automation invoking the protected endpoint using fresh owner Sites authorization, without persisting secrets. Its enablement and first live request must be verified separately; an endpoint alone is not a running schedule. YouTube continues its existing independent checks and is not part of this durable news snapshot. A native infrastructure scheduler remains the migration target for tighter timing or larger ingestion workloads.

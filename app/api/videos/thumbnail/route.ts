@@ -1,6 +1,7 @@
+import {thumbnailVideo} from "../../../thumbnail-source";
 import { canEmbed, videoCatalog } from "../../../video-catalog";
 import { blockedVideoIds } from "../../../video-server";
-import { edgeCache, readBounded, YOUTUBE_REFRESH_MS } from "../../../youtube-source";
+import { edgeCache, loadYouTubeSource, withYouTubeSource, readBounded, YOUTUBE_REFRESH_MS } from "../../../youtube-source";
 import {currentYouTubeVideo} from "../../../youtube-feed-server";
 
 const missing = (status = 404) => new Response(null, {status,headers:{"Cache-Control":"no-store","X-Content-Type-Options":"nosniff"}});
@@ -9,11 +10,16 @@ export async function GET(request: Request) {
   if (!id || (!videoCatalog.some(item=>item.id===id)&&!/^youtube-[\w-]{11}$/.test(id))) return missing();
   try {
     if ((await blockedVideoIds()).has(id)) return missing();
-    const video = await currentYouTubeVideo(id);
+    const seed=videoCatalog.find(video=>video.id===id);
+    const video = seed?await thumbnailVideo(seed):await currentYouTubeVideo(id);
     if (!video || !canEmbed(video)||!video.thumbnail?.originalUrl) return missing();
+    if(new URL(request.url).searchParams.get("metadata")==="1"){
+      if((await blockedVideoIds()).has(id))return missing();
+      return Response.json({url:video.thumbnail.originalUrl},{headers:{"Cache-Control":"no-store"}});
+    }
     // The only upstream URL comes from validated metadata for a curated ID.
     // Never forward user headers, cookies, IP addresses or query strings.
-    const key = new Request(`https://stackscroll-cache.invalid/youtube/thumbnail-v1/${video.youtubeId}?checked=${encodeURIComponent(video.rights.checkedAt)}`);
+    const key = new Request(`https://stackscroll-cache.invalid/youtube/thumbnail-v1/${video.youtubeId}?checked=${Math.floor(Date.parse(video.rights.checkedAt)/900000)}`);
     const cache = edgeCache();
     let cached: Response | undefined;
     try { cached = await cache?.match(key); } catch { /* Fetch without cache. */ }

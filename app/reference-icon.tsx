@@ -19,6 +19,6 @@ export function ReferenceIcon({name,size=30,className=""}:{name:ReferenceIconNam
  <defs>{shape&&<clipPath id={`${key}-clip`}><path d={shape}/></clipPath>}<filter id={`${key}-shine`} filterUnits="userSpaceOnUse" x={-2} y={-2} width={w+4} height={h+4} colorInterpolationFilters="sRGB"><feComponentTransfer><feFuncR type="linear" slope="1.24" intercept=".035"/><feFuncG type="linear" slope="1.24" intercept=".035"/><feFuncB type="linear" slope="1.24" intercept=".035"/></feComponentTransfer></filter><filter id={`${key}-logo`} filterUnits="userSpaceOnUse" x={-2} y={-2} width={w+4} height={h+4} colorInterpolationFilters="sRGB"><feColorMatrix type="matrix" values="1.15 0 0 0 0 0 1.15 0 0 0 0 0 1.15 0 0 .65 1.15 .2 0 -.22"/></filter></defs>
  {shape&&<path d={shape} fill="#142128" stroke="#F6FCFF" strokeWidth="2.6" strokeLinejoin="round"/>}
  <g clipPath={shape?`url(#${key}-clip)`:undefined}><image href="/brand/ui-reference-artwork.png" x={-x} y={-y} width="1448" height="1086" filter={`url(#${key}-${shape?"shine":"logo"})`}/></g>
- {shape&&<path d={shape} fill="none" stroke="#F3FAFF" strokeOpacity=".92" strokeWidth="1.5" strokeLinejoin="round"/>}
+ {shape&&<path d={shape} fill="none" stroke="#F3FAFF" strokeOpacity=".92" strokeWidth="1.9" strokeLinejoin="round"/>}
  </svg>;
 }
