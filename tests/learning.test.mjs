@@ -54,6 +54,8 @@ test('saved state rejects corrupt data and unsafe links',()=>{
  assert.equal(localDay(new Date(2026,8,7,23,59)),'2026-09-07');
 });
 test('publisher RSS is decoded, dated, and restricted to its source host',()=>{
+ assert.ok(newsSources.length>=18);assert.equal(new Set(newsSources.map(source=>source.name)).size,newsSources.length);
+ assert.ok(newsSources.every(source=>new URL(source.url).protocol==='https:'&&new URL(source.url).hostname===source.host));
  const xml='<rss><channel><item><title><![CDATA[Agents &amp; code]]></title><link>https://github.blog/changelog/example/</link><pubDate>Mon, 07 Sep 2026 08:00:00 GMT</pubDate></item><item><title>Unsafe</title><link>javascript:alert(1)</link><pubDate>Mon, 07 Sep 2026 08:00:00 GMT</pubDate></item><item><title>Foreign host</title><link>https://attacker.example/</link><pubDate>Mon, 07 Sep 2026 08:00:00 GMT</pubDate></item></channel></rss>';
  const items=parseNews(xml,newsSources[0],Date.parse('2026-09-07T12:00:00Z'));
  assert.equal(items.length,1);assert.equal(items[0].title,'Agents & code');assert.equal(items[0].topic,'Agentic AI');

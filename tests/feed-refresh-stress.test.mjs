@@ -19,7 +19,7 @@ test('50 background jobs share one durable lease and preserve partial successes'
   if(url.includes('/item/'))return Response.json({id:123,type:'story',title:'Show HN: Python debugger',time:Math.floor(Date.parse(date)/1000)});
   return Response.json([{paper:{id:'2609.01234',title:'Agent evaluation',publishedAt:date}}]);
  };
- try{const results=await Promise.all(Array.from({length:50},()=>ingestNews()));assert.equal(calls,7);assert.equal(results.filter(r=>r.status==='already-current-or-running').length,49);assert.equal((await readNewsSnapshot()).items.length,3);await ingestNews();assert.equal(calls,7);}finally{globalThis.fetch=original;}
+ try{const results=await Promise.all(Array.from({length:50},()=>ingestNews()));assert.equal(calls,21);assert.equal(results.filter(r=>r.status==='already-current-or-running').length,49);assert.equal((await readNewsSnapshot()).items.length,3);await ingestNews();assert.equal(calls,21);}finally{globalThis.fetch=original;}
 });
 test('full provider outage keeps durable last-good cards and reports stale',async()=>{
  const original=globalThis.fetch,clock=Date.now;Date.now=()=>clock()+3600001;globalThis.fetch=async()=>{throw new Error('Outage');};
