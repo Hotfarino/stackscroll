@@ -15,7 +15,7 @@ export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
   body?: string; takeaway?: string; code?: string; language?: string; visual?: "network" | "subnet" | "workflow";
   options?: string[]; answer?: number; explanation?: string; back?: string;
-  source: string; sourceName: string; date?: string; minutes?: number; catalog?: CatalogMetadata;
+  source: string; sourceName: string; date?: string; minutes?: number; catalog?: CatalogMetadata; newsImage?: string;
 };
 export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Data centers"];
 const refs = {

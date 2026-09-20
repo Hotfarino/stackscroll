@@ -39,3 +39,25 @@ body .mixed-workspace[data-layout="stream"] .feed-item:has(.media-preview):not(:
  body .mixed-workspace[data-layout="stream"] .feed-card-options { margin-inline:18px; }
 }
 @media(forced-colors:active) { html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] { background:Canvas; } }
+
+/* Format headers share the site's cyan/lime palette, with purple for media.
+   News deliberately keeps its existing neutral header. Labels remain visible. */
+:is(.feed-preview,.learning-card):not(.kind-news) { --header-accent:#00D9FF; }
+:is(.feed-preview,.learning-card):is(.kind-quiz,.kind-flashcard,.kind-humor,.catalog-humor,.catalog-practice) { --header-accent:#C6FF3A; }
+:is(.feed-preview,.learning-card):is(.kind-video,.kind-explainer,.kind-podcast,.kind-quote,.quote-card,.explainer-card,.catalog-video,.catalog-podcast) { --header-accent:#C5A3FF; }
+html[data-skin="signal"] body :is(.feed-preview,.learning-card):not(.kind-news) > .card-top,
+html[data-skin="signal"] body .feed-preview:not(.kind-news) .preview-meta {
+ border-left:2px solid var(--header-accent);
+ background:linear-gradient(90deg,color-mix(in srgb,var(--header-accent) 9%,transparent),transparent 85%);
+ box-shadow:inset 0 1px color-mix(in srgb,var(--header-accent) 15%,transparent);
+}
+html[data-skin="signal"] body .feed-preview:not(.kind-news) .preview-meta { padding:10px 12px; color:var(--header-accent); }
+html[data-skin="signal"] body .learning-card:not(.kind-news) .card-top :is(.card-author strong,.kind-badge,.topic-icon) { color:var(--header-accent); }
+.news-thumbnail { display:block; width:100%; aspect-ratio:16/9; overflow:hidden; background:#111418; }
+.news-thumbnail img { display:block; width:100%; height:100%; object-fit:cover; }
+.news-thumbnail:focus-visible { outline:2px solid var(--ring); outline-offset:-3px; }
+@media(forced-colors:active) {
+ html[data-skin="signal"] body :is(.feed-preview,.learning-card):not(.kind-news) > .card-top,
+ html[data-skin="signal"] body .feed-preview:not(.kind-news) .preview-meta { background:Canvas; color:CanvasText; border-color:CanvasText; box-shadow:none; }
+ html[data-skin="signal"] body .learning-card:not(.kind-news) .card-top :is(.card-author strong,.kind-badge,.topic-icon) { color:CanvasText; }
+}

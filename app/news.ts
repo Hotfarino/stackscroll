@@ -44,6 +44,24 @@ function clean(value:string) {
  }).replace(/\s+/g," ").trim();
 }
 function field(item:string,name:string) {return clean(item.match(new RegExp(`<${name}\\b[^>]*>([\\s\\S]*?)<\\/${name}>`,"i"))?.[1]||"");}
+// Only publisher-supplied image URLs; never guess artwork or fetch article pages.
+export function newsImageUrl(value:string,base?:string):string|undefined {
+ try {
+  const url=new URL(clean(value),base);
+  if(!value.trim()||url.protocol!=="https:"||url.username||url.password||url.port||!url.hostname.includes(".")||/^[\d.]+$/.test(url.hostname)||/[:\[\]]/.test(url.hostname)||/(?:^|\.)(?:localhost|local|internal|test|invalid)$/.test(url.hostname))return;
+  return url.href;
+ }catch{return;}
+}
+export function publisherImage(item:string,base:string):string|undefined {
+ const markup=item.replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g,"$1").replace(/&lt;/gi,"<").replace(/&gt;/gi,">").replace(/&quot;/gi,'"');
+ const attr=(tag:string,name:string)=>tag.match(new RegExp(`\\b${name}\\s*=\\s*["']([^"']+)["']`,"i"))?.[1]||"";
+ const candidates=[...markup.matchAll(/<(?:media:thumbnail|media:content|enclosure)\b[^>]*>/gi)].filter(([tag])=>/media:thumbnail/i.test(tag)||/^image\//i.test(attr(tag,"type"))||attr(tag,"medium")==="image"||/\.(?:jpe?g|png|webp|avif)(?:[?#]|$)/i.test(attr(tag,"url"))).map(([tag])=>attr(tag,"url"));
+ for(const [tag] of markup.matchAll(/<img\b[^>]*>/gi)){
+  if(["width","height"].some(key=>/^[12]$/.test(attr(tag,key))))continue;
+  candidates.push(attr(tag,"src"));
+ }
+ return candidates.map(value=>newsImageUrl(value,base)).find(Boolean);
+}
 export function parseNews(xml:string,source:typeof newsSources[number],now=Date.now()):Card[] {
  const items:Card[]=[];
  for(const match of xml.matchAll(/<(?:item|entry)\b[^>]*>([\s\S]*?)<\/(?:item|entry)>/gi)) {
@@ -55,7 +73,7 @@ export function parseNews(xml:string,source:typeof newsSources[number],now=Date.
    const description=(field(item,"description")||field(item,"summary")).replace(/<[^>]*>/g,"").trim();
    const words=description.split(/\s+/).filter(Boolean);
    const preview=words.slice(0,24).join(" ").slice(0,320);
-   items.push({id:`rss-${url.href}`,kind:"news",topic,level:"Intermediate",title:title.slice(0,240),body:preview?`Publisher preview: ${preview}${words.length>24?"…":""}`:`Latest from ${source.name}. Read the original for details.`,source:url.href,sourceName:source.name,date:new Date(time).toISOString()});
+   items.push({id:`rss-${url.href}`,kind:"news",topic,level:"Intermediate",title:title.slice(0,240),body:preview?`Publisher preview: ${preview}${words.length>24?"…":""}`:`Latest from ${source.name}. Read the original for details.`,source:url.href,sourceName:source.name,date:new Date(time).toISOString(),newsImage:publisherImage(item,url.href)});
   }catch{continue;}
   if(items.length>=NEWS_PER_SOURCE)break;
  }

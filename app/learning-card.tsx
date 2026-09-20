@@ -6,6 +6,7 @@ import {RadioGroup,RadioGroupItem} from "@/components/ui/radio-group";
 import {StackButton} from "./brand";
 import type {Card} from "./content";
 import {CardArt,RecallStack} from "./card-art";
+import {NewsThumbnail} from "./news-thumbnail";
 import {scheduleReview,type LearningState} from "./learning";
 const icons = {Networking:Network,CompTIA:Cpu,CCNA:Network,Cloud:Cloud,Development:Code2,Languages:Terminal,"Agentic AI":Bot,"Machine learning":BrainCircuit,"AI workflows":Workflow,"Data centers":Server};
 const kinds = {lesson:"Quick lesson",quiz:"Knowledge check",flashcard:"Flashcard",news:"Tech news",video:"Video",quote:"Quote",explainer:"AI explainer",story:"IT story",podcast:"Podcast",resource:"Guide",humor:"Tech humor"};
@@ -24,7 +25,8 @@ export function LearningCard({card,state,onSave,onComplete,onAnswer,onReview}:{c
  const Icon=icons[card.topic];const KindIcon=typeIcons[card.kind];
  return <article className={`learning-card kind-${card.kind}`} data-topic={card.topic}>
   <div className="card-top"><div className={`topic-icon topic-${card.topic.toLowerCase().replaceAll(" ","-")}`}><Icon size={19}/></div><div className="card-author"><strong>{card.topic}</strong><span>{card.level} <b>·</b> {card.kind==="news"?dateLabel(card.date):`${card.minutes||1} min`}</span></div><span className={`kind-badge ${card.kind}`}><KindIcon size={13}/>{kinds[card.kind]}</span></div>
-  {(card.kind==="news"||(card.kind==="lesson"&&!card.visual&&!card.code))&&<CardArt topic={card.topic} layout={card.kind==="news"?"cover":"compact"} label={card.kind==="news"?"On the radar":"One idea. Keep building."}/>}
+  {card.kind==="news"&&<NewsThumbnail card={card}/>}
+  {card.kind==="lesson"&&!card.visual&&!card.code&&<CardArt topic={card.topic} layout="compact" label="One idea. Keep building."/>}
   <div className="card-main"><h2>{card.title}</h2>{card.body&&<p className="card-body">{card.body}</p>}
    {card.visual==="network"&&<NetworkDiagram/>}{card.visual==="workflow"&&<WorkflowDiagram/>}{card.visual==="subnet"&&<SubnetDiagram/>}
    {card.code&&<div className="code-panel"><div><Terminal size={14}/>{card.language}</div><pre><code>{card.code}</code></pre></div>}
