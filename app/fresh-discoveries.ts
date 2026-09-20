@@ -11,7 +11,7 @@ export function hnCard(value:unknown,now=Date.now()):Card|undefined {
 }
 export function paperCards(value:unknown,now=Date.now()):Card[]{
  if(!Array.isArray(value))return [];
- return value.slice(0,20).flatMap(v=>{const p=v?.paper;if(!p||typeof p.id!=='string'||!/^\d{4}\.\d{4,5}(v\d+)?$/.test(p.id))return [];const title=clean(p.title),date=dated(p.publishedAt,now);if(!title||!date)return [];
+ return value.slice(0,30).flatMap(v=>{const p=v?.paper;if(!p||typeof p.id!=='string'||!/^\d{4}\.\d{4,5}(v\d+)?$/.test(p.id))return [];const title=clean(p.title),date=dated(p.publishedAt,now);if(!title||!date)return [];
  return [{id:`hf-paper-${p.id}`,kind:'news',topic:/agent|LLM/i.test(title)?'Agentic AI':'Machine learning',level:'Advanced',title,body:'Research preview. Inspect the paper’s methods, evaluation setup, and limitations. A listing does not establish independent replication or production readiness.',source:`https://huggingface.co/papers/${p.id}`,sourceName:'Hugging Face · Research preview',date} as Card];});
 }
 async function json(url:string,fetcher:typeof fetch){
@@ -21,10 +21,10 @@ async function json(url:string,fetcher:typeof fetch){
 }
 export async function discoverHN(fetcher:typeof fetch=fetch){
  const ids=await json('https://hacker-news.firebaseio.com/v0/showstories.json',fetcher);if(!Array.isArray(ids))throw new Error('Invalid discovery');
- const selected=[...new Set(ids.filter(id=>Number.isSafeInteger(id)&&id>0))].slice(0,16);
+ const selected=[...new Set(ids.filter(id=>Number.isSafeInteger(id)&&id>0))].slice(0,48);
  if(!selected.length)throw new Error('Empty discovery');
  const results=await Promise.allSettled(selected.map(id=>json(`https://hacker-news.firebaseio.com/v0/item/${id}.json`,fetcher)));
  if(results.every(r=>r.status==='rejected'))throw new Error('Items unavailable');
  return {items:results.flatMap(r=>r.status==='fulfilled'?[hnCard(r.value)].filter((c):c is Card=>!!c):[]),partial:results.some(r=>r.status==='rejected')};
 }
-export async function discoverPapers(fetcher:typeof fetch=fetch){const items=paperCards(await json('https://huggingface.co/api/daily_papers?limit=12',fetcher));if(!items.length)throw new Error('No dated papers');return {items,partial:false};}
+export async function discoverPapers(fetcher:typeof fetch=fetch){const items=paperCards(await json('https://huggingface.co/api/daily_papers?limit=30',fetcher));if(!items.length)throw new Error('No dated papers');return {items,partial:false};}

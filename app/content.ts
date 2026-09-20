@@ -1,4 +1,4 @@
-export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows" | "Data centers";
+export type Topic = "Networking" | "CompTIA" | "CCNA" | "Cloud" | "Development" | "Languages" | "Agentic AI" | "Machine learning" | "AI workflows" | "Data centers" | "Cybersecurity" | "Data engineering" | "DevOps" | "Web & accessibility" | "Mobile development" | "Robotics & IoT";
 export type Kind = "lesson" | "quiz" | "flashcard" | "news" | "video" | "quote" | "explainer" | "story" | "podcast" | "resource" | "humor";
 export type CatalogMetadata = {
   edition: "launch-1000";
@@ -17,7 +17,7 @@ export type Card = {
   options?: string[]; answer?: number; explanation?: string; back?: string;
   source: string; sourceName: string; date?: string; minutes?: number; catalog?: CatalogMetadata; newsImage?: string;
 };
-export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Data centers"];
+export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Data centers", "Cybersecurity", "Data engineering", "DevOps", "Web & accessibility", "Mobile development", "Robotics & IoT"];
 const refs = {
   network: ["https://www.rfc-editor.org/rfc/rfc826", "IETF · ARP"],
   subnet: ["https://www.rfc-editor.org/rfc/rfc4632", "IETF · CIDR"],
@@ -87,7 +87,58 @@ const curiosityCards: Card[] = [
  ["Agentic AI","Human in the loop","The human is currently in a loop asking why the agent is in a loop."]
  ] as [Topic,string,string][]).map(([topic,title,body],i)=>({id:`curiosity-humor-${i+1}`,kind:"humor" as const,topic,level:"Foundation" as const,title,body,source:"https://stackscroll.bigdawgroof812178.chatgpt.site/terms",sourceName:"Stackscroll Originals · Fiction"}))
 ];
-export const cards: Card[] = [...coreCards, ...catalogCards, ...curiosityCards];
+// New source-linked guides are separate from the immutable launch-1000 edition.
+export const expandedGuides:Card[]=( [
+ ["Cybersecurity","OWASP application security testing","https://owasp.org/www-project-web-security-testing-guide/"],
+ ["Cybersecurity","OWASP application verification requirements","https://github.com/OWASP/ASVS"],
+ ["Cybersecurity","OWASP API security","https://owasp.org/API-Security/"],
+ ["Cybersecurity","OWASP secure coding cheat sheets","https://cheatsheetseries.owasp.org/"],
+ ["Cybersecurity","PortSwigger web security learning labs","https://portswigger.net/web-security"],
+ ["Cybersecurity","MITRE ATT&CK knowledge base","https://attack.mitre.org/"],
+ ["Cybersecurity","OpenSSF secure development learning","https://openssf.org/training/"],
+ ["Cybersecurity","NIST cybersecurity framework","https://www.nist.gov/cyberframework"],
+ ["Data engineering","Apache Airflow workflow documentation","https://airflow.apache.org/docs/"],
+ ["Data engineering","Apache Kafka documentation","https://kafka.apache.org/documentation/"],
+ ["Data engineering","Apache Spark documentation","https://spark.apache.org/docs/latest/"],
+ ["Data engineering","Apache Flink documentation","https://nightlies.apache.org/flink/flink-docs-stable/"],
+ ["Data engineering","DuckDB SQL documentation","https://duckdb.org/docs/stable/"],
+ ["Data engineering","dbt documentation","https://docs.getdbt.com/docs/introduction"],
+ ["Data engineering","Apache Arrow documentation","https://arrow.apache.org/docs/"],
+ ["Data engineering","Apache Iceberg documentation","https://iceberg.apache.org/docs/latest/"],
+ ["DevOps","Jenkins user handbook","https://www.jenkins.io/doc/book/"],
+ ["DevOps","OpenTelemetry documentation","https://opentelemetry.io/docs/"],
+ ["DevOps","Prometheus overview","https://prometheus.io/docs/introduction/overview/"],
+ ["DevOps","Grafana documentation","https://grafana.com/docs/"],
+ ["DevOps","Argo CD documentation","https://argo-cd.readthedocs.io/en/stable/"],
+ ["DevOps","Ansible project and documentation","https://github.com/ansible/ansible"],
+ ["DevOps","OpenTofu documentation","https://opentofu.org/docs/"],
+ ["DevOps","Google site reliability books","https://sre.google/books/"],
+ ["Web & accessibility","W3C accessibility tutorials","https://www.w3.org/WAI/tutorials/"],
+ ["Web & accessibility","W3C accessible design patterns","https://www.w3.org/WAI/ARIA/apg/"],
+ ["Web & accessibility","W3C accessible forms","https://www.w3.org/WAI/tutorials/forms/"],
+ ["Web & accessibility","Web.dev accessibility course","https://web.dev/learn/accessibility"],
+ ["Web & accessibility","Web.dev responsive design course","https://web.dev/learn/design"],
+ ["Web & accessibility","Web.dev performance course","https://web.dev/learn/performance"],
+ ["Web & accessibility","MDN accessibility reference","https://developer.mozilla.org/en-US/docs/Web/Accessibility"],
+ ["Web & accessibility","MDN web components","https://developer.mozilla.org/en-US/docs/Web/API/Web_components"],
+ ["Mobile development","Android architecture guidance","https://developer.android.com/topic/architecture"],
+ ["Mobile development","Android Jetpack Compose","https://developer.android.com/develop/ui/compose/documentation"],
+ ["Mobile development","Android app testing","https://developer.android.com/training/testing"],
+ ["Mobile development","Apple SwiftUI documentation","https://developer.apple.com/documentation/swiftui"],
+ ["Mobile development","Swift language guide","https://docs.swift.org/swift-book/documentation/the-swift-programming-language/"],
+ ["Mobile development","Flutter learning path","https://docs.flutter.dev/get-started/learn-flutter"],
+ ["Mobile development","React Native fundamentals","https://reactnative.dev/docs/getting-started"],
+ ["Mobile development","Kotlin Multiplatform documentation","https://kotlinlang.org/docs/multiplatform.html"],
+ ["Robotics & IoT","ROS 2 tutorials","https://docs.ros.org/en/jazzy/Tutorials.html"],
+ ["Robotics & IoT","ROS 2 concepts","https://docs.ros.org/en/jazzy/Concepts.html"],
+ ["Robotics & IoT","Arduino documentation","https://docs.arduino.cc/"],
+ ["Robotics & IoT","Raspberry Pi documentation","https://github.com/raspberrypi/documentation"],
+ ["Robotics & IoT","MicroPython documentation","https://docs.micropython.org/en/latest/"],
+ ["Robotics & IoT","Zephyr development documentation","https://docs.zephyrproject.org/latest/"],
+ ["Robotics & IoT","ESP-IDF development guide","https://docs.espressif.com/projects/esp-idf/en/stable/esp32/"],
+ ["Robotics & IoT","Gazebo simulation documentation","https://gazebosim.org/docs/latest/"],
+] as [Topic,string,string][]).map(([topic,title,source],index)=>({id:`expanded-guide-${index+1}`,kind:"resource",topic,title,source,sourceName:new URL(source).hostname,level:"Foundation",body:"Explore the original documentation, examples, and learning material. Save this guide to shape your next mix or use its topic to start a Stack."}));
+export const cards: Card[] = [...coreCards, ...catalogCards, ...curiosityCards, ...expandedGuides];
 export const cardById = new Map(cards.map(card => [card.id, card]));
 export function resolveCatalogSaved(saved: Card[], resolveOther: (saved: Card[]) => Card[]): Card[] {
   return saved.flatMap(card => (card.id.startsWith("catalog-")||card.id.startsWith("curiosity-")) ? (cardById.has(card.id) ? [cardById.get(card.id)!] : []) : resolveOther([card]));

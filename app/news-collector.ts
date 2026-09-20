@@ -2,7 +2,7 @@ import {curatedNews,type Card} from "./content";
 import {parseNews,newsSources} from "./news";
 import {discoverHN,discoverPapers} from "./fresh-discoveries";
 export type NewsSnapshot={items:Card[];status:string;sources:{name:string;status:string;count:number}[];fetchedAt:string;expires:number};
-export const NEWS_SNAPSHOT_LIMIT=1000;
+export const NEWS_SNAPSHOT_LIMIT=2000;
 export async function collectNews(previous:NewsSnapshot|null=null):Promise<NewsSnapshot>{
  const providers=[...newsSources.map(source=>source.name),"Hacker News","Hugging Face Papers"];
  const results=await Promise.allSettled([...newsSources.map(async(source)=>{

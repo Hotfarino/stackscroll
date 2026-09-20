@@ -44,6 +44,19 @@ async function attest(user) { assert.equal((await post({ operation: 'attest', ad
 async function saved(body, user) { const response = await post(body, user); const data = await response.json(); assert.equal(response.status, 200, JSON.stringify(data)); return data.stack; }
 const versions = id => sqlite.prepare('SELECT version,edition FROM personal_stack_versions WHERE stack_id=? ORDER BY version').all(id);
 
+test('each new engagement-suggested topic can be saved and activated without altering other Stacks', async()=>{
+ await attest('owner');
+ for(const topic of ['Cybersecurity','Data engineering','DevOps','Web & accessibility','Mobile development','Robotics & IoT']){
+  const definition={...emptyStack(),name:`${topic} Stack`,purpose:`Explore ${topic} through original source guides.`,layers:[{topic,emphasis:3}]};
+  assert.ok(stackDefinitionSchema.safeParse(definition).success);
+  const draft=await saved(command('save',crypto.randomUUID(),0,definition),'owner');
+  const active=await saved(command('activate',draft.id,draft.revision,definition),'owner');
+  assert.equal(active.active.contentIds.length,8);
+  assert.ok(active.active.contentIds.every(id=>cards.find(c=>c.id===id)?.topic===topic));
+ }
+ assert.equal((await list('owner')).stacks.length,6);
+});
+
 test('topic emphasis controls early representation; visual ordering does not; the mix is finite and unique', () => {
   const definition = { name: 'Systems', purpose: 'Build reliable systems', layers: [{ topic: 'Agentic AI', emphasis: 3 }, { topic: 'Data centers', emphasis: 1 }], excludedIds: [] };
   const pool = definition.layers.flatMap(layer => Array.from({ length: 12 }, (_, i) => ({ id: `${layer.topic}-${i}`, topic: layer.topic })));

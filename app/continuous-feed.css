@@ -1,4 +1,9 @@
 /* One continuous reading surface; media and controls carry the contrast. */
+.engagement-preview { border-block:1px solid var(--border); padding:18px 0; margin:16px 0; }
+.engagement-preview h3 { color:#C5A3FF; font-size:1rem; }
+.engagement-preview p { font-size:.875rem; line-height:1.6; color:var(--muted-foreground); margin:10px 0; }
+.engagement-preview>div { margin:14px 0; }
+.engagement-preview .stack-button { max-width:100%; white-space:normal; text-align:left; height:auto; min-height:44px; }
 .feed-preview:not(.media-preview) .preview-image { display:none; }
 .feed-preview:not(.media-preview) .preview-row { grid-template-columns:minmax(0,1fr); }
 html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] {

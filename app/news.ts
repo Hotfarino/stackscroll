@@ -19,7 +19,7 @@ export const newsSources = [
  {url:"https://azure.microsoft.com/en-us/blog/feed/",name:"Azure Blog",host:"azure.microsoft.com",topic:"Cloud" as Topic},
  {url:"https://www.redhat.com/en/rss/blog/channel/red-hat-enterprise-linux",name:"Red Hat Enterprise Linux",host:"www.redhat.com",topic:"Cloud" as Topic},
  {url:"https://aws.amazon.com/blogs/architecture/feed/",name:"AWS Architecture",host:"aws.amazon.com",topic:"Cloud" as Topic},
- {url:"https://aws.amazon.com/blogs/security/feed/",name:"AWS Security",host:"aws.amazon.com",topic:"Networking" as Topic},
+ {url:"https://aws.amazon.com/blogs/security/feed/",name:"AWS Security",host:"aws.amazon.com",topic:"Cybersecurity" as Topic},
  {url:"https://aws.amazon.com/blogs/machine-learning/feed/",name:"AWS Machine Learning",host:"aws.amazon.com",topic:"Machine learning" as Topic},
  {url:"https://aws.amazon.com/blogs/compute/feed/",name:"AWS Compute",host:"aws.amazon.com",topic:"Cloud" as Topic},
  {url:"https://aws.amazon.com/blogs/containers/feed/",name:"AWS Containers",host:"aws.amazon.com",topic:"Cloud" as Topic},
@@ -32,7 +32,24 @@ export const newsSources = [
  {url:"https://blog.jupyter.org/feed",name:"Jupyter Blog",host:"blog.jupyter.org",topic:"Machine learning" as Topic},
  {url:"https://blogs.cisco.com/networking/feed",name:"Cisco Networking",host:"blogs.cisco.com",topic:"CCNA" as Topic},
  {url:"https://github.blog/engineering/feed/",name:"GitHub Engineering",host:"github.blog",topic:"Development" as Topic},
- {url:"https://github.blog/security/feed/",name:"GitHub Security",host:"github.blog",topic:"Development" as Topic},
+ {url:"https://github.blog/security/feed/",name:"GitHub Security",host:"github.blog",topic:"Cybersecurity" as Topic},
+ {url:"https://security.googleblog.com/feeds/posts/default?alt=rss&redirect=false",name:"Google Security",host:"security.googleblog.com",topic:"Cybersecurity" as Topic},
+ {url:"https://www.microsoft.com/en-us/security/blog/feed/",name:"Microsoft Security",host:"www.microsoft.com",topic:"Cybersecurity" as Topic},
+ {url:"https://blogs.cisco.com/security/feed",name:"Cisco Security",host:"blogs.cisco.com",topic:"Cybersecurity" as Topic},
+ {url:"https://aws.amazon.com/blogs/database/feed/",name:"AWS Database",host:"aws.amazon.com",topic:"Data engineering" as Topic},
+ {url:"https://aws.amazon.com/blogs/big-data/feed/",name:"AWS Big Data",host:"aws.amazon.com",topic:"Data engineering" as Topic},
+ {url:"https://airflow.apache.org/blog/index.xml",name:"Apache Airflow",host:"airflow.apache.org",topic:"Data engineering" as Topic},
+ {url:"https://www.jenkins.io/rss.xml",name:"Jenkins",host:"www.jenkins.io",topic:"DevOps" as Topic},
+ {url:"https://aws.amazon.com/blogs/devops/feed/",name:"AWS DevOps",host:"aws.amazon.com",topic:"DevOps" as Topic},
+ {url:"https://github.blog/changelog/label/actions/feed/",name:"GitHub Actions",host:"github.blog",topic:"DevOps" as Topic},
+ {url:"https://web.dev/static/blog/feed.xml",name:"Web.dev",host:"web.dev",topic:"Web & accessibility" as Topic},
+ {url:"https://developer.chrome.com/static/blog/feed.xml",name:"Chrome Developers",host:"developer.chrome.com",topic:"Web & accessibility" as Topic},
+ {url:"https://www.deque.com/blog/feed/",name:"Deque Accessibility",host:"www.deque.com",topic:"Web & accessibility" as Topic},
+ {url:"https://android-developers.googleblog.com/feeds/posts/default",name:"Android Developers",host:"android-developers.googleblog.com",topic:"Mobile development" as Topic},
+ {url:"https://www.swift.org/atom.xml",name:"Swift",host:"www.swift.org",topic:"Mobile development" as Topic},
+ {url:"https://blog.arduino.cc/feed/",name:"Arduino",host:"blog.arduino.cc",topic:"Robotics & IoT" as Topic},
+ {url:"https://www.raspberrypi.com/news/feed/",name:"Raspberry Pi",host:"www.raspberrypi.com",topic:"Robotics & IoT" as Topic},
+ {url:"https://aws.amazon.com/blogs/iot/feed/",name:"AWS IoT",host:"aws.amazon.com",topic:"Robotics & IoT" as Topic},
 ];
 export const NEWS_PER_SOURCE=80;
 function clean(value:string) {
@@ -69,7 +86,7 @@ export function parseNews(xml:string,source:typeof newsSources[number],now=Date.
   try {
    const url=new URL(link);const time=Date.parse(date);
    if(url.protocol!=="https:"||url.hostname!==source.host||url.username||url.password||url.port||!title||!Number.isFinite(time)||time>now||time<now-7*86400000)continue;
-   const topic:Topic=/\bagents?\b|copilot|agentic/i.test(title)?"Agentic AI":/\brag\b|workflow|bedrock/i.test(title)?"AI workflows":/machine learning|\bllm\b|neural|model training/i.test(title)?"Machine learning":source.topic;
+   const topic:Topic=["Cybersecurity","Data engineering","DevOps","Web & accessibility","Mobile development","Robotics & IoT"].includes(source.topic)?source.topic:/\bagents?\b|copilot|agentic/i.test(title)?"Agentic AI":/\brag\b|workflow|bedrock/i.test(title)?"AI workflows":/machine learning|\bllm\b|neural|model training/i.test(title)?"Machine learning":source.topic;
    const description=(field(item,"description")||field(item,"summary")).replace(/<[^>]*>/g,"").trim();
    const words=description.split(/\s+/).filter(Boolean);
    const preview=words.slice(0,24).join(" ").slice(0,320);

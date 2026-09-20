@@ -9,6 +9,12 @@ export function savedTopicSignals(saved:Card[]):Partial<Record<Topic,number>> {
  for(const card of new Map(saved.map(card=>[card.id,card])).values())if(topics.includes(card.topic))result[card.topic]=Math.min(6,(result[card.topic]||0)+2);
  return result;
 }
+export function stackInterestSuggestions(saved:Card[],feedback:TopicFeedback[],enabled=true):{topic:Topic;saves:number}[]{
+ if(!enabled)return [];
+ const counts=new Map<Topic,number>();
+ for(const card of new Map(saved.filter(eligible=>topics.includes(eligible.topic)).map(card=>[card.id,card])).values())counts.set(card.topic,(counts.get(card.topic)||0)+1);
+ return [...counts].filter(([topic,count])=>count>=2&&feedback.find(item=>item.topic===topic)?.preference!=="less").sort((a,b)=>b[1]-a[1]||topics.indexOf(a[0])-topics.indexOf(b[0])).slice(0,3).map(([topic,saves])=>({topic,saves}));
+}
 export function preferenceScore(card:Card,feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}):number{
  const setting=feedback.find(item=>item.topic===card.topic)?.preference;
  return (setting==="less"?0:Math.max(0,Math.min(6,affinity[card.topic]||0)))+(layers.find(layer=>layer.topic===card.topic)?.emphasis||0)*6+(path.includes(card.topic)?5:0)+(pinned.includes(card.topic)?3:0)+(setting==="more"?8:setting==="less"?-12:0)+(setting==="basic"?(card.level==="Foundation"?5:-5):setting==="advanced"?(card.level!=="Foundation"?5:-5):0);
