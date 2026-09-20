@@ -67,7 +67,7 @@ export function canEmbed(video: VideoRecord, now = Date.now()): boolean {
 
 export function embedUrl(video: VideoRecord, now = Date.now()): string | null {
   if (!canEmbed(video, now)) return null;
-  return `https://www.youtube-nocookie.com/embed/${video.youtubeId}?autoplay=0&playsinline=1&rel=0`;
+  return `https://www.youtube-nocookie.com/embed/${video.youtubeId}?autoplay=1&playsinline=1&rel=0&enablejsapi=1`;
 }
 
 export function videoIdentity(video: VideoRecord): string {

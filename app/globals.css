@@ -366,6 +366,10 @@ button svg,a svg {flex-shrink:0}
 .load-more {text-align:center;padding:20px}
 .empty-state {border:1px dashed var(--input);background:var(--card);padding:48px 24px;gap:20px;border-radius:8px;margin-top:7px}
 .card-skeleton {height:450px;border-radius:10px;background:var(--muted)}
+.feed-loading-card{min-height:260px;padding:34px var(--card-space);border:1px solid var(--border);border-radius:10px;background:var(--card);display:flex;flex-direction:column;gap:16px;justify-content:center;color:var(--soft);font-size:.875rem;overflow:hidden}
+.feed-loading-kicker{font-size:.75rem;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--primary)}
+.feed-loading-title{height:30px;width:min(78%,34rem);border-radius:4px}
+.feed-loading-line{height:14px;width:94%;border-radius:3px}.feed-loading-line.short{width:63%}
 .news-notice {display:flex;gap:11px;align-items:flex-start;background:var(--network-bg);border:1px solid var(--network-edge);border-radius:7px;padding:15px;color:var(--network);margin:0 0 19px}
 .news-notice strong {font-size:.875rem;font-weight:650}
 .news-notice p {font-size:.75rem;line-height:1.75;margin:5px 0 0;color:var(--copy)}

@@ -84,6 +84,12 @@ test("renders sidebar skeletons deterministically", async () => {
   assert.match(first, /--skeleton-width:70%/);
 });
 
+test("feed loading state is labeled instead of rendering a blank card", async()=>{
+ const source=await readFile(path.join(root,"app","stackscroll.tsx"),"utf8");
+ assert.match(source,/role="status"/);assert.match(source,/Loading source-linked cards/);
+ assert.doesNotMatch(source,/<Skeleton className="card-skeleton"\/>/);
+});
+
 test("video players make no embedded requests before a click and respect blocking and expiry", async () => {
   const { VideoCard } = await vite.ssrLoadModule("/app/video-card.tsx");
   const { videoCatalog, createPlaybackSession } = await vite.ssrLoadModule("/app/video-catalog.ts");
@@ -108,9 +114,18 @@ test("video players make no embedded requests before a click and respect blockin
   const after=render({active:true});
   assert.match(after,/<iframe[^>]+src="https:\/\/www.youtube-nocookie.com\/embed\//);
   assert.match(after,/referrerPolicy="strict-origin-when-cross-origin"/i);
-  assert.match(after,/autoplay=0/);
+  assert.match(after,/autoplay=1/);
+  assert.match(after,/enablejsapi=1/);
+  assert.match(after,/allow="autoplay;/);
   assert.doesNotMatch(render({active:true,blocked:true}),/<iframe\b/);
   assert.doesNotMatch(render({active:true,video:{...video,rights:{...video.rights,status:'revoked'}}}),/<iframe\b/);
+});
+
+test("YouTube embed errors distinguish disabled embeds without redirecting", async()=>{
+ const {youtubePlaybackError}=await vite.ssrLoadModule("/app/video-card.tsx");
+ assert.match(youtubePlaybackError(JSON.stringify({event:"onError",id:"player-1",info:150}),"player-1"),/disabled embedded playback/);
+ assert.match(youtubePlaybackError({event:"onError",id:"player-1",info:100},"player-1"),/unavailable/);
+ assert.equal(youtubePlaybackError({event:"onError",id:"another-player",info:150},"player-1"),null);
 });
 
 
@@ -210,7 +225,7 @@ test("catalog video previews request real thumbnails and suppress them when bloc
  const {FeedPreview}=await vite.ssrLoadModule('/app/feed-preview.tsx');
  const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
  const card=catalogCards.find(card=>card.kind==='video'&&card.source.startsWith('https://youtu.be/'));
- const props={card,blocked:false,saved:false,onSave(){},onToggle(){},children:null};
+ const props={card,blocked:false,saved:false,onSave(){},onToggle(){},onPlay(){},children:null};
  const html=renderToStaticMarkup(React.createElement(FeedPreview,props));
  assert.match(html,/\/api\/catalog\/thumbnail\?id=/);
  assert.doesNotMatch(html,/src="https:\/\//);
