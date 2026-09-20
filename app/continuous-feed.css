@@ -11,8 +11,13 @@ html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] {
  background-image:radial-gradient(ellipse at 80% 0%,#00d9ff08,transparent 55%);
 }
 html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] .feed-item {
- margin:0; padding:24px 0 16px; border-bottom:1px solid #ffffff12;
+ margin:0 0 18px; padding:0 0 12px;
+ border:1px solid #ffffff1c; border-top-color:#ffffff26; border-radius:4px;
+ background:#ffffff02;
+ box-shadow:inset 0 1px 0 #ffffff05,0 2px 5px #00000012;
 }
+html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] .feed-item:focus-within { border-color:#ffffff38; }
+body .mixed-workspace[data-layout="stream"] .feed-revisit-label { margin:12px 24px; }
 html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] .feed-item :is(.feed-preview,article.learning-card) {
  background:transparent; border:0; border-radius:0; clip-path:none; box-shadow:none;
  margin:0; transition:none;
@@ -37,13 +42,16 @@ body .mixed-workspace[data-layout="stream"] .feed-item:has(.media-preview):not(:
 @media(max-width:767px) {
  body .mixed-workspace[data-layout="stream"] .workspace { padding-inline:0; }
  body .mixed-workspace[data-layout="stream"] .preview-copy { padding:16px 18px 0; }
- body .mixed-workspace[data-layout="stream"] .feed-item { padding-top:16px; }
+ html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] .feed-item { margin:0 8px 14px; }
  body .mixed-workspace[data-layout="stream"] .preview-controls { gap:8px; }
  body .mixed-workspace[data-layout="stream"] .preview-controls>a { flex-basis:auto; }
  body .mixed-workspace[data-layout="stream"] .preview-controls>a span { max-width:18ch; }
  body .mixed-workspace[data-layout="stream"] .feed-card-options { margin-inline:18px; }
 }
-@media(forced-colors:active) { html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] { background:Canvas; } }
+@media(forced-colors:active) {
+ html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] { background:Canvas; }
+ html[data-skin="signal"] body .mixed-workspace[data-layout="stream"] .feed-item { border-color:CanvasText; background:Canvas; box-shadow:none; }
+}
 
 /* Format headers share the site's cyan/lime palette, with purple for media.
    News deliberately keeps its existing neutral header. Labels remain visible. */
