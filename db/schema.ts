@@ -1,5 +1,13 @@
 import { sqliteTable, text, integer, index, primaryKey } from "drizzle-orm/sqlite-core";
 
+export const diagnosticBuckets = sqliteTable("diagnostic_buckets", {
+ hour: integer("hour").notNull(),
+ code: text("code").notNull(),
+ origin: text("origin").notNull(),
+ count: integer("count").notNull().default(1),
+ lastSeen: integer("last_seen").notNull(),
+}, table => [primaryKey({columns:[table.hour,table.code,table.origin]})]);
+
 export const contentReports = sqliteTable("content_reports", {
   id: text("id").primaryKey(),
   userId: text("user_id").notNull(),

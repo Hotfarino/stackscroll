@@ -1,4 +1,5 @@
 "use client";
+import {reportDiagnostic} from "./diagnostics-client";
 import { useEffect, useId, useRef, useState } from "react";
 import {ExternalLink, Flag, Play, Shield, Video, X} from "lucide-react";
 import {Bookmark} from "./reference-bookmark";
@@ -71,6 +72,7 @@ export function VideoCard({video,saved,blocked,active,requested=false,session,on
   const [loading,setLoading] = useState(false);
   const [error,setError] = useState("");
   const request = useRef<AbortController|null>(null);
+  useEffect(()=>{if(error)void reportDiagnostic("youtube-player");},[error]);
   const article = useRef<HTMLElement|null>(null);
   const frame = useRef<HTMLIFrameElement|null>(null);
   const handledRequest = useRef(false);

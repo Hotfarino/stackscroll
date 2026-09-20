@@ -14,10 +14,11 @@ after(()=>{globalThis.fetch=originalFetch;sqlite.close();rmSync(temp,{recursive:
 function compile(source,name) {
  const code = ts.transpileModule(readFileSync(source,'utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText
   .replaceAll('"cloudflare:workers"','"./env.mjs"')
-  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source|youtube-discovery|youtube-feed-server|content|catalog-records|youtube-link|thumbnail-source)"/g, '"./$1.mjs"');
+  .replace(/"(?:\.\.?\/)+(video-server|video-catalog|youtube-source|youtube-discovery|youtube-feed-server|content|catalog-records|youtube-link|thumbnail-source|diagnostics-server|diagnostic-codes)"/g, '"./$1.mjs"');
  writeFileSync(join(temp,name+'.mjs'),code);
 }
 writeFileSync(join(temp,'env.mjs'),'export const env = {};');
+compile('app/diagnostic-codes.ts','diagnostic-codes');compile('app/diagnostics-server.ts','diagnostics-server');
 compile('app/video-catalog.ts','video-catalog');compile('app/video-server.ts','video-server');compile('app/youtube-source.ts','youtube-source');compile('app/youtube-discovery.ts','youtube-discovery');compile('app/youtube-feed-server.ts','youtube-feed-server');compile('app/api/videos/thumbnail/route.ts','thumbnail');compile('app/thumbnail-source.ts','thumbnail-source');
 for(const route of ['videos','reports','moderation'])compile(`app/api/${route}/route.ts`,route);
 for(const name of ['content','catalog-records','youtube-link'])compile(`app/${name}.ts`,name);

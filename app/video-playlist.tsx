@@ -1,4 +1,5 @@
 "use client";
+import {reportDiagnostic} from "./diagnostics-client";
 import {useEffect,useRef,useState} from "react";
 import {ListVideo,ArrowUp,ArrowDown,X} from "lucide-react";
 import {Sheet,SheetContent,SheetHeader,SheetTitle,SheetDescription,SheetTrigger} from "@/components/ui/sheet";
@@ -20,6 +21,7 @@ declare global{interface Window{YT?:YTApi;onYouTubeIframeAPIReady?:()=>void}}
 let apiPromise:Promise<YTApi>|null=null;
 function loadAPI(){if(window.YT?.Player)return Promise.resolve(window.YT);if(apiPromise)return apiPromise;apiPromise=new Promise<YTApi>((resolve,reject)=>{const script=document.createElement("script");const timeout=setTimeout(()=>{apiPromise=null;script.remove();reject(new Error("YouTube did not load. Stop and try again."));},15000);window.onYouTubeIframeAPIReady=()=>{clearTimeout(timeout);if(window.YT)resolve(window.YT);};script.src="https://www.youtube.com/iframe_api";script.onerror=()=>{clearTimeout(timeout);apiPromise=null;script.remove();reject(new Error("YouTube could not load."));};document.head.appendChild(script);});return apiPromise;}
 function PlaylistPlayer({id,videos,blocked,onEnded}:{id:string;videos:VideoRecord[];blocked:boolean;onEnded:()=>void}){
+ useEffect(()=>{const onError=(event:MessageEvent)=>{if(!["https://www.youtube.com","https://www.youtube-nocookie.com"].includes(event.origin)||!host.current?.querySelector("iframe")||event.source!==host.current.querySelector("iframe")?.contentWindow)return;try{const data=typeof event.data==="string"?JSON.parse(event.data):event.data;if(data?.event==="onError")void reportDiagnostic("youtube-player");}catch{}};window.addEventListener("message",onError);return()=>window.removeEventListener("message",onError);},[]);
  const host=useRef<HTMLDivElement>(null),native=useRef<HTMLVideoElement>(null),ended=useRef(onEnded);ended.current=onEnded;
  const [error,setError]=useState("");const clip=explainers.find(v=>v.id===id),record=videos.find(v=>v.id===id);const identity=record?videoIdentity(record):"";const allowed=!!record&&canEmbed(record);
  useEffect(()=>{setError("");let disposed=false,finished=false;let player:Player|undefined;const controller=new AbortController();const video=native.current;

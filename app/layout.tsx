@@ -1,4 +1,5 @@
 import {IconMaterials} from "./icon-materials";
+import {DiagnosticsObserver} from "./diagnostics-client";
 import type { Metadata } from "next";
 import "./globals.css";
 import "./glass-interface.css";
@@ -11,5 +12,5 @@ export const metadata: Metadata = {
   icons: { icon: "/favicon.svg", shortcut: "/favicon.svg" },
 };
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
-  return <html lang="en" data-skin="signal" className="dark"><body><IconMaterials/>{children}</body></html>;
+  return <html lang="en" data-skin="signal" className="dark"><body><IconMaterials/><DiagnosticsObserver/>{children}</body></html>;
 }

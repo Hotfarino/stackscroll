@@ -1,4 +1,5 @@
 "use client";
+import {reportDiagnostic} from "./diagnostics-client";
 import {useEffect,useId,useRef,useState} from "react";
 import {ArrowRight,BookOpen,Code2,ExternalLink,Headphones,Play,Smile,Sparkles,X} from "lucide-react";
 import {SourceThumbnail} from "./source-thumbnail";
@@ -24,6 +25,7 @@ export function CatalogCard({card,saved,onSave,onBuild,blocked=false,active=fals
  useEffect(()=>{if(!active||!article.current||typeof IntersectionObserver==="undefined")return;const observer=new IntersectionObserver(entries=>{if(entries.every(entry=>!entry.isIntersecting||entry.intersectionRatio<.15))onUnload();},{threshold:[0,.15]});observer.observe(article.current);return()=>observer.disconnect();},[active,onUnload]);
  useEffect(()=>{if(!active)return;const receive=(event:MessageEvent)=>{if(!["https://www.youtube.com","https://www.youtube-nocookie.com"].includes(event.origin))return;const message=youtubePlaybackError(event.data,frameId);if(message){setError(`${message} You can still watch it on YouTube.`);onUnload();}};window.addEventListener("message",receive);return()=>window.removeEventListener("message",receive);},[active,frameId,onUnload]);
  const src=player&&embedUrl(player);
+ useEffect(()=>{if(error)void reportDiagnostic("youtube-player");},[error]);
  function connectPlayer(){frame.current?.contentWindow?.postMessage(JSON.stringify({event:"listening",id:frameId}),"https://www.youtube-nocookie.com");frame.current?.contentWindow?.postMessage(JSON.stringify({event:"command",func:"addEventListener",args:["onError"],id:frameId}),"https://www.youtube-nocookie.com");}
  return <article ref={article} className={`learning-card catalog-card catalog-${meta.format} ${humor?"catalog-humor":""}`} data-topic={card.topic}>
   <div className="card-top"><div className="topic-icon"><Icon size={19}/></div><div className="card-author"><strong>{card.topic}</strong><span>{humor?"Stackscroll original":card.sourceName}</span></div><span className="kind-badge"><Icon size={13}/>{labels[meta.format]}</span></div>
