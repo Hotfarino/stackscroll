@@ -233,6 +233,18 @@ test("catalog video previews request real thumbnails and suppress them when bloc
  assert.doesNotMatch(blocked,/<img/);assert.match(blocked,/Preview blocked/);
 });
 
+test("catalog video cards load YouTube in place and retain an optional source link", async () => {
+ const {CatalogCard}=await vite.ssrLoadModule('/app/catalog-card.tsx');
+ const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
+ const card=catalogCards.find(card=>card.kind==='video'&&card.source.startsWith('https://youtu.be/'));
+ const props={card,blocked:false,saved:false,onSave(){},onBuild(){},onActivate(){},onUnload(){}};
+ const idle=renderToStaticMarkup(React.createElement(CatalogCard,props));
+ assert.match(idle,/aria-label="Open /);assert.match(idle,/Watch on YouTube \(optional\)/);
+ assert.doesNotMatch(idle,/<iframe|youtube-nocookie\.com/);
+ const active=renderToStaticMarkup(React.createElement(CatalogCard,{...props,active:true}));
+ assert.doesNotMatch(active,/<iframe/);
+});
+
 test("repository browser exposes curated projects, search results and source links", async () => {
  const {RepositoryBrowser}=await vite.ssrLoadModule('/app/repository-browser.tsx');
  const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
