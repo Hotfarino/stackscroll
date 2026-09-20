@@ -37,6 +37,18 @@ test('nearby topic and publisher repetition loses priority',()=>{
  const pool=[card,{...card,id:'b'},{...card,id:'c',topic:'Networking',sourceName:'Publisher B'}];
  assert.deepEqual(mixedFeed(pool,[],[],[],now).map(item=>item.id),['a','c','b']);
 });
+
+test('lopsided inventories still produce balanced early topics and formats',()=>{
+ const topicPool=[...Array.from({length:30},(_,i)=>({...card,id:`cloud-${i}`,source:`https://cloud.example/${i}`,sourceName:`Cloud ${i%3}`})),...['Networking','Languages','Agentic AI'].flatMap((topic,j)=>Array.from({length:6},(_,i)=>({...card,id:`topic-${j}-${i}`,topic,source:`https://topic${j}.example/${i}`,sourceName:`Topic ${j}`})))];
+ const topicMix=mixedFeed(topicPool,[],[],[],now).slice(0,16);
+ const topicCounts=Object.values(Object.groupBy(topicMix,item=>item.topic)).map(items=>items.length);
+ assert.equal(topicCounts.length,4);assert.ok(Math.max(...topicCounts)-Math.min(...topicCounts)<=1);
+ const formats=['news','video','lesson','resource'];
+ const formatPool=formats.flatMap((kind,j)=>Array.from({length:kind==='resource'?60:12},(_,i)=>({...card,id:`format-${j}-${i}`,kind,source:`https://format${j}.example/${i}`,sourceName:`Format ${j}`,date:kind==='news'||kind==='video'?new Date(now-i*1000).toISOString():undefined})));
+ const formatMix=mixedFeed(formatPool,[],[],[],now).slice(0,40);
+ const formatCounts=Object.fromEntries(formats.map(kind=>[kind,formatMix.filter(item=>item.kind===kind).length]));
+ assert.deepEqual(formatCounts,{news:10,video:10,lesson:10,resource:10});
+});
 test('editorial bookmarks resolve against curated records, retaining source and type',()=>{
  assert.equal(editorialCards.filter(item=>item.kind==='story').length,2);
  assert.equal(editorialCards.filter(item=>item.kind==='podcast').length,3);

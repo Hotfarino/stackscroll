@@ -16,7 +16,7 @@ export function preferenceScore(card:Card,feedback:TopicFeedback[],path:Topic[]=
 export function feedReason(card:Card,feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}):string{
  const setting=feedback.find(item=>item.topic===card.topic)?.preference;
  const reasons=[affinity[card.topic]&&setting!=="less"?"Related to topics in your saved cards on this device.":"",layers.some(layer=>layer.topic===card.topic)?"Matches a topic in your selected Stack.":"",setting==="more"?"You asked for more of this topic.":setting==="less"?"You asked for less of this topic; it is ranked lower, not hidden.":setting==="basic"?"Difficulty preference: more foundational material.":setting==="advanced"?"Difficulty preference: more advanced material.":"",path.includes(card.topic)?"Related to your career direction.":"",pinned.includes(card.topic)?"One of your pinned topics.":""].filter(Boolean);
- return (reasons.join(" ")||"A curated tech pick for exploring the field.")+" The mix also balances formats and publishers, with discovery slots outside your selected topics when available. Viewing time is not used.";
+ return (reasons.join(" ")||"A curated tech pick for exploring the field.")+" The mix also balances topics, formats, and publishers, with discovery slots outside your selected topics when available. Viewing time is not used.";
 }
 export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],now=Date.now(),layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}):Card[]{
  const ids=new Set<string>(),links=new Set<string>();
@@ -47,6 +47,7 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
  const inputOrder=new Map(candidates.map((card,i)=>[card.id,i]));
  const output:Card[]=[];
  const kindHistory=new Map<Kind,Card[]>();
+ const topicExposure=new Map<Topic,number>();
  function pick(kind:Kind){
   const groups=pools.get(kind)!;if(!remaining.get(kind))return;
   const recent=output.slice(-3),sameKind=kindHistory.get(kind)||[];
@@ -58,7 +59,7 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
   const explore=interests.size>0&&(output.length+1)%5===0;
   const outside=explore?heads.filter(g=>!interests.has(g.cards[g.offset].topic)&&!less.has(g.cards[g.offset].topic)):[];
   const options=outside.length?outside:heads;
-  const score=(g:Bucket)=>g.base-(recentTopics.get(g.cards[g.offset].topic)||0)*4-(publishers.has(g.cards[g.offset].sourceName)?5:0);
+  const score=(g:Bucket)=>{const card=g.cards[g.offset];return g.base-(topicExposure.get(card.topic)||0)*3-(recentTopics.get(card.topic)||0)*5-(publishers.has(card.sourceName)?5:0);};
   let best=options[0],bestScore=score(best);
   for(const candidate of options.slice(1)){
    const candidateScore=score(candidate),a=candidate.cards[candidate.offset],b=best.cards[best.offset];
@@ -67,12 +68,13 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
    if(candidateScore>bestScore||(candidateScore===bestScore&&(dateDelta>0||(dateDelta===0&&inputOrder.get(a.id)!<inputOrder.get(b.id)!)))){best=candidate;bestScore=candidateScore;}
   }
   const card=best.cards[best.offset++];output.push(card);remaining.set(kind,remaining.get(kind)!-1);
+  topicExposure.set(card.topic,(topicExposure.get(card.topic)||0)+1);
   kindHistory.set(kind,[...sameKind,card].slice(-3));
  }
  for(const kind of feedRotation)pick(kind);
- // Sublinear weights prevent a prolific source/format from buying most slots
- // merely by supplying more cards. Inventory still remains fully accessible.
- const weights=new Map(feedRotation.map(kind=>[kind,Math.sqrt(remaining.get(kind)!)]));
+ // Give every available format equal opportunity. Large inventories remain fully
+ // accessible, but cannot buy a larger share of the early feed merely by volume.
+ const weights=new Map(feedRotation.map(kind=>[kind,remaining.get(kind)!>0?1:0]));
  const credits=new Map(feedRotation.map(kind=>[kind,0]));
  while([...remaining.values()].some(count=>count>0)){
   const available=feedRotation.filter(kind=>remaining.get(kind)!>0);
