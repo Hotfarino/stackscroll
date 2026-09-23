@@ -1,6 +1,7 @@
 .nano-transfer-layer{position:fixed;inset:0;z-index:1000;pointer-events:none;overflow:hidden;contain:strict}
-.nano-transfer-layer i{position:absolute;width:2px;height:2px;background:#8eeaff;box-shadow:0 0 4px #46d6ed80;pointer-events:none;will-change:transform,opacity}
-.nano-transfer-layer i:nth-child(3n){width:1px;height:1px;background:#dcefff}
-.nano-transfer-layer i:nth-child(5n){background:#a9a2ed;box-shadow:none}
+.nano-transfer-layer i{position:absolute;width:2px;height:2px;opacity:0;background:#b9ced4;box-shadow:0 0 3px #76dbea50;pointer-events:none;will-change:transform,opacity;transform-origin:center}
+.nano-transfer-layer i:nth-child(3n){width:1px;height:1px;background:#e2f4f8;box-shadow:2px -2px #90a4ae80,-2px 2px #65bac960}
+.nano-transfer-layer i:nth-child(4n){width:7px;height:1px;background:linear-gradient(90deg,transparent,#66dcec);box-shadow:none}
+.nano-transfer-layer i:nth-child(5n){width:3px;height:2px;background:#62828d;box-shadow:inset 0 1px #c7ecf5,0 0 5px #65d8ec50}
 @media(prefers-reduced-motion:reduce),(forced-colors:active){.nano-transfer-layer{display:none}}
 html[data-motion="reduced"] .nano-transfer-layer{display:none}

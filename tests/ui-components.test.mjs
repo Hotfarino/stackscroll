@@ -35,6 +35,22 @@ async function readCssTree(directory) {
   return contents.join("\n");
 }
 
+test("nanotech streams return to their material with bounded, finite keyframes",async()=>{
+ const {swarmFrames}=await vite.ssrLoadModule('/app/nano-choreography.ts');
+ for(const screen of [false,true])for(let i=0;i<80;i++){
+  const start={x:20,y:40},end=screen?{x:320,y:480}:start;
+  const frames=swarmFrames(start,end,i,screen);
+  assert.equal(frames.length,25);
+  assert.equal(frames[0].opacity,0);assert.equal(frames.at(-1).opacity,0);
+  assert.match(frames.at(-1).transform,screen?/translate\(300px,440px\)/:/translate\(0px,0px\)/);
+  for(const frame of frames){assert.doesNotMatch(frame.transform,/NaN|Infinity/);assert.ok(frame.opacity>=0&&frame.opacity<=1);}
+ }
+ const source=await readFile(path.join(root,'app/nano-motion.tsx'),'utf8');
+ assert.match(source,/duration=screen\?1300:1000/);
+ assert.match(source,/prefers-reduced-motion: reduce/);
+ assert.match(source,/observer.disconnect\(\)/);
+});
+
 test("mobile header uses reliable strokes, balanced icons and touch feedback",async()=>{
  const css=await readFile(path.join(root,'app/popout-navigation.css'),'utf8');
  assert.match(css,/\.topbar svg\.lucide\{stroke:currentColor;filter:none;stroke-width:2\}/);
