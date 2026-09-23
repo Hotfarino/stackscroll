@@ -161,6 +161,26 @@ test("workspace popout has an accessible closed trigger and reduced motion",asyn
  assert.match(css,/forced-colors:active/);
 });
 
+test("profile sanitizes device data and exposes local stats and photo controls",async()=>{
+ const {ProfileControl,readProfile}=await vite.ssrLoadModule('/app/profile.tsx');
+ assert.deepEqual(readProfile('{'),{name:'',headline:'',bio:'',photo:''});
+ const safe=readProfile(JSON.stringify({name:'A'.repeat(80),headline:4,bio:'Builder',photo:'https://example.com/avatar.jpg'}));
+ assert.equal(safe.name.length,60);assert.equal(safe.headline,'');assert.equal(safe.bio,'Builder');assert.equal(safe.photo,'');
+ const html=renderToStaticMarkup(React.createElement(ProfileControl,{stats:{saved:4,completed:3,accuracy:75,stacks:2,recalls:1},storageMode:'device'}));
+ assert.match(html,/Open your profile/);assert.match(html,/lucide-user-round/);
+ const source=await readFile(path.join(root,'app/profile.tsx'),'utf8');
+ assert.match(source,/Offline test storage/);assert.match(source,/Cards completed/);assert.match(source,/Quiz accuracy/);assert.match(source,/toDataURL\("image\/jpeg",\.82\)/);
+});
+
+test("offline shell is opt-in on HTTPS and never caches API responses",async()=>{
+ const client=await readFile(path.join(root,'app/offline-client.tsx'),'utf8');
+ const worker=await readFile(path.join(root,'public/sw.js'),'utf8');
+ const manifest=JSON.parse(await readFile(path.join(root,'public/manifest.webmanifest'),'utf8'));
+ assert.match(client,/location\.protocol!=="https:"/);assert.match(client,/navigator\.serviceWorker\.register\("\/sw\.js"\)/);
+ assert.match(worker,/startsWith\("\/api\/"\)/);assert.match(worker,/request\.mode==="navigate"/);
+ assert.equal(manifest.display,'standalone');assert.equal(manifest.start_url,'/');
+});
+
 test("catalog permission gates omit stale excerpts from rendered views", async()=>{
  const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
  const original=catalogCards.find(card=>card.catalog?.format==='repository');
