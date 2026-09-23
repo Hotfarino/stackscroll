@@ -8,6 +8,7 @@ import {QuoteCard,ExplainerCard} from "./media-cards";
 import {quotes,explainers,mediaCards,resolveOriginalMedia} from "./media-content";
 import {EditorialCard} from "./editorial-card";
 import {editorialCards,resolveEditorialMedia} from "./editorial-content";
+import {visualCards} from "./visual-content";
 import {mixedFeed,feedReason,savedTopicSignals} from "./mixed-feed";
 import {EngagementPreview} from "./engagement-preview";
 import {useFeedMemory,FeedExposure} from "./use-feed-memory";
@@ -137,7 +138,7 @@ export default function Stackscroll(){
  const recallSessions=stacks.sessions.filter(item=>(item.data.reviewDue!==null&&item.data.reviewDue<=now)||(item.data.recallAt!==null&&item.data.reviewDue===null));
  const upcoming=stacks.sessions.filter(item=>item.data.reviewDue!==null&&item.data.reviewDue>now);
  const savedStacks=stacks.sessions.filter(item=>item.data.saved||(!item.data.completedAt&&item.data.seen.length>0));
- const allCards=useMemo(()=>mixedFeed([...videos.map(videoAsCard),...mediaCards(),...editorialCards,...news,...cards].filter(card=>!stackExclusions.has(card.id)),mixFeedback,activePath?.topics,preferences.pinnedTopics,Date.now(),stackLayers),[videos,news,mixFeedback,activePath,preferences.pinnedTopics,stackExclusions,stackLayers]);
+ const allCards=useMemo(()=>mixedFeed([...videos.map(videoAsCard),...mediaCards(),...editorialCards,...visualCards,...news,...cards].filter(card=>!stackExclusions.has(card.id)),mixFeedback,activePath?.topics,preferences.pinnedTopics,Date.now(),stackLayers),[videos,news,mixFeedback,activePath,preferences.pinnedTopics,stackExclusions,stackLayers]);
  const savedAffinity=useMemo(()=>preferences.personalizeFromSaves?savedTopicSignals(state.saved):{},[state.saved,preferences.personalizeFromSaves]);
  const feedMemory=useFeedMemory(allCards,mixFeedback,activePath?.topics,preferences.pinnedTopics,stackLayers,savedAffinity);
  const rotatingFeed=view==="feed"&&!guided&&!query.trim();

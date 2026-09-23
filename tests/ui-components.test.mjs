@@ -46,6 +46,22 @@ test("vector icons preserve dimensions without raster artwork or blur",async()=>
  assert.match(html,/viewBox="-2 -2 53 55"/);
 });
 
+test("reviewed feed images retain attribution, lazy loading and exact-work permission",async()=>{
+ const {visualCards,reviewedFeedImage}=await vite.ssrLoadModule('/app/visual-content.ts');
+ const {FeedImage}=await vite.ssrLoadModule('/app/feed-image.tsx');
+ assert.equal(visualCards.length,4);
+ for(const card of visualCards){
+  const work=reviewedFeedImage(card);assert.ok(work);
+  assert.equal(reviewedFeedImage({...card,source:'https://example.com/'}),undefined);
+  await readFile(path.join(root,'public',work.src));
+  const html=renderToStaticMarkup(React.createElement(FeedImage,{card,onOpen:()=>{}}));
+  assert.ok(html.includes(work.credit));assert.match(html,/CC BY 4.0/);assert.match(html,/loading="lazy"/);
+  assert.match(html,/width="960" height="540"/);assert.match(html,/Archive/);assert.match(html,/<button/);
+ }
+ const withheld=renderToStaticMarkup(React.createElement(FeedImage,{card:{id:'rss-x',kind:'news',source:'https://example.com',newsImage:'https://example.com/unverified.jpg'}}));
+ assert.equal(withheld,'');
+});
+
 test("workspace popout has an accessible closed trigger and reduced motion",async()=>{
  const {PopoutNavigation}=await vite.ssrLoadModule('/app/popout-navigation.tsx');
  const html=renderToStaticMarkup(React.createElement(PopoutNavigation,{items:[{id:'feed',label:'Discover',detail:'Fresh'}],view:'feed',onNavigate:()=>{throw Error('render must not navigate')}}));
