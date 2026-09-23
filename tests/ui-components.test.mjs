@@ -35,6 +35,18 @@ async function readCssTree(directory) {
   return contents.join("\n");
 }
 
+test("flashcard texture keeps recall semantics and accessible fallback styling",async()=>{
+ const {LearningCard}=await vite.ssrLoadModule('/app/learning-card.tsx');
+ const {initialState}=await vite.ssrLoadModule('/app/learning.ts');
+ const card={id:'texture-test',kind:'flashcard',topic:'Networking',level:'Foundation',title:'Recall a concept',back:'The answer',source:'https://example.com',sourceName:'Reference'};
+ const html=renderToStaticMarkup(React.createElement(LearningCard,{card,state:initialState,onSave:()=>{},onComplete:()=>{},onAnswer:()=>{},onReview:()=>{}}));
+ assert.match(html,/aria-label="Reveal answer"/);assert.match(html,/aria-expanded="false"/);
+ const css=await readFile(path.join(root,'app/flashcard-texture.css'),'utf8');
+ assert.match(css,/graphite-cyan-cracks.webp/);assert.match(css,/forced-colors:active/);assert.match(css,/focus-visible/);
+ assert.doesNotMatch(css,/animation:|min-height:|padding:/);
+ await readFile(path.join(root,'public/media/cards/graphite-cyan-cracks.webp'));
+});
+
 test("vector icons preserve dimensions without raster artwork or blur",async()=>{
  const {ReferenceIcon}=await vite.ssrLoadModule('/app/reference-icon.tsx');
  const names=['logo','discover','stacks','lab','radar','saved','search','profile','settings'];

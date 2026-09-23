@@ -1,0 +1,22 @@
+/* One cached, decorative texture; no layout or recall-behavior changes. */
+html body .learning-card .flash-surface {
+ background-color:#0e151b;
+ background-image:linear-gradient(#0a11174d,#0a111766),url('/media/cards/graphite-cyan-cracks.webp');
+ background-position:center;
+ background-size:cover;
+ border-color:#42616c;
+ color:#e8f2f7;
+ box-shadow:inset 0 1px #bdefff1c,inset 0 -1px #00d9ff21,0 0 14px #00d9ff08;
+}
+html body .learning-card .flash-surface>strong {color:#f3f8fb;text-shadow:0 1px 3px #000c;}
+html body .learning-card .flash-surface p {color:#d5e2eb;text-shadow:0 1px 3px #000c;}
+html body .learning-card .flash-surface :is(.eyebrow,.flip-hint) {color:#a7e7f1;}
+html body .learning-card .flash-surface.is-flipped {
+ background-image:linear-gradient(#0a1117b8,#0a1117d1),url('/media/cards/graphite-cyan-cracks.webp');
+ border-top-color:#63d1e4;
+}
+html body .learning-card .flash-surface:focus-visible {outline:2px solid #73e3f4;outline-offset:3px;}
+@media(forced-colors:active){
+ html body .learning-card .flash-surface,html body .learning-card .flash-surface.is-flipped {background:Canvas;border-color:ButtonText;color:CanvasText;box-shadow:none;}
+ html body .learning-card .flash-surface :is(strong,p,.eyebrow,.flip-hint) {color:CanvasText;text-shadow:none;}
+}
