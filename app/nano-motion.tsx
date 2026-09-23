@@ -13,7 +13,7 @@ export function NanoMotion() {
   const disabled=()=>preference.matches||contrast.matches||document.documentElement.dataset.motion==="reduced"||document.hidden;
   function clear(){running.forEach(a=>a.cancel());running.clear();layers.forEach(e=>e.remove());layers.clear();}
   function animate(element:Element,frames:Keyframe[],duration:number){
-   const animation=element.animate(frames,{duration,easing:"cubic-bezier(.22,1,.36,1)"});
+   const animation=element.animate(frames,{duration,easing:"cubic-bezier(.4,0,.2,1)"});
    running.add(animation);
    animation.finished.then(()=>running.delete(animation),()=>running.delete(animation));
    return animation;
@@ -29,14 +29,15 @@ export function NanoMotion() {
    const layer=document.createElement("div");
    layer.className="nano-transfer-layer";layer.setAttribute("aria-hidden","true");
    document.body.appendChild(layer);layers.add(layer);
-   const count=screen?48:24,duration=screen?620:460;
+   const count=screen?48:24,duration=screen?1300:1000;
    for(let i=0;i<count;i++){
     const particle=document.createElement("i");
     const x=left+width*((i%8+.5)/8),y=top+height*((Math.floor(i/8)+.5)/(count/8));
     const angle=i*2.39996,spread=screen?52:25;
     particle.style.left=`${x}px`;particle.style.top=`${y}px`;
     layer.appendChild(particle);
-    animate(particle,[{opacity:0,transform:"translate(0,0) scale(.4)"},{offset:.22,opacity:.85},{offset:.48,opacity:.75,transform:`translate(${Math.cos(angle)*spread}px,${Math.sin(angle)*spread}px) scale(1)`},{opacity:0,transform:"translate(0,0) scale(.25)"}],duration);
+    const dispersed=`translate(${Math.cos(angle)*spread}px,${Math.sin(angle)*spread}px) scale(1)`;
+    animate(particle,[{opacity:0,transform:"translate(0,0) scale(.4)"},{offset:.22,opacity:.85},{offset:.42,opacity:.75,transform:dispersed},{offset:.58,opacity:.75,transform:dispersed},{opacity:0,transform:"translate(0,0) scale(.25)"}],duration);
    }
    const material=screen?target:(target.querySelector("svg")||target);
    const finish=animate(material,[{opacity:1},{offset:.25,opacity:screen?.72:.25},{offset:.65,opacity:.8},{opacity:1}],duration);
