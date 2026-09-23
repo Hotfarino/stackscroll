@@ -6,6 +6,6 @@ export function nanoPhase(progress:number){
  return {
   scatter:t<.4?smooth(t/.4):t<.58?1:1-smooth((t-.58)/.34),
   cover:Math.min(smooth(t/.08),1-smooth((t-.92)/.08)),
-  travel:smooth(t),turn:t*Math.PI*1.4,
+  travel:smooth(t),turn:smooth(t)*Math.PI*1.15,
  };
 }

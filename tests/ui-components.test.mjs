@@ -35,6 +35,31 @@ async function readCssTree(directory) {
   return contents.join("\n");
 }
 
+test("page fade commits after exit, restores entry, and latest navigation wins",async()=>{
+ const {createPageFade}=await vite.ssrLoadModule('/app/page-fade.ts');
+ const previous=globalThis.getComputedStyle;globalThis.getComputedStyle=()=>({opacity:'1'});
+ const animations=[],commits=[];let reduced=false;
+ const surface={animate(frames,options){
+  let resolve,reject;const finished=new Promise((yes,no)=>{resolve=yes;reject=no;});
+  const animation={frames,options,finished,resolve,cancel:()=>reject(new Error('cancelled'))};animations.push(animation);return animation;
+ }};
+ const fade=createPageFade(()=>surface,()=>reduced,action=>action());
+ try{
+  fade.run(()=>commits.push('Radar'));assert.deepEqual(commits,[]);
+  assert.equal(animations[0].options.duration,160);
+  animations[0].resolve();await Promise.resolve();
+  assert.deepEqual(commits,['Radar']);assert.equal(animations[1].options.duration,260);
+  fade.run(()=>commits.push('Stacks'));const stale=animations.at(-1);
+  fade.run(()=>commits.push('Saved'));stale.resolve();await Promise.resolve();
+  assert.deepEqual(commits,['Radar']);animations.at(-1).resolve();await Promise.resolve();
+  assert.deepEqual(commits,['Radar','Saved']);
+  reduced=true;fade.run(()=>commits.push('Discover'));assert.equal(commits.at(-1),'Discover');
+  reduced=false;fade.run(()=>commits.push('Cancelled'));fade.cancel();await Promise.resolve();
+  assert.equal(commits.at(-1),'Discover');
+  fade.run(()=>commits.push('Hidden'));fade.finish();assert.equal(commits.at(-1),'Hidden');
+ }finally{fade.cancel();globalThis.getComputedStyle=previous;}
+});
+
 test("nanotech material fully disperses and reassembles with a continuous clock",async()=>{
  const {nanoPhase}=await vite.ssrLoadModule('/app/nano-choreography.ts');
  assert.equal(nanoPhase(0).scatter,0);assert.equal(nanoPhase(1).scatter,0);

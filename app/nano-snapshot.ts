@@ -52,7 +52,8 @@ export function controlSnapshot(target:Element){
   let visible=false;
   for(let dy=0;dy<h&&!visible;dy++)for(let dx=0;dx<w;dx++)if(pixels[((y+dy)*bitmap.width+x+dx)*4+3]>20){visible=true;break;}
   if(!visible)continue;
-  const angle=tiles.length*2.39996,radius=24+(tiles.length%17)*2;
+  // A tighter envelope keeps fragments connected to their original control.
+  const angle=tiles.length*2.39996,radius=18+(tiles.length%17)*1.35;
   tiles.push({x,y,w,h,vx:Math.cos(angle)*radius,vy:Math.sin(angle)*radius*.7});
  }
  return tiles.length?{bitmap,tiles,rect}:null;

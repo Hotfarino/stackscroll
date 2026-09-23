@@ -10,7 +10,7 @@ export function PopoutNavigation({items,view,onNavigate,due=0}:{items:readonly {
  return <DropdownMenu><DropdownMenuTrigger asChild><button type="button" className="popout-trigger" aria-label="Open workspace menu"><Menu size={20}/><span>Menu</span></button></DropdownMenuTrigger>
  <DropdownMenuContent className="workspace-popout" align="start" sideOffset={10} collisionPadding={12}>
   <DropdownMenuLabel>YOUR WORKSPACE</DropdownMenuLabel><DropdownMenuSeparator/>
-  {items.map((item,index)=><DropdownMenuItem key={item.id} className="workspace-popout-item" style={{"--item-order":index} as CSSProperties} aria-current={view===item.id?"page":undefined} onSelect={()=>{if(view!==item.id)onNavigate(item.id);}}>
+  {items.map((item,index)=><DropdownMenuItem key={item.id} className="workspace-popout-item" style={{"--item-order":index} as CSSProperties} aria-current={view===item.id?"page":undefined} onSelect={()=>onNavigate(item.id)}>
    {item.id==="repos"?<GitFork size={28}/>:<ReferenceIcon name={artwork[item.id]!} size={28}/>}
    <span className="popout-copy"><strong>{item.label}</strong><small>{item.detail}</small></span>
    {item.id==="practice"&&due>0&&<span className="popout-due" aria-label={`${due} reviews due`}>{due}</span>}
