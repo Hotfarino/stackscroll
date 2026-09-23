@@ -9,6 +9,7 @@ import {quotes,explainers,mediaCards,resolveOriginalMedia} from "./media-content
 import {EditorialCard} from "./editorial-card";
 import {editorialCards,resolveEditorialMedia} from "./editorial-content";
 import {visualCards} from "./visual-content";
+import {useContinuousFeed,nextFeedLimit} from "./use-continuous-feed";
 import {mixedFeed,feedReason,savedTopicSignals} from "./mixed-feed";
 import {EngagementPreview} from "./engagement-preview";
 import {useFeedMemory,FeedExposure} from "./use-feed-memory";
@@ -148,13 +149,13 @@ export default function Stackscroll(){
   const base=view==="saved"?resolveCatalogSaved(state.saved,items=>resolveEditorialMedia(resolveOriginalMedia(resolveSavedVideos(items,videos)))):view==="practice"?dueCards:rotatingFeed?feedMemory.cards:allCards;
   return base.filter(card=>cardMatchesSearch(card,query,videos)&&(format==="all"||card.kind===format)&&(topic==="all"||card.topic===topic)&&(level==="all"||card.level===level)&&(view!=="explore"||!activePath||activePath.topics.includes(card.topic)));
  },[view,state.saved,videos,dueCards,allCards,format,topic,level,activePath,query,rotatingFeed,feedMemory.cards]);
- // Reveal the next batch before the reader reaches the end. Native scrolling
- // and browser scroll anchoring keep existing cards in place; no wheel/touch hijack.
+ const affinityKey=JSON.stringify(savedAffinity),lastAffinity=useRef(affinityKey);
  useEffect(()=>{
-  if(!ready||guided||preferences.layout!=="stream"||(view!=="feed"&&view!=="explore")||format==="stacks"||limit>=filtered.length||!feedEnd.current||typeof IntersectionObserver==="undefined")return;
-  const observer=new IntersectionObserver(entries=>{if(entries.some(entry=>entry.isIntersecting)){observer.disconnect();setLimit(current=>Math.min(current+6,filtered.length));}},{rootMargin:"600px 0px",threshold:0});
-  observer.observe(feedEnd.current);return()=>observer.disconnect();
- },[ready,guided,view,format,preferences.layout,limit,filtered.length,query,topic,level]);
+  if(!feedMemory.ready||lastAffinity.current===affinityKey)return;
+  lastAffinity.current=affinityKey;
+  feedMemory.tuneRemaining(filtered.slice(0,limit).map(card=>card.id));
+ },[affinityKey,feedMemory.ready,feedMemory.tuneRemaining,filtered,limit]);
+ useContinuousFeed({enabled:ready&&!guided&&preferences.layout==="stream"&&(view==="feed"||view==="explore")&&format!=="stacks",sentinel:feedEnd,cards:filtered,limit,onMore:()=>setLimit(current=>nextFeedLimit(current,filtered.length))});
  function save(card:Card){if(!state.saved.some(item=>item.id===card.id)&&state.saved.length>=1500){toast("Your device collection holds up to 1,500 cards. Unsave one before adding another.");return;}setState(current=>({...current,saved:current.saved.some(item=>item.id===card.id)?current.saved.filter(item=>item.id!==card.id):[card,...current.saved]}));}
  function complete(id:string){setState(current=>({...current,done:{...current.done,[id]:localDay()}}));}
  function answer(id:string,value:number){setState(current=>({...current,answers:{...current.answers,[id]:value},done:{...current.done,[id]:localDay()}}));}
@@ -182,7 +183,7 @@ export default function Stackscroll(){
  {(view==="explore"||view==="feed")&&format==="video"&&<div className="video-feed-notice" role="status"><strong>{videoStatus==="ready"?"Creator videos, on your terms":videoStatus==="loading"?"Loading video sources…":videoStatus==="empty"?"Watch at the source":"Embedded players are temporarily unavailable"}</strong><p>Curated YouTube videos use real source thumbnails. Players load after your click, and you can save videos to your playlist. Independent factual review is pending.</p>{videoStatus==="unavailable"&&<StackButton onClick={()=>void refreshVideos()} tone="secondary">Try again</StackButton>}</div>}
  {(view==="explore"||view==="feed")&&format==="news"&&<div className="news-notice"><div><strong>{newsStatus==="live"||newsStatus==="partial"?"News & discoveries":"Curated news snapshot"}</strong><p>{newsStatus==="live"||newsStatus==="partial"?"Dates, source links, and content labels appear on each card. Community dates reflect submission time.":"Live sources are unavailable. Showing dated articles selected September 8, 2026."}</p></div><StackButton tone="quiet" disabled={newsLoading} onClick={()=>void refreshNews()}>Refresh</StackButton></div>}
  {(!ready&&view!=="feed"&&view!=="explore")||(rotatingFeed&&!feedMemory.ready)?<FeedLoadingCard/>:filtered.length===0?<Empty className="empty-state"><EmptyHeader><EmptyTitle>{query.trim()?"No cards match your search.":view==="saved"?"Keep a useful find here.":"No cards in this selection."}</EmptyTitle><EmptyDescription>{query.trim()?"Try fewer words or clear your topic, format, and difficulty filters.":view==="saved"?"Use the bookmark on a card or stack to save it.":"Try another filter or browse the stacks above."}</EmptyDescription></EmptyHeader></Empty>:preferences.layout==="focus"?<section className="focus-session"><div className="focus-controls"><span>Card {activeIndex+1} of {filtered.length}</span><div><button aria-label="Previous card" disabled={activeIndex===0} onClick={()=>{unloadVideos();setFocusIndex(activeIndex-1);}}><ChevronLeft/></button><button aria-label="Next card" disabled={activeIndex===filtered.length-1} onClick={()=>{unloadVideos();setFocusIndex(activeIndex+1);}}><ChevronRight/></button></div></div>{renderCard(filtered[activeIndex])}</section>:preferences.layout==="index"?<Accordion type="multiple" className="topic-index">{filtered.slice(0,limit).map(card=><AccordionItem value={card.id} key={card.id} className="index-item"><AccordionTrigger className="index-trigger"><span className="index-content"><span className="index-meta">{card.topic} / {card.kind}</span><strong>{card.title}</strong></span></AccordionTrigger><AccordionContent>{renderCard(card)}</AccordionContent></AccordionItem>)}</Accordion>:filtered.slice(0,limit).map(renderCard)}
- {ready&&preferences.layout!=="focus"&&limit<filtered.length&&<div className="load-more" ref={feedEnd}><StackButton tone="secondary" onClick={()=>setLimit(current=>current+6)}>Show 6 more cards<ArrowRight size={16}/></StackButton></div>}
+ {ready&&preferences.layout!=="focus"&&limit<filtered.length&&<div className="load-more" ref={feedEnd}><StackButton tone="secondary" onClick={()=>setLimit(current=>nextFeedLimit(current,filtered.length))}>Show 6 more cards<ArrowRight size={16}/></StackButton></div>}
  {rotatingFeed&&feedMemory.ready&&(filtered.length===0||(preferences.layout==="focus"?activeIndex===filtered.length-1:limit>=filtered.length))&&<div className="feed-end-controls"><p>You’ve reached the end of this mix. Refresh for unseen finds, or revisit cards you’ve seen.</p><StackButton tone="secondary" onClick={()=>applyFeedMix(true)}>Revisit seen cards</StackButton></div>}
  </>;
  return <SidebarProvider open={true} style={{"--sidebar-width":"15.5rem"} as CSSProperties}><Navigation view={view} onNavigate={navigate} due={dueStacks.length}/><div ref={scrollSurface} className={`app-main stack-workspace ${view==="feed"&&!guided?"mixed-workspace":""} ${view==="stacks"?"stack-discovery-workspace":""} ${view==="practice"?"practice-workspace":""}`} data-layout={preferences.layout} data-rail={preferences.showRail?"show":"hide"} data-activity={preferences.showActivity?"show":"hide"}>

@@ -1,6 +1,17 @@
 import {topics,type Card,type Kind,type Topic} from "./content";
 import type {TopicFeedback} from "./stacks";
 export const feedRotation:Kind[]=["video","quote","story","explainer","news","lesson","quiz","podcast","flashcard","humor","resource"];
+// Publisher labels can vary between imports. Group by canonical source instead.
+// Shared platforms keep creators/owners separate rather than becoming one source.
+export function publisherKey(card:Card):string{
+ try{const url=new URL(card.source),host=url.hostname.replace(/^www\./,"");
+  if(host==="youtu.be"||host==="youtube.com")return `youtube:${card.sourceName.toLowerCase()}`;
+  if(host==="github.com")return `github:${url.pathname.split("/")[1]?.toLowerCase()}`;
+  if(host==="commons.wikimedia.org")return `commons:${card.sourceName.toLowerCase()}`;
+  if(host.endsWith(".amazon.com")||host==="aws.amazon.com")return "aws.amazon.com";
+  return host;
+ }catch{return card.sourceName.toLowerCase();}
+}
 export function eligibleCard(card:Card,now=Date.now()):boolean {
  try{const url=new URL(card.source);return !!card.id&&!!card.title&&topics.includes(card.topic)&&feedRotation.includes(card.kind)&&url.protocol==="https:"&&!url.username&&!url.password&&!url.port&&(!card.date||(Number.isFinite(Date.parse(card.date))&&Date.parse(card.date)<=now));}catch{return false;}
 }
@@ -36,6 +47,8 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
  // Cards sharing a topic, publisher and preference score have the same dynamic
  // penalty. Rank each bucket once, then compare only its next available card.
  const dates=new Map(candidates.map(card=>[card.id,Date.parse(card.date||"")||0]));
+ const publisherIds=new Map(candidates.map(card=>[card.id,publisherKey(card)]));
+ const publisherOf=(card:Card)=>publisherIds.get(card.id)!;
  const interests=new Set([...topics.filter(topic=>(affinity[topic]||0)>0),...layers.map(layer=>layer.topic),...path,...pinned,...feedback.filter(f=>f.preference==="more").map(f=>f.topic)]);
  const less=new Set(feedback.filter(f=>f.preference==="less").map(f=>f.topic));
  type Bucket={cards:Card[];offset:number;base:number};
@@ -44,7 +57,7 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
  for(const kind of feedRotation){
   const groups=new Map<string,Bucket>();
   for(const card of candidates.filter(card=>card.kind===kind)){
-   const base=preferenceScore(card,feedback,path,pinned,layers,affinity),key=JSON.stringify([card.topic,card.sourceName,base]);
+   const base=preferenceScore(card,feedback,path,pinned,layers,affinity),key=JSON.stringify([card.topic,publisherOf(card),base,card.id.startsWith("visual-")]);
    if(!groups.has(key))groups.set(key,{cards:[],offset:0,base});groups.get(key)!.cards.push(card);
   }
   if(["news","video","podcast"].includes(kind))for(const group of groups.values())group.cards.sort((a,b)=>dates.get(b.id)!-dates.get(a.id)!);
@@ -58,14 +71,19 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
   const groups=pools.get(kind)!;if(!remaining.get(kind))return;
   const recent=output.slice(-3),sameKind=kindHistory.get(kind)||[];
   const recentTopics=new Map<Topic,number>();for(const card of recent)recentTopics.set(card.topic,(recentTopics.get(card.topic)||0)+1);
-  const publishers=new Set([...recent,...sameKind].map(card=>card.sourceName));
+  const publishers=new Map<string,number>();
+  for(const card of output.slice(-6))publishers.set(publisherOf(card),(publishers.get(publisherOf(card))||0)+1);
+  const samePublishers=new Set(sameKind.map(publisherOf));
   const heads=groups.filter(g=>g.offset<g.cards.length);
   // Every fifth slot may explore an unselected topic, when this format has one.
   // Explicit "less" preferences are never used to fill the discovery slot.
   const explore=interests.size>0&&(output.length+1)%5===0;
   const outside=explore?heads.filter(g=>!interests.has(g.cards[g.offset].topic)&&!less.has(g.cards[g.offset].topic)):[];
   const options=outside.length?outside:heads;
-  const score=(g:Bucket)=>{const card=g.cards[g.offset];return g.base-(topicExposure.get(card.topic)||0)*3-(recentTopics.get(card.topic)||0)*5-(publishers.has(card.sourceName)?5:0);};
+  // Give the curated visual series a modest discovery lift, not extra format
+  // slots; explicit topic preferences and balance still outweigh this signal.
+  const visualGap=!output.slice(-4).some(card=>card.id.startsWith("visual-"));
+  const score=(g:Bucket)=>{const card=g.cards[g.offset],publisher=publisherOf(card);return g.base+(visualGap&&card.id.startsWith("visual-")?3:0)-(topicExposure.get(card.topic)||0)*3-(recentTopics.get(card.topic)||0)*5-(publishers.get(publisher)||0)*4-(samePublishers.has(publisher)?2:0);};
   let best=options[0],bestScore=score(best);
   for(const candidate of options.slice(1)){
    const candidateScore=score(candidate),a=candidate.cards[candidate.offset],b=best.cards[best.offset];

@@ -49,17 +49,38 @@ test("vector icons preserve dimensions without raster artwork or blur",async()=>
 test("reviewed feed images retain attribution, lazy loading and exact-work permission",async()=>{
  const {visualCards,reviewedFeedImage}=await vite.ssrLoadModule('/app/visual-content.ts');
  const {FeedImage}=await vite.ssrLoadModule('/app/feed-image.tsx');
- assert.equal(visualCards.length,4);
+ assert.equal(visualCards.length,11);
  for(const card of visualCards){
   const work=reviewedFeedImage(card);assert.ok(work);
   assert.equal(reviewedFeedImage({...card,source:'https://example.com/'}),undefined);
   await readFile(path.join(root,'public',work.src));
   const html=renderToStaticMarkup(React.createElement(FeedImage,{card,onOpen:()=>{}}));
-  assert.ok(html.includes(work.credit));assert.match(html,/CC BY 4.0/);assert.match(html,/loading="lazy"/);
-  assert.match(html,/width="960" height="540"/);assert.match(html,/Archive/);assert.match(html,/<button/);
+  const escapedCredit=renderToStaticMarkup(React.createElement('span',null,work.credit)).slice(6,-7);
+  assert.ok(html.includes(escapedCredit));assert.ok(html.includes(work.license));assert.match(html,/loading="lazy"/);
+  assert.match(html,/width="960" height="540"/);assert.match(html,/Archive|Reference image/);assert.match(html,/<button/);
  }
  const withheld=renderToStaticMarkup(React.createElement(FeedImage,{card:{id:'rss-x',kind:'news',source:'https://example.com',newsImage:'https://example.com/unverified.jpg'}}));
  assert.equal(withheld,'');
+ const plain=renderToStaticMarkup(React.createElement(FeedImage,{card:{id:'plain',kind:'lesson',topic:'Networking',source:'https://example.com'}}));
+ assert.equal(plain,'','missing source images must not repeat generic artwork');
+});
+
+test("continuous loading prewarms at most three reviewed local images",async()=>{
+ const {visualCards}=await vite.ssrLoadModule('/app/visual-content.ts');
+ const {nextImageBatch,nextFeedLimit}=await vite.ssrLoadModule('/app/use-continuous-feed.ts');
+ assert.equal(nextFeedLimit(6,8),8);assert.equal(nextFeedLimit(6,1000),12);
+ const images=nextImageBatch(visualCards,0);assert.equal(images.length,3);
+ assert.ok(images.every(src=>src.startsWith('/media/licensed/')));
+ assert.deepEqual(nextImageBatch(visualCards,visualCards.length),[]);
+});
+
+test("saved-interest tuning preserves the rendered prefix and only reorders unread cards",async()=>{
+ const {retuneTail}=await vite.ssrLoadModule('/app/feed-memory.ts');
+ const cards=['a','b','c','d','e'].map(id=>({id}));
+ const result=retuneTail(cards.map(c=>c.id),['a','c'],cards,tail=>tail.reverse());
+ assert.deepEqual(result,['a','b','c','e','d']);
+ assert.equal(new Set(result).size,cards.length);
+ assert.deepEqual(retuneTail(result,result,cards,tail=>tail.reverse()),result);
 });
 
 test("workspace popout has an accessible closed trigger and reduced motion",async()=>{

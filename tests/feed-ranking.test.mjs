@@ -15,6 +15,15 @@ const {editorialCards,resolveEditorialMedia}=await load('editorial-content');
 const {stateSchema,initialState}=await load('learning');
 const now=Date.parse('2026-09-08T12:00:00Z');
 const card={id:'a',kind:'lesson',topic:'Cloud',level:'Foundation',title:'A useful idea',source:'https://example.org/reference',sourceName:'Publisher A'};
+test('publisher aliases do not evade source diversity',()=>{
+ const pool=[card,{...card,id:'alias',source:'https://www.example.org/other',sourceName:'Different label'},{...card,id:'outside',source:'https://another.org/reference',sourceName:'Publisher B'}];
+ assert.deepEqual(mixedFeed(pool,[],[],[],now).map(c=>c.id),['a','outside','alias']);
+});
+test('visual discovery lift does not override an explicit less preference',()=>{
+ const pool=[card,{...card,id:'visual-test',topic:'Networking',source:'https://other.example/'}];
+ assert.equal(mixedFeed(pool,[],[],[],now)[0].id,'visual-test');
+ assert.equal(mixedFeed(pool,[{topic:'Networking',preference:'less'}],[],[],now)[0].id,'a');
+});
 test('candidate gate rejects unsafe sources, invalid metadata and future content',()=>{
  for(const patch of [{source:'javascript:alert(1)'},{source:'https://user:pass@example.org/'},{topic:'Gaming'},{kind:'ad'},{title:''},{date:'tomorrow'},{date:'2026-09-09'}])assert.equal(eligibleCard({...card,...patch},now),false);
  assert.equal(eligibleCard(card,now),true);

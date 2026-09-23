@@ -3,7 +3,7 @@ import {useCallback,useEffect,useMemo,useRef,useState,type ReactNode} from "reac
 import type {Card,Topic} from "./content";
 import type {TopicFeedback} from "./stacks";
 import {mixedFeed} from "./mixed-feed";
-import {FEED_MEMORY_KEY,emptyFeedMemory,parseFeedMemory,feedCandidates,rotatedCandidates,stableFeed} from "./feed-memory";
+import {FEED_MEMORY_KEY,emptyFeedMemory,parseFeedMemory,feedCandidates,rotatedCandidates,stableFeed,retuneTail} from "./feed-memory";
 
 export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}) {
  const memory=useRef(emptyFeedMemory()),latest=useRef({inventory,feedback,path,pinned,layers,affinity});latest.current={inventory,feedback,path,pinned,layers,affinity};
@@ -34,6 +34,11 @@ export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Top
   setSnapshot(current=>{const existing=new Set(current.ids);return {...current,ids:[...current.ids,...ranked.filter(card=>!existing.has(card.id)).map(card=>card.id)]};});
  },[inventory,ready,feedback,path,pinned,layers,affinity]);
  const rotate=useCallback((allowRecent=false)=>{revisit.current=allowRecent;setRevision(value=>value+1);},[]);
+ // A save can improve the unread tail without moving anything already rendered.
+ const tuneRemaining=useCallback((renderedIds:string[])=>{
+  const {inventory,feedback,path,pinned,layers,affinity}=latest.current;
+  setSnapshot(current=>({...current,ids:retuneTail(current.ids,renderedIds,inventory,cards=>mixedFeed(cards,feedback,path,pinned,Date.now(),layers,affinity))}));
+ },[]);
  const markSeen=useCallback((id:string)=>{memory.current.seen[id]=Date.now();persist();},[persist]);
  const dismiss=useCallback((id:string)=>{
   if(!memory.current.dismissed.includes(id)&&memory.current.dismissed.length>=5000)return false;
@@ -44,7 +49,7 @@ export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Top
  const clearSeen=useCallback(()=>{memory.current.seen={};persist();rotate();},[persist,rotate]);
  const cards=useMemo(()=>stableFeed(snapshot.ids,inventory),[snapshot,inventory]);
  const pendingCount=ready?feedCandidates(inventory,memory.current).filter(card=>!baseline.current.has(card.id)).length:0;
- return {ready,cards,pendingCount,rotate,markSeen,dismiss,restoreDismissed,clearSeen,storageOk,revisited:snapshot.revisited};
+ return {ready,cards,pendingCount,rotate,tuneRemaining,markSeen,dismiss,restoreDismissed,clearSeen,storageOk,revisited:snapshot.revisited};
 }
 
 export function FeedExposure({id,enabled,onSeen,children}:{id:string;enabled:boolean;onSeen:(id:string)=>void;children:ReactNode}) {

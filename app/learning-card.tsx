@@ -5,7 +5,7 @@ import {Bookmark} from "./reference-bookmark";
 import {RadioGroup,RadioGroupItem} from "@/components/ui/radio-group";
 import {StackButton} from "./brand";
 import type {Card} from "./content";
-import {CardArt,RecallStack} from "./card-art";
+import {RecallStack} from "./card-art";
 import {NewsThumbnail} from "./news-thumbnail";
 import {FeedImage} from "./feed-image";
 import {reviewedFeedImage} from "./visual-content";
@@ -30,7 +30,7 @@ export function LearningCard({card,state,onSave,onComplete,onAnswer,onReview}:{c
  return <article className={`learning-card kind-${card.kind}`} data-topic={card.topic}>
   <div className="card-top"><div className={`topic-icon topic-${card.topic.toLowerCase().replaceAll(" ","-")}`}><Icon size={19}/></div><div className="card-author"><strong>{card.topic}</strong><span>{card.level} <b>·</b> {card.kind==="news"?dateLabel(card.date):`${card.minutes||1} min`}</span></div><span className={`kind-badge ${card.kind}`}><KindIcon size={13}/>{kinds[card.kind]}</span></div>
   {card.kind==="news"&&<NewsThumbnail card={card}/>}
-  {reviewedFeedImage(card)?<FeedImage card={card}/>:card.kind==="lesson"&&!card.visual&&!card.code&&<CardArt topic={card.topic} layout="compact" label="One idea. Keep building."/>}
+  {reviewedFeedImage(card)&&<FeedImage card={card}/>}
   <div className="card-main"><h2>{card.title}</h2>{permittedCardBody(card)&&<p className="card-body">{permittedCardBody(card)}</p>}<ContentCredit card={card}/>
    {card.visual==="network"&&<NetworkDiagram/>}{card.visual==="workflow"&&<WorkflowDiagram/>}{card.visual==="subnet"&&<SubnetDiagram/>}
    {card.code&&<div className="code-panel"><div><Terminal size={14}/>{card.language}</div><pre><code>{card.code}</code></pre></div>}

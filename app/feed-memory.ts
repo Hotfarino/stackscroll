@@ -33,3 +33,8 @@ export function stableFeed(ids:string[],inventory:Card[]):Card[]{
  const available=new Map(inventory.map(card=>[card.id,card]));
  return ids.flatMap(id=>available.has(id)?[available.get(id)!]:[]);
 }
+export function retuneTail(ids:string[],renderedIds:string[],inventory:Card[],rank:(cards:Card[])=>Card[]):string[]{
+ const rendered=new Set(renderedIds);let boundary=-1;
+ ids.forEach((id,index)=>{if(rendered.has(id))boundary=index;});
+ return [...ids.slice(0,boundary+1),...rank(stableFeed(ids.slice(boundary+1),inventory)).map(card=>card.id)];
+}
