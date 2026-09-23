@@ -35,18 +35,23 @@ async function readCssTree(directory) {
   return contents.join("\n");
 }
 
-test("nanotech streams return to their material with bounded, finite keyframes",async()=>{
- const {swarmFrames}=await vite.ssrLoadModule('/app/nano-choreography.ts');
- for(const screen of [false,true])for(let i=0;i<80;i++){
-  const start={x:20,y:40},end=screen?{x:320,y:480}:start;
-  const frames=swarmFrames(start,end,i,screen);
-  assert.equal(frames.length,25);
-  assert.equal(frames[0].opacity,0);assert.equal(frames.at(-1).opacity,0);
-  assert.match(frames.at(-1).transform,screen?/translate\(300px,440px\)/:/translate\(0px,0px\)/);
-  for(const frame of frames){assert.doesNotMatch(frame.transform,/NaN|Infinity/);assert.ok(frame.opacity>=0&&frame.opacity<=1);}
+test("nanotech material fully disperses and reassembles with a continuous clock",async()=>{
+ const {nanoPhase}=await vite.ssrLoadModule('/app/nano-choreography.ts');
+ assert.equal(nanoPhase(0).scatter,0);assert.equal(nanoPhase(1).scatter,0);
+ assert.equal(nanoPhase(0).cover,0);assert.equal(nanoPhase(1).cover,0);
+ assert.equal(nanoPhase(.5).scatter,1);assert.equal(nanoPhase(.5).cover,1);
+ assert.equal(nanoPhase(.92).scatter,0);
+ let previous=nanoPhase(0);
+ for(let i=1;i<=1000;i++){
+  const current=nanoPhase(i/1000);
+  for(const field of ['scatter','cover','travel']){assert.ok(current[field]>=0&&current[field]<=1);assert.ok(Math.abs(current[field]-previous[field])<.025);}
+  previous=current;
  }
  const source=await readFile(path.join(root,'app/nano-motion.tsx'),'utf8');
- assert.match(source,/duration=screen\?1300:1000/);
+ assert.match(source,/offset:\.08,opacity:0/);assert.match(source,/offset:\.92,opacity:0/);
+ assert.match(source,/duration:1000/);assert.match(source,/duration:1300/);
+ assert.match(source,/removeKind\(burst.kind\)/);
+ assert.doesNotMatch(source,/createElement\("i"\)|addEventListener\("scroll"/);
  assert.match(source,/prefers-reduced-motion: reduce/);
  assert.match(source,/observer.disconnect\(\)/);
 });
