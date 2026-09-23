@@ -35,6 +35,31 @@ async function readCssTree(directory) {
   return contents.join("\n");
 }
 
+test("catalog permission gates omit stale excerpts from rendered views", async()=>{
+ const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
+ const original=catalogCards.find(card=>card.catalog?.format==='repository');
+ const card={...original,catalog:{...original.catalog,excerpt:'UNVERIFIED_EXCERPT_SENTINEL'}};
+ const {CatalogCard}=await vite.ssrLoadModule('/app/catalog-card.tsx');
+ const {FeedPreview}=await vite.ssrLoadModule('/app/feed-preview.tsx');
+ const {RepositoryBrowser}=await vite.ssrLoadModule('/app/repository-browser.tsx');
+ const noop=()=>{};
+ const views=[
+  React.createElement(CatalogCard,{card,saved:false,onSave:noop,onBuild:noop}),
+  React.createElement(FeedPreview,{card,saved:false,blocked:false,onSave:noop,onToggle:noop}),
+  React.createElement(RepositoryBrowser,{cards:[card],saved:[],query:'',onSave:noop,onBuild:noop})
+ ];
+ for(const view of views){const html=renderToStaticMarkup(view);assert.doesNotMatch(html,/UNVERIFIED_EXCERPT_SENTINEL/);assert.ok(html.includes(card.source));}
+});
+
+test("saved attribution renders original work, license and modifications",async()=>{
+ const {licensedCards}=await vite.ssrLoadModule('/app/content.ts');
+ const {ContentCredit}=await vite.ssrLoadModule('/app/content-credit.tsx');
+ const card=JSON.parse(JSON.stringify(licensedCards[0]));
+ const html=renderToStaticMarkup(React.createElement(ContentCredit,{card}));
+ assert.match(html,/Philip Walton/);assert.match(html,/creativecommons.org\/licenses\/by\/4.0/);
+ assert.match(html,/Condensed and rewritten/);assert.ok(html.includes(card.source));
+});
+
 test("emits the catalog's animation and scrolling utilities", async () => {
   const css = await readCssTree(path.join(root, "dist"));
 

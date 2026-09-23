@@ -6,6 +6,24 @@ import {loadFeed} from './helpers/feed-loader.mjs';
 const feed=await loadFeed();after(feed.cleanup);
 const code=ts.transpileModule(readFileSync('app/content-rights.ts','utf8'),{compilerOptions:{target:ts.ScriptTarget.ES2022,module:ts.ModuleKind.ES2022}}).outputText;
 const rights=await import('data:text/javascript;base64,'+Buffer.from(code).toString('base64'));
+test('catalog ships all 1000 records without publisher excerpts',()=>{
+ assert.equal(feed.catalogCards.length,1000);
+ assert.equal(feed.catalogCards.filter(card=>card.catalog?.excerpt).length,0);
+ const stale={...feed.catalogCards[0],catalog:{...feed.catalogCards[0].catalog,excerpt:'Unverified old excerpt'}};
+ assert.equal(rights.permittedCatalogExcerpt(stale),undefined);
+ assert.equal(rights.permittedCatalogExcerpt({...stale,attribution:feed.licensedCards[0].attribution}),undefined);
+ for(const file of ['feed-preview','catalog-card','repository-browser','content-search']){
+  const source=readFileSync(`app/${file}.${file==='content-search'?'ts':'tsx'}`,'utf8');
+  assert.match(source,/permittedCatalogExcerpt\(card\)/);
+  assert.doesNotMatch(source,/meta\.excerpt|card\.catalog\?\.excerpt/);
+ }
+});
+test('saved attribution survives removal of the current registry entry',()=>{
+ const saved=JSON.parse(JSON.stringify(feed.licensedCards[0]));
+ const work=rights.licensedWorks.shift();
+ try{assert.deepEqual(rights.licensedWork(saved),saved.attribution);}
+ finally{rights.licensedWorks.unshift(work);}
+});
 test('every licensed card has a matching exact-work record and stable unique ID',()=>{
  assert.equal(feed.licensedCards.length,4);
  assert.equal(new Set(feed.cards.map(c=>c.id)).size,feed.cards.length);

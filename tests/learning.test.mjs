@@ -15,6 +15,18 @@ const { cards, topics } = await import(pathToFileURL(join(temp,'content.mjs')));
 const { initialState, stateSchema, scheduleReview, isDue, quizScore, localDay } = await import(pathToFileURL(join(temp,'learning.mjs')));
 const { parseNews, newsSources } = await import(pathToFileURL(join(temp,'news.mjs')));
 const { defaultPreferences, readPreferences, orderedTopics } = await import(pathToFileURL(join(temp,'preferences.mjs')));
+test('saved license attribution survives round trips and backfills older licensed saves',()=>{
+ const card=cards.find(c=>c.id==='licensed-web-vitals');
+ const current=stateSchema.parse({...initialState,saved:[card]});
+ assert.deepEqual(stateSchema.parse(JSON.parse(JSON.stringify(current))).saved[0].attribution,card.attribution);
+ const {attribution,...old}=card;
+ assert.deepEqual(stateSchema.parse({...initialState,saved:[old]}).saved[0].attribution,attribution);
+ assert.equal(stateSchema.parse({...initialState,saved:[{...old,source:'https://example.com/other'}]}).saved[0].attribution,undefined);
+ const damaged={...old,attribution:{source:'javascript:alert(1)'}};
+ const recovered=stateSchema.parse({...initialState,saved:[damaged]});
+ assert.equal(recovered.saved.length,1);
+ assert.deepEqual(recovered.saved[0].attribution,attribution);
+});
 test('display settings recover invalid values without discarding valid choices',()=>{
  assert.deepEqual(readPreferences('{broken'),defaultPreferences);
  const p=readPreferences(JSON.stringify({skin:'daylight',layout:'unknown',textScale:999,showActivity:false,pinnedTopics:['Cloud','Cloud','Networking']}));

@@ -7,7 +7,7 @@ import ts from 'typescript';
 
 const temp = mkdtempSync(join(process.cwd(), '.catalog-test-'));
 after(() => rmSync(temp, { recursive: true, force: true }));
-const modules = ['catalog-records', 'content', 'learning', 'mixed-feed', 'editorial-content', 'media-content', 'video-catalog', 'content-search'];
+const modules = ['content-rights', 'catalog-records', 'content', 'learning', 'mixed-feed', 'editorial-content', 'media-content', 'video-catalog', 'content-search'];
 for (const name of modules) {
   let code = ts.transpileModule(readFileSync(`app/${name}.ts`, 'utf8'), { compilerOptions: { target: ts.ScriptTarget.ES2022, module: ts.ModuleKind.ES2022 } }).outputText;
   for (const dependency of modules) code = code.replaceAll(`"./${dependency}"`, `"./${dependency}.mjs"`);
@@ -22,8 +22,11 @@ const { resolveOriginalMedia } = await load('media-content');
 const { resolveSavedVideos } = await load('video-catalog');
 const { cardMatchesSearch } = await load('content-search');
 
-test('the shipped edition contains 1,000 distinct usable entries and matches its audit manifest', () => {
+test('the shipped edition matches its 1,000-entry audit manifest apart from withheld excerpts', () => {
   const manifest = JSON.parse(readFileSync('data/catalog/launch-1000.json', 'utf8'));
+  // Historical audit data is private and retained; excerpt text is not shipped.
+  assert.equal(manifest.filter(card=>card.catalog?.excerpt).length,765);
+  for(const card of manifest)delete card.catalog?.excerpt;
   const checks = JSON.parse(readFileSync('data/catalog/source-checks.json', 'utf8'));
   assert.deepEqual(catalogCards, manifest);
   assert.equal(catalogCards.length, 1000);

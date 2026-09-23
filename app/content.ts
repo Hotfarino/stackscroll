@@ -11,11 +11,15 @@ export type CatalogMetadata = {
   prompt?: string;
   excerpt?: string;
 };
+export type ContentAttribution = {
+ cardId:string; source:string; title:string; creator:string; license:"CC-BY-4.0";
+ changes:string; reviewedAt:string;
+};
 export type Card = {
   id: string; kind: Kind; topic: Topic; title: string; level: "Foundation" | "Intermediate" | "Advanced";
   body?: string; takeaway?: string; code?: string; language?: string; visual?: "network" | "subnet" | "workflow";
   options?: string[]; answer?: number; explanation?: string; back?: string;
-  source: string; sourceName: string; date?: string; minutes?: number; catalog?: CatalogMetadata; newsImage?: string;
+  source: string; sourceName: string; date?: string; minutes?: number; catalog?: CatalogMetadata; newsImage?: string; attribution?:ContentAttribution;
 };
 export const topics: Topic[] = ["Networking", "CompTIA", "CCNA", "Cloud", "Development", "Languages", "Agentic AI", "Machine learning", "AI workflows", "Data centers", "Cybersecurity", "Data engineering", "DevOps", "Web & accessibility", "Mobile development", "Robotics & IoT"];
 const refs = {
@@ -138,12 +142,12 @@ export const expandedGuides:Card[]=( [
  ["Robotics & IoT","ESP-IDF development guide","https://docs.espressif.com/projects/esp-idf/en/stable/esp32/"],
  ["Robotics & IoT","Gazebo simulation documentation","https://gazebosim.org/docs/latest/"],
 ] as [Topic,string,string][]).map(([topic,title,source],index)=>({id:`expanded-guide-${index+1}`,kind:"resource",topic,title,source,sourceName:new URL(source).hostname,level:"Foundation",body:"Explore the original documentation, examples, and learning material. Save this guide to shape your next mix or use its topic to start a Stack."}));
-export const licensedCards:Card[]=[
+export const licensedCards:Card[]=([
  {id:"licensed-web-vitals",kind:"lesson",topic:"Web & accessibility",level:"Foundation",title:"Measure the experience, not just the download.",body:"A page can load quickly and still feel frustrating. Core Web Vitals examine loading, responsiveness, and visual stability. Compare real-user measurements with lab tests: each reveals different problems.",source:"https://web.dev/articles/vitals",sourceName:"Philip Walton / Google · Web Vitals"},
  {id:"licensed-devtools",kind:"lesson",topic:"Development",level:"Foundation",title:"Choose the browser tool that matches the question.",body:"Use Elements to inspect page structure and styles, Network to examine requests, and Sources to debug JavaScript. Performance recordings help investigate slow interactions. Begin with a specific symptom, then choose the relevant panel.",source:"https://developer.chrome.com/docs/devtools/overview",sourceName:"Google · Chrome DevTools"},
  {id:"licensed-overfitting",kind:"lesson",topic:"Machine learning",level:"Foundation",title:"A model must succeed beyond its training examples.",body:"Excellent training results can hide poor performance on unseen examples. Compare training and validation loss: increasing validation loss while training loss falls can signal overfitting. Model complexity and unrepresentative data are common contributors.",source:"https://developers.google.com/machine-learning/crash-course/overfitting/overfitting",sourceName:"Google · Machine Learning Crash Course"},
  {id:"licensed-classification",kind:"lesson",topic:"Machine learning",level:"Foundation",title:"Choose a metric that reflects the cost of mistakes.",body:"Precision asks how many positive predictions were correct. Recall asks how many actual positives were found. Accuracy alone can mislead when classes are imbalanced. Choose metrics with the consequences of missed cases and false alarms in mind.",source:"https://developers.google.com/machine-learning/crash-course/classification/accuracy-precision-recall",sourceName:"Google · Machine Learning Crash Course"},
-];
+] satisfies Card[]).map((card,index)=>({...card,attribution:{cardId:card.id,source:card.source,title:["Web Vitals","Overview (Chrome DevTools)","Overfitting","Classification: Accuracy, recall, precision, and related metrics"][index],creator:index===0?"Philip Walton / Google":"Google",license:"CC-BY-4.0",changes:"Condensed and rewritten by StackScroll.",reviewedAt:"2026-09-23"}}));
 export const cards: Card[] = [...coreCards, ...catalogCards, ...curiosityCards, ...expandedGuides, ...licensedCards];
 export const cardById = new Map(cards.map(card => [card.id, card]));
 export function resolveCatalogSaved(saved: Card[], resolveOther: (saved: Card[]) => Card[]): Card[] {

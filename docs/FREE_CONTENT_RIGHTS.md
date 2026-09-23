@@ -2,7 +2,7 @@
 
 Reviewed: 2026-09-23. Scope: four text-only learning cards, not clearance of the existing feed.
 
-No paid contract, publisher partnership, or exclusive rights have been obtained. These are existing public licenses, usable only subject to their conditions. The implementation in `app/content-rights.ts` matches exact card IDs and source URLs for attribution. RSS ingestion withholds all publisher excerpts and images; rendering also withholds them from older RSS saves. Other catalog, quotation, and artwork rights remain outside this implementation. Deployment status is reported separately.
+No paid contract, publisher partnership, or exclusive rights have been obtained. These are existing public licenses, usable only subject to their conditions. Attribution snapshots are stored with the four licensed cards and validated/backfilled for older device saves. Snapshots identify the card, original work, creator, license, modifications, and review date; they are not grants to import other content. RSS ingestion withholds publisher excerpts and images, including old RSS saves at render time. All 765 unverified catalog excerpt fields have also been removed from the shipped catalog; their originals remain in Git history before this change. All 1,000 catalog card IDs, links, and other fields are preserved. Closed-by-default checks also cover catalog cards, collapsed previews, repository listings, and search. Other quotation and artwork rights remain outside this implementation. Deployment status is reported separately.
 
 ## Verified page-level notices
 
