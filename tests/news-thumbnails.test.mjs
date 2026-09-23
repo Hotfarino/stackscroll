@@ -16,11 +16,11 @@ test('missing, tracking, non-image enclosures and unsafe URLs stay text-only',()
  assert.equal(publisherImage('<enclosure type="audio/mpeg" url="https://example.org/audio.mp3"/><img width="1" src="https://example.org/pixel.gif">',base),undefined);
  assert.equal(publisherImage('<description>No image</description>',base),undefined);
 });
-test('news parsing preserves source, date and text while attaching publisher image',()=>{
+test('news parsing preserves source and date without importing unverified publisher text or images',()=>{
  const date=new Date(Date.now()-60000).toISOString();
  const [card]=parseNews(`<rss><item><title>Release</title><link>${base}</link><pubDate>${date}</pubDate><description><![CDATA[Useful release notes <img src="https://cdn.example.org/article.jpg">]]></description></item></rss>`,newsSources[0]);
  assert.equal(card.kind,'news');assert.equal(card.source,base);assert.equal(card.date,date);
- assert.equal(card.body,'Publisher preview: Useful release notes');assert.equal(card.newsImage,'https://cdn.example.org/article.jpg');
+ assert.match(card.body,/excerpts are withheld/);assert.equal(card.newsImage,undefined);
 });
 test('header accents explicitly exclude news and thumbnail loading is lazy with failure fallback',()=>{
  const css=readFileSync('app/continuous-feed.css','utf8');

@@ -87,10 +87,7 @@ export function parseNews(xml:string,source:typeof newsSources[number],now=Date.
    const url=new URL(link);const time=Date.parse(date);
    if(url.protocol!=="https:"||url.hostname!==source.host||url.username||url.password||url.port||!title||!Number.isFinite(time)||time>now||time<now-7*86400000)continue;
    const topic:Topic=["Cybersecurity","Data engineering","DevOps","Web & accessibility","Mobile development","Robotics & IoT"].includes(source.topic)?source.topic:/\bagents?\b|copilot|agentic/i.test(title)?"Agentic AI":/\brag\b|workflow|bedrock/i.test(title)?"AI workflows":/machine learning|\bllm\b|neural|model training/i.test(title)?"Machine learning":source.topic;
-   const description=(field(item,"description")||field(item,"summary")).replace(/<[^>]*>/g,"").trim();
-   const words=description.split(/\s+/).filter(Boolean);
-   const preview=words.slice(0,24).join(" ").slice(0,320);
-   items.push({id:`rss-${url.href}`,kind:"news",topic,level:"Intermediate",title:title.slice(0,240),body:preview?`Publisher preview: ${preview}${words.length>24?"…":""}`:`Latest from ${source.name}. Read the original for details.`,source:url.href,sourceName:source.name,date:new Date(time).toISOString(),newsImage:publisherImage(item,url.href)});
+   items.push({id:`rss-${url.href}`,kind:"news",topic,level:"Intermediate",title:title.slice(0,240),body:`Read the original at ${source.name}. Publisher excerpts are withheld until reuse permissions are verified.`,source:url.href,sourceName:source.name,date:new Date(time).toISOString()});
   }catch{continue;}
   if(items.length>=NEWS_PER_SOURCE)break;
  }

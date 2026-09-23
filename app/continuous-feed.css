@@ -74,3 +74,5 @@ html[data-skin="signal"] body .learning-card:not(.kind-news) .card-top :is(.card
  html[data-skin="signal"] body .feed-preview:not(.kind-news) .preview-meta { background:Canvas; color:CanvasText; border-color:CanvasText; box-shadow:none; }
  html[data-skin="signal"] body .learning-card:not(.kind-news) .card-top :is(.card-author strong,.kind-badge,.topic-icon) { color:CanvasText; }
 }
+body .content-credit,body .mixed-workspace[data-layout="stream"] .preview-copy>p.content-credit{display:block;-webkit-line-clamp:unset;overflow:visible;font-size:.875rem;line-height:1.55;color:var(--copy);margin:.75rem 0;overflow-wrap:anywhere}
+.content-credit a{text-decoration:underline;text-underline-offset:3px;color:inherit}

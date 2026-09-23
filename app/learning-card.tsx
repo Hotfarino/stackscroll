@@ -7,6 +7,8 @@ import {StackButton} from "./brand";
 import type {Card} from "./content";
 import {CardArt,RecallStack} from "./card-art";
 import {NewsThumbnail} from "./news-thumbnail";
+import {ContentCredit} from "./content-credit";
+import {permittedCardBody} from "./content-rights";
 import {scheduleReview,type LearningState} from "./learning";
 const icons = {Networking:Network,CompTIA:Cpu,CCNA:Network,Cloud:Cloud,Development:Code2,Languages:Terminal,"Agentic AI":Bot,"Machine learning":BrainCircuit,"AI workflows":Workflow,"Data centers":Server,"Cybersecurity":Target,"Data engineering":Server,"DevOps":Workflow,"Web & accessibility":Code2,"Mobile development":Laptop,"Robotics & IoT":Cpu};
 const kinds = {lesson:"Quick lesson",quiz:"Knowledge check",flashcard:"Flashcard",news:"Tech news",video:"Video",quote:"Quote",explainer:"AI explainer",story:"IT story",podcast:"Podcast",resource:"Guide",humor:"Tech humor"};
@@ -27,7 +29,7 @@ export function LearningCard({card,state,onSave,onComplete,onAnswer,onReview}:{c
   <div className="card-top"><div className={`topic-icon topic-${card.topic.toLowerCase().replaceAll(" ","-")}`}><Icon size={19}/></div><div className="card-author"><strong>{card.topic}</strong><span>{card.level} <b>·</b> {card.kind==="news"?dateLabel(card.date):`${card.minutes||1} min`}</span></div><span className={`kind-badge ${card.kind}`}><KindIcon size={13}/>{kinds[card.kind]}</span></div>
   {card.kind==="news"&&<NewsThumbnail card={card}/>}
   {card.kind==="lesson"&&!card.visual&&!card.code&&<CardArt topic={card.topic} layout="compact" label="One idea. Keep building."/>}
-  <div className="card-main"><h2>{card.title}</h2>{card.body&&<p className="card-body">{card.body}</p>}
+  <div className="card-main"><h2>{card.title}</h2>{permittedCardBody(card)&&<p className="card-body">{permittedCardBody(card)}</p>}<ContentCredit card={card}/>
    {card.visual==="network"&&<NetworkDiagram/>}{card.visual==="workflow"&&<WorkflowDiagram/>}{card.visual==="subnet"&&<SubnetDiagram/>}
    {card.code&&<div className="code-panel"><div><Terminal size={14}/>{card.language}</div><pre><code>{card.code}</code></pre></div>}
    {card.kind==="quiz"&&<div className="quiz-area"><RadioGroup aria-label={card.title} value={answered?String(answer):selected} onValueChange={setSelected} disabled={answered} className="quiz-options">{card.options?.map((option,i)=><label key={i} className={`quiz-option ${answered&&i===card.answer?"correct":answered&&i===answer?"incorrect":""} ${selected===String(i)?"selected":""}`} htmlFor={`${card.id}-${i}`}><RadioGroupItem value={String(i)} id={`${card.id}-${i}`} className="answer-radio"/><span className="option-letter">{String.fromCharCode(65+i)}</span><span>{option}</span>{answered&&i===card.answer&&<CheckCircle2 size={17}/>}</label>)}</RadioGroup>{!answered?<div className="quiz-action"><span>Choose your answer</span><StackButton tone="primary" disabled={selected===""} onClick={()=>onAnswer(card.id,Number(selected))}>Check answer <ArrowRight size={16}/></StackButton></div>:<div className={`answer-explanation ${answer===card.answer?"right":"wrong"}`} role="status"><strong>{answer===card.answer?<><CheckCircle2 size={17}/>You’ve got it.</>:<><Lightbulb size={17}/>A useful one to remember.</>}</strong><p>{card.explanation}</p></div>}</div>}

@@ -2,6 +2,7 @@ import {json} from "../../video-server";
 import {ingestNews,readNewsSnapshot} from "../../news-ingestion";
 import {newsSources} from "../../news";
 import {recordDiagnostic} from "../../diagnostics-server";
+import {permittedCardBody,permittedNewsImage} from "../../content-rights";
 export async function GET(request?:Request){
  try {
   let snapshot=await readNewsSnapshot();
@@ -11,6 +12,6 @@ export async function GET(request?:Request){
   }
   if(!snapshot){await recordDiagnostic("news-request");return json({error:"The first feed collection is still running. Try again shortly."},503);}
   if(snapshot.status!=="live")await recordDiagnostic("news-source");
-  return json({...snapshot,status:Date.now()-Date.parse(snapshot.fetchedAt)>7200000?"stale":snapshot.status});
+  return json({...snapshot,items:snapshot.items.map(card=>({...card,body:permittedCardBody(card),newsImage:permittedNewsImage(card)})),status:Date.now()-Date.parse(snapshot.fetchedAt)>7200000?"stale":snapshot.status});
  }catch{await recordDiagnostic("news-request");return json({error:"Feed storage is temporarily unavailable. Your current cards are kept."},503);}
 }
