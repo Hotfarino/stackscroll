@@ -104,7 +104,7 @@ export function Customizer({ preferences: p, onChange, canSave }: {
             {key:"showRail" as const,label:"Learning sidebar",detail:"Stack outline and activity on wide screens."},
             {key:"showActivity" as const,label:"Stack activity",detail:"Separate read, attempted, and later recall counts."},
             {key:"expandSources" as const,label:"Expand source details",detail:"Show the reference and review status under each card."},
-            {key:"reduceMotion" as const,label:"Reduce motion",detail:"Stop interface animations and smooth scrolling."},
+            {key:"reduceMotion" as const,label:"Reduce motion",detail:"Stop interface animations and smooth scrolling. Your device’s Reduce Motion setting is also respected, even when this switch is off."},
           ].map(option => <div className="switch-setting" key={option.key}><label htmlFor={`setting-${option.key}`}><strong>{option.label}</strong><span>{option.detail}</span></label><Switch id={`setting-${option.key}`} checked={p[option.key]} onCheckedChange={value => set(option.key, value)}/></div>)}
         </section>
         <section className="custom-section">

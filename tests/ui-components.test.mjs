@@ -35,6 +35,16 @@ async function readCssTree(directory) {
   return contents.join("\n");
 }
 
+test("mobile header uses reliable strokes, balanced icons and touch feedback",async()=>{
+ const css=await readFile(path.join(root,'app/popout-navigation.css'),'utf8');
+ assert.match(css,/\.topbar svg\.lucide\{stroke:currentColor;filter:none;stroke-width:2\}/);
+ assert.match(css,/>svg\.lucide\{width:20px;height:20px;flex-shrink:0\}/);
+ assert.match(css,/min-width:44px;min-height:44px/);
+ assert.match(css,/:active\{transform:scale\(\.94\)/);
+ assert.match(css,/transform-box:fill-box;transform-origin:center/);
+ assert.match(css,/prefers-reduced-motion:reduce/);
+});
+
 test("flashcard texture keeps recall semantics and accessible fallback styling",async()=>{
  const {LearningCard}=await vite.ssrLoadModule('/app/learning-card.tsx');
  const {initialState}=await vite.ssrLoadModule('/app/learning.ts');
