@@ -62,3 +62,8 @@ The application logo and principal navigation icons now use SVG viewports into t
 ## Icon clarity and menu access
 
 Reference icons now use silhouette clips, brighter material and a white outline; rectangular screenshot backgrounds must never show on light surfaces. Preserve the supplied icon artwork inside the silhouette. Desktop navigation stays expanded. The logo/menu control opens the matching left drawer on mobile; bottom navigation remains available. The sidebar uses the reference's angled right edge, tall identity block, separated navigation rows and cyan active edge.
+# September 23 interaction and sharpness update
+
+The requested workspace popout supplements the desktop sidebar and mobile bottom navigation. It uses the installed accessible dropdown primitive for keyboard navigation, dismissal and focus restoration. Opening it or selecting the current destination preserves feed state. Button entrance effects are brief, opacity-only, and disabled by system or app reduced-motion preferences.
+
+The explicit request for sharper icons supersedes screenshot-crop rendering: ReferenceIcon now uses SVG vector masters with the existing silhouettes, dimensions and silver/cyan graphite material. The reference bitmap remains untouched. Functional toolbar glyphs retain their dimensions without softening filters.

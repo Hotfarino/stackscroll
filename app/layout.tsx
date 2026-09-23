@@ -6,6 +6,7 @@ import "./glass-interface.css";
 import "./signal-interface.css";
 import "./reference-foundations.css";
 import "./continuous-feed.css";
+import "./popout-navigation.css";
 export const metadata: Metadata = {
   title: "Stackscroll — Build your next level",
   description: "Your daily feed of IT knowledge. Learn networking, cloud, code, and AI through bite-sized lessons, original quizzes, and flashcards.",

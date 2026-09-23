@@ -35,6 +35,27 @@ async function readCssTree(directory) {
   return contents.join("\n");
 }
 
+test("vector icons preserve dimensions without raster artwork or blur",async()=>{
+ const {ReferenceIcon}=await vite.ssrLoadModule('/app/reference-icon.tsx');
+ const names=['logo','discover','stacks','lab','radar','saved','search','profile','settings'];
+ const html=renderToStaticMarkup(React.createElement('div',null,...names.map(name=>React.createElement(ReferenceIcon,{key:name,name,size:28}))));
+ assert.doesNotMatch(html,/<image|<filter|feGaussianBlur/);
+ assert.equal((html.match(/width="28" height="28"/g)||[]).length,names.length);
+ const ids=[...html.matchAll(/ id="([^"]+)"/g)].map(match=>match[1]);
+ assert.equal(new Set(ids).size,ids.length);
+ assert.match(html,/viewBox="-2 -2 53 55"/);
+});
+
+test("workspace popout has an accessible closed trigger and reduced motion",async()=>{
+ const {PopoutNavigation}=await vite.ssrLoadModule('/app/popout-navigation.tsx');
+ const html=renderToStaticMarkup(React.createElement(PopoutNavigation,{items:[{id:'feed',label:'Discover',detail:'Fresh'}],view:'feed',onNavigate:()=>{throw Error('render must not navigate')}}));
+ assert.match(html,/aria-label="Open workspace menu"/);
+ assert.match(html,/aria-haspopup="menu"/);assert.match(html,/aria-expanded="false"/);
+ const css=await readFile(path.join(root,'app/popout-navigation.css'),'utf8');
+ assert.match(css,/prefers-reduced-motion:reduce/);assert.match(css,/data-motion="reduced"/);
+ assert.match(css,/forced-colors:active/);
+});
+
 test("catalog permission gates omit stale excerpts from rendered views", async()=>{
  const {catalogCards}=await vite.ssrLoadModule('/app/content.ts');
  const original=catalogCards.find(card=>card.catalog?.format==='repository');
