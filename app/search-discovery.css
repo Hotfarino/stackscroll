@@ -1,0 +1,4 @@
+.search-keywords{display:flex;flex-wrap:wrap;gap:.5rem;margin:.75rem 0 1rem}
+.search-keywords button{font-size:.875rem;min-height:36px;padding:.35rem .65rem;border:1px solid var(--border);background:var(--card);color:var(--foreground);border-radius:var(--radius);cursor:pointer}
+.search-keywords button:hover{border-color:var(--primary);background:var(--accent)}
+.search-keywords button:focus-visible{outline:2px solid var(--primary);outline-offset:3px}

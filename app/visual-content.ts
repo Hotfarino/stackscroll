@@ -1,5 +1,6 @@
 import type {Card} from "./content";
 import {technologyCards,technologyVisuals} from "./technology-visuals";
+import {discoveryVisualCards,discoveryVisuals} from "./discovery-visuals";
 // Exact-work image grants reviewed 2026-09-23. Never trust image URLs in cached cards.
 // ESA/Webb policy: https://esawebb.org/copyright/ ; no endorsement is implied.
 const works=[
@@ -8,8 +9,10 @@ const works=[
  {key:"ring",page:"weic2320c",date:"2023-08-21",credit:"ESA/Webb, NASA, CSA, M. Barlow, N. Cox, R. Wesson",topic:"Machine learning",title:"A striking pattern is the start of a question.",alt:"Webb mid-infrared image of the Ring Nebula and its faint outer arcs.",body:"Webb’s mid-infrared view shows intricate structure around the Ring Nebula. For anyone working with image models, it is a reminder to distinguish a visible pattern from an explanation of what caused it.",takeaway:"When a model detects a feature, what independent evidence would you use to interpret it?"},
  {key:"cartwheel",page:"weic2211b",date:"2022-08-02",credit:"NASA, ESA, CSA, STScI",topic:"Data engineering",title:"Read the instrument before you read the image.",alt:"Mid-infrared view of the Cartwheel Galaxy’s bright ring and dusty spokes.",body:"Webb’s MIRI view highlights dust and star-forming regions in the Cartwheel Galaxy. Scientific images are measurements presented visually; instrument and processing context help explain what the colors and structures represent.",takeaway:"Before reusing a visualization, check its instrument, legend, processing notes and original source."}
 ] satisfies {key:string;page:string;date:string;credit:string;topic:Card["topic"];title:string;alt:string;body:string;takeaway:string}[];
-export const visualCards:Card[]=[...technologyCards,...works.map(work=>({id:`visual-${work.key}`,kind:"lesson" as const,topic:work.topic,level:"Foundation" as const,title:work.title,body:work.body,takeaway:work.takeaway,source:`https://esawebb.org/images/${work.page}/`,sourceName:"ESA/Webb · Visual field notes",date:work.date,minutes:1}))];
+export const visualCards:Card[]=[...discoveryVisualCards,...technologyCards,...works.map(work=>({id:`visual-${work.key}`,kind:"lesson" as const,topic:work.topic,level:"Foundation" as const,title:work.title,body:work.body,takeaway:work.takeaway,source:`https://esawebb.org/images/${work.page}/`,sourceName:"ESA/Webb · Visual field notes",date:work.date,minutes:1}))];
 export function reviewedFeedImage(card:Pick<Card,"id"|"source">){
+ const discovery=discoveryVisuals.find(work=>card.id===`visual-${work.key}`&&card.source===work.source);
+ if(discovery)return {src:`/media/licensed/${discovery.key}.webp`,alt:discovery.alt,credit:discovery.credit,source:discovery.source,license:discovery.license,policy:discovery.policy,date:discovery.date,fit:discovery.fit};
  const photo=technologyVisuals.find(work=>card.id===`visual-${work.key}`&&card.source===`https://commons.wikimedia.org/wiki/File:${work.file}`);
  if(photo)return {src:`/media/licensed/${photo.key}.webp`,alt:photo.alt,credit:photo.credit,source:card.source,license:photo.license,policy:photo.policy,date:undefined};
  const work=works.find(work=>card.id===`visual-${work.key}`&&card.source===`https://esawebb.org/images/${work.page}/`);

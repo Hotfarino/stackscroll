@@ -2,6 +2,7 @@
 .feed-image-frame{aspect-ratio:16/9;overflow:hidden;background:#11181e}
 .feed-image-frame>a,.feed-image-frame>button{position:relative;display:block;width:100%;height:100%;padding:0;border:0;color:#edf7fc;background:transparent;text-align:left;cursor:pointer}
 .feed-image-frame img{display:block;width:100%;height:100%;object-fit:cover}
+.feed-image[data-full-image] img{object-fit:contain}
 .feed-image-frame :is(a,button):focus-visible{outline:2px solid var(--ring);outline-offset:-4px}
 .feed-image-action{position:absolute;bottom:12px;right:12px;padding:6px 9px;border:1px solid #ffffff35;border-radius:3px;background:#101820e8;font-size:12px}
 .feed-image figcaption{display:flex;flex-wrap:wrap;gap:6px 12px;padding:8px 14px;font-size:12px;line-height:1.5;color:var(--muted-foreground)}

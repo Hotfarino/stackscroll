@@ -61,7 +61,7 @@ test("vector icons preserve dimensions without raster artwork or blur",async()=>
 test("reviewed feed images retain attribution, lazy loading and exact-work permission",async()=>{
  const {visualCards,reviewedFeedImage}=await vite.ssrLoadModule('/app/visual-content.ts');
  const {FeedImage}=await vite.ssrLoadModule('/app/feed-image.tsx');
- assert.equal(visualCards.length,11);
+ assert.equal(visualCards.length,27);
  for(const card of visualCards){
   const work=reviewedFeedImage(card);assert.ok(work);
   assert.equal(reviewedFeedImage({...card,source:'https://example.com/'}),undefined);
