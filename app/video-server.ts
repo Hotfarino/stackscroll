@@ -1,13 +1,14 @@
 import { env } from "cloudflare:workers";
 import { z } from "zod";
 
-// The current private workspace owner. Never authorize moderation in client code.
-// Change this server-only allowlist when transferring editorial ownership.
-const moderatorEmails = new Set(["bigdawgroof@gmail.com"]);
+function moderatorIds() {
+  const value=(env as unknown as {STACKSCROLL_OWNER_IDS?:string}).STACKSCROLL_OWNER_IDS||"";
+  return new Set(value.split(",").map(id=>id.trim()).filter(Boolean));
+}
 
 export function isModerator(request: Request): boolean {
-  return !!request.headers.get("oai-authenticated-user-id")
-    && moderatorEmails.has((request.headers.get("oai-authenticated-user-email") || "").toLowerCase());
+  const id=request.headers.get("oai-authenticated-user-id");
+  return !!id && moderatorIds().has(id);
 }
 
 export function database() {

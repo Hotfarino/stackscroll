@@ -30,6 +30,7 @@ const videos = await imp('videos');const reports = await imp('reports');const mo
 const {readBody} = await imp('video-server');
 const binding = {prepare(sql){return {bind(...args){const stmt=sqlite.prepare(sql);return {async run(){const result=stmt.run(...args);return {meta:{changes:Number(result.changes)}};},async all(){return {results:stmt.all(...args)};}};},async all(){return {results:sqlite.prepare(sql).all()};}};}};
 env.DB=binding;
+env.STACKSCROLL_OWNER_IDS='moderator';
 const now = Date.now();
 for(const video of videoCatalog){video.rights.checkedAt=new Date(now-60000).toISOString();video.rights.recheckAfter=new Date(now+86400000).toISOString();}
 const video = videoCatalog[0];
@@ -89,7 +90,7 @@ test('bounded parser rejects oversized bodies without a Content-Length header',a
 });
 
 test('moderation is owner-only and hidden videos cannot be played from the catalog',async()=>{
- const admin={user:'moderator',email:'bigdawgroof@gmail.com'};
+ const admin={user:'moderator',email:'untrusted@example.org'};
  assert.equal((await moderation.GET(request('/api/moderation'))).status,403);
  assert.equal((await moderation.POST(request('/api/moderation',{videoId:video.id,action:'hide'}))).status,403);
  assert.equal((await moderation.POST(request('/api/moderation',{videoId:video.id,action:'hide'},admin))).status,200);
@@ -202,7 +203,7 @@ test('privacy requests stay available when all videos are hidden and can be dele
  const response=await reports.POST(request('/api/reports',{videoId:'privacy-request',category:'privacy',details:'Please remove the report data referenced in my earlier submission.'},{user:'privacy-request-user'}));
  assert.equal(response.status,201);
  const {id}=await response.json();
- const deleted=await moderation.POST(request('/api/moderation',{videoId:'privacy-request',reportId:id,action:'delete'},{user:'moderator',email:'bigdawgroof@gmail.com'}));
+ const deleted=await moderation.POST(request('/api/moderation',{videoId:'privacy-request',reportId:id,action:'delete'},{user:'moderator',email:'untrusted@example.org'}));
  assert.equal(deleted.status,200);
  assert.equal(sqlite.prepare('SELECT id FROM content_reports WHERE id=?').get(id),undefined);
 });
