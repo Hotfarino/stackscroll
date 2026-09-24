@@ -4,6 +4,7 @@ import {Camera,UserRound,X} from "lucide-react";
 import {Sheet,SheetTrigger,SheetContent,SheetHeader,SheetTitle,SheetDescription} from "@/components/ui/sheet";
 import {Input} from "@/components/ui/input";
 import {StackButton} from "./brand";
+import {clearStackscrollDeviceData} from "./device-storage";
 
 export type ProfileStats={saved:number;completed:number;accuracy:number|null;stacks:number;recalls:number};
 type Profile={name:string;headline:string;bio:string;photo:string};
@@ -25,10 +26,12 @@ async function resizePhoto(file:File){
 }
 export function ProfileControl({stats,storageMode}:{stats:ProfileStats;storageMode:"account"|"device"}){
  const [profile,setProfile]=useState<Profile>(empty),[ready,setReady]=useState(false),[message,setMessage]=useState("");
+ const [confirmClear,setConfirmClear]=useState(false),[clearing,setClearing]=useState(false);
  const file=useRef<HTMLInputElement|null>(null);
  useEffect(()=>{setProfile(readProfile(localStorage.getItem(key)));setReady(true);},[]);
  function save(){try{localStorage.setItem(key,JSON.stringify(profile));setMessage("Profile saved on this device.");}catch{setMessage("Profile could not be saved on this device.");}}
  async function photo(next:File|undefined){if(!next)return;try{const resized=await resizePhoto(next);setProfile(current=>({...current,photo:resized}));setMessage("Photo ready. Save your profile to keep it.");}catch(error){setMessage(error instanceof Error?error.message:"That photo could not be used.");}}
+ async function clearDevice(){setClearing(true);try{await clearStackscrollDeviceData();location.reload();}catch{setMessage("Some device data could not be cleared. Use your browser's website-data settings.");setClearing(false);}}
  const label=profile.name.trim()||"Your profile";
  return <Sheet><SheetTrigger asChild><button className="profile-trigger" aria-label="Open your profile">{ready&&profile.photo?<img src={profile.photo} alt=""/>:<UserRound size={20}/>}<span>{profile.name.trim()||"Profile"}</span></button></SheetTrigger>
   <SheetContent className="profile-panel" aria-describedby="profile-description">
@@ -39,6 +42,7 @@ export function ProfileControl({stats,storageMode}:{stats:ProfileStats;storageMo
     <section className="profile-stats" aria-label="Learning stats"><div><strong>{stats.saved}</strong><span>Saved</span></div><div><strong>{stats.completed}</strong><span>Cards completed</span></div><div><strong>{stats.accuracy===null?"—":`${stats.accuracy}%`}</strong><span>Quiz accuracy</span></div><div><strong>{stats.stacks}</strong><span>Stacks finished</span></div><div><strong>{stats.recalls}</strong><span>Recalls completed</span></div></section>
     <p className="profile-storage"><strong>{storageMode==="account"?"Account Stack storage":"Offline test storage"}</strong><br/>{storageMode==="account"?"Stack progress is connected. Profile details remain on this device.":"Profile and Stack progress remain on this browser and do not sync to another device."}</p>
     <div className="profile-save"><StackButton onClick={save}>Save profile</StackButton><span role="status" aria-live="polite">{message}</span></div>
+    <section className="profile-danger"><strong>Private-device controls</strong><p>Remove this profile photo, offline progress, preferences, playlists, and downloaded app cache from this browser. Account-backed records are not deleted.</p>{confirmClear?<div><StackButton tone="secondary" disabled={clearing} onClick={()=>void clearDevice()}>{clearing?"Clearing…":"Confirm clear"}</StackButton><button onClick={()=>setConfirmClear(false)} disabled={clearing}>Cancel</button></div>:<button onClick={()=>setConfirmClear(true)}>Clear this device</button>}</section>
    </div>
   </SheetContent>
  </Sheet>;

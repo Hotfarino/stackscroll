@@ -87,3 +87,9 @@ export const feedIngestion = sqliteTable("feed_ingestion", {
  leaseUntil: integer("lease_until").notNull().default(0),
  leaseToken: text("lease_token"),
 });
+
+export const apiRateLimits = sqliteTable("api_rate_limits", {
+ scope: text("scope").primaryKey(),
+ count: integer("count").notNull().default(1),
+ expiresAt: integer("expires_at").notNull(),
+}, table => [index("api_rate_limits_expires").on(table.expiresAt)]);

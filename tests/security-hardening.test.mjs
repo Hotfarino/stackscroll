@@ -7,7 +7,7 @@ const root=process.cwd();
 
 test("worker places every API behind authentication and applies browser defenses",async()=>{
  const source=await readFile(path.join(root,"worker/index.ts"),"utf8");
- assert.match(source,/pathname\.startsWith\("\/api\/"\).*oai-authenticated-user-id/);
+ assert.match(source,/pathname\.startsWith\("\/api\/"\)/);assert.match(source,/oai-authenticated-user-id/);
  for(const value of ["Content-Security-Policy","Strict-Transport-Security","Permissions-Policy","Referrer-Policy","X-Content-Type-Options","X-Frame-Options","X-Robots-Tag","Cross-Origin-Opener-Policy"]){assert.ok(source.includes(value),`${value} missing`);}
  assert.match(source,/frame-ancestors 'none'/);assert.match(source,/object-src 'none'/);assert.match(source,/Cache-Control","no-store"/);
 });

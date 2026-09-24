@@ -43,6 +43,13 @@
       "when": 1789888586025,
       "tag": "0005_modern_rumiko_fujikawa",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "6",
+      "when": 1790217952367,
+      "tag": "0006_api_rate_limits",
+      "breakpoints": true
     }
   ]
 }

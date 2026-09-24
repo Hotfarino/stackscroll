@@ -48,6 +48,29 @@ function unauthenticated(request:Request){
   return secured(Response.json({error:"Authentication required."},{status:401}),request);
 }
 
+function requestLimit(url:URL,method:string){
+  if(method!=="GET")return url.pathname==="/api/feed-ingestion"?10:60;
+  if(url.pathname.endsWith("/thumbnail"))return 180;
+  return 90;
+}
+
+async function rateLimit(request:Request,env:Env,ctx:ExecutionContext){
+  const id=request.headers.get("oai-authenticated-user-id");if(!id)return unauthenticated(request);
+  const url=new URL(request.url),now=Date.now(),windowMs=60_000,bucket=Math.floor(now/windowMs),expires=(bucket+1)*windowMs;
+  const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(`${id}:${request.method}:${url.pathname}:${bucket}`));
+  const scope=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,"0")).join("");
+  try{
+    const row=await env.DB.prepare("INSERT INTO api_rate_limits (scope,count,expires_at) VALUES (?,1,?) ON CONFLICT(scope) DO UPDATE SET count=count+1,expires_at=excluded.expires_at RETURNING count").bind(scope,expires).first<{count:number}>();
+    if(Math.random()<.02)ctx.waitUntil(env.DB.prepare("DELETE FROM api_rate_limits WHERE expires_at < ?").bind(now-windowMs).run().then(()=>undefined));
+    const limit=requestLimit(url,request.method);
+    if((row?.count??limit+1)>limit){const response=Response.json({error:"Too many requests. Try again shortly."},{status:429,headers:{"Retry-After":String(Math.max(1,Math.ceil((expires-now)/1000)))}});return secured(response,request);}
+    return null;
+  }catch{
+    if(request.method!=="GET")return secured(Response.json({error:"Request protection is temporarily unavailable. Try again."},{status:503}),request);
+    return null;
+  }
+}
+
 interface ExecutionContext {
   waitUntil(promise: Promise<unknown>): void;
   passThroughOnException(): void;
@@ -65,7 +88,10 @@ const worker = {
 
     // The Sites access gate is the primary control. This second boundary keeps
     // API data closed if a route is ever exposed through another hostname.
-    if(url.pathname.startsWith("/api/")&&!request.headers.get("oai-authenticated-user-id"))return unauthenticated(request);
+    if(url.pathname.startsWith("/api/")){
+      if(!request.headers.get("oai-authenticated-user-id"))return unauthenticated(request);
+      const limited=await rateLimit(request,env,ctx);if(limited)return limited;
+    }
 
     if (url.pathname === "/_vinext/image") {
       const allowedWidths = [...DEFAULT_DEVICE_SIZES, ...DEFAULT_IMAGE_SIZES];
