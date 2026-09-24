@@ -2,7 +2,7 @@
 import {useEffect} from "react";
 export function OfflineClient(){
  useEffect(()=>{
-  if(!("serviceWorker" in navigator)||location.protocol!=="https:")return;
+  if(!("serviceWorker" in navigator)||location.protocol!=="https:"||sessionStorage.getItem("stackscroll-offline-disabled")==="1")return;
   let active=true;
   navigator.serviceWorker.register("/sw.js").then(async registration=>{
    if(!active)return;

@@ -17,6 +17,8 @@ test("rate limiting uses a hashed user scope, durable storage and endpoint budge
 
 test("device wipe removes only StackScroll storage and unregisters its offline shell",async()=>{
  const source=await readFile(path.join(root,"app/device-storage.ts"),"utf8");
+ const offline=await readFile(path.join(root,"app/offline-client.tsx"),"utf8");
  assert.match(source,/startsWith\("stackscroll-"\)/);assert.match(source,/caches\.delete/);assert.match(source,/registration\.unregister/);
+ assert.match(source,/stackscroll-offline-disabled/);assert.match(offline,/stackscroll-offline-disabled/);
  assert.doesNotMatch(source,/localStorage\.clear/);
 });
