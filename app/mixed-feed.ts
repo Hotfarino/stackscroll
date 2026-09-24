@@ -96,19 +96,42 @@ export function mixedFeed(cards:Card[],feedback:TopicFeedback[],path:Topic[]=[],
   kindHistory.set(kind,[...sameKind,card].slice(-3));
  }
  for(const kind of feedRotation)pick(kind);
- // Give every available format equal opportunity. Large inventories remain fully
- // accessible, but cannot buy a larger share of the early feed merely by volume.
- const weights=new Map(feedRotation.map(kind=>[kind,remaining.get(kind)!>0?1:0]));
+ // Weighted fair scheduling spreads scarce formats across the complete feed
+ // instead of exhausting every small bucket near the beginning. Topic and
+ // publisher penalties still choose the best card within each format.
+ const weights=new Map(feedRotation.map(kind=>[kind,Math.max(0,remaining.get(kind)!)]));
  const credits=new Map(feedRotation.map(kind=>[kind,0]));
+ let weighted=false;
  while([...remaining.values()].some(count=>count>0)){
   const available=feedRotation.filter(kind=>remaining.get(kind)!>0);
-  const total=available.reduce((sum,kind)=>sum+weights.get(kind)!,0);
-  for(const kind of available)credits.set(kind,credits.get(kind)!+weights.get(kind)!);
+  const opening=output.length<40;
+  if(!opening&&!weighted){for(const kind of feedRotation)credits.set(kind,0);weighted=true;}
+  const weight=(kind:Kind)=>opening?1:weights.get(kind)!;
+  const total=available.reduce((sum,kind)=>sum+weight(kind),0);
+  for(const kind of available)credits.set(kind,credits.get(kind)!+weight(kind));
   const last=output.at(-1)?.kind;
   const varied=output.slice(-3).length===3&&output.slice(-3).every(card=>card.kind===last)?available.filter(kind=>kind!==last):available;
   const choices=varied.length?varied:available;
   const chosen=choices.reduce((best,kind)=>credits.get(kind)!>credits.get(best)!?kind:best);
   credits.set(chosen,credits.get(chosen)!-total);pick(chosen);
+ }
+ // Long catalogs should not consume a scarce format before a reader reaches
+ // later sections. Keep at least one representative in every quarter when the
+ // inventory can support it; swapping preserves uniqueness and total balance.
+ if(output.length>=200){
+  const size=Math.ceil(output.length/4);
+  for(const kind of feedRotation){
+   if(output.filter(card=>card.kind===kind).length<4)continue;
+   for(let quarter=0;quarter<4;quarter++){
+    const start=quarter*size,end=Math.min(output.length,start+size);
+    if(output.slice(start,end).some(card=>card.kind===kind))continue;
+    const donor=[0,1,2,3].find(candidate=>candidate!==quarter&&output.slice(candidate*size,Math.min(output.length,(candidate+1)*size)).filter(card=>card.kind===kind).length>1);
+    if(donor===undefined)continue;
+    const from=output.findLastIndex((card,index)=>card.kind===kind&&index>=donor*size&&index<Math.min(output.length,(donor+1)*size));
+    const to=Math.min(end-1,start+Math.floor((end-start)/2));
+    [output[from],output[to]]=[output[to],output[from]];
+   }
+  }
  }
  return output;
 }

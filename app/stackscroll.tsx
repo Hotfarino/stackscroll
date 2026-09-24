@@ -47,6 +47,7 @@ import {videoAsCard,resolveSavedVideos,videoIdentity,createPlaybackSession,type 
 import {youtubeLinkId} from "./youtube-link";
 import {cards,catalogCards,resolveCatalogSaved,curatedNews,topics,paths,type Card,type Topic} from "./content";
 import {initialState,stateSchema,localDay,scheduleReview,isDue,quizScore,type LearningState} from "./learning";
+import {readAccountState,writeAccountState} from "./account-state-client";
 
 type View="repos"|"feed"|"explore"|"stacks"|"practice"|"saved";
 const nav=[{id:"feed",label:"Discover",detail:"Fresh & relevant",icon:PanelsTopLeft},{id:"explore",label:"Radar",detail:"Trends & signals",icon:Radar},{id:"stacks",label:"Stacks",detail:"Your connected interests",icon:Layers},{id:"practice",label:"Lab",detail:"Practice & build",icon:FlaskConical},{id:"repos",label:"Repos",detail:"GitHub projects & tools",icon:GitFork},{id:"saved",label:"Saved",detail:"Your library",icon:Bookmark}] as const;
@@ -98,8 +99,8 @@ export default function Stackscroll(){
  const quizResult=quizScore(state);
  const profileStats={saved:state.saved.length,completed:Object.keys(state.done).length,accuracy:quizResult.total?Math.round(quizResult.correct/quizResult.total*100):null,stacks:stacks.sessions.filter(item=>item.data.completedAt).length,recalls:stacks.sessions.filter(item=>item.data.recallAt).length};
  const storageWarned=useRef(false),unreadableStorage=useRef(false);
- useEffect(()=>{try{const raw=localStorage.getItem("stackscroll-learning-v1");if(raw){const parsed=stateSchema.safeParse(JSON.parse(raw));if(parsed.success)setState(parsed.data);else {unreadableStorage.current=true;setStorageOk(false);toast("Existing device data could not be read. It has been left unchanged.");}}}catch{unreadableStorage.current=true;setStorageOk(false);}setReady(true);},[]);
- useEffect(()=>{if(!ready||unreadableStorage.current)return;try{localStorage.setItem("stackscroll-learning-v1",JSON.stringify(state));}catch{setStorageOk(false);if(!storageWarned.current){toast("Device storage is unavailable. Library card changes last for this session.");storageWarned.current=true;}}},[state,ready]);
+ useEffect(()=>{let active=true;try{const raw=localStorage.getItem("stackscroll-learning-v1");if(raw){const parsed=stateSchema.safeParse(JSON.parse(raw));if(parsed.success)setState(parsed.data);else {unreadableStorage.current=true;setStorageOk(false);toast("Existing device data could not be read. It has been left unchanged.");}}}catch{unreadableStorage.current=true;setStorageOk(false);}void readAccountState<{learning_state:LearningState}>().then(account=>{const parsed=stateSchema.safeParse(account?.learning_state);if(active&&parsed.success)setState(parsed.data);}).catch(()=>{}).finally(()=>{if(active)setReady(true);});return()=>{active=false;};},[]);
+ useEffect(()=>{if(!ready||unreadableStorage.current)return;try{localStorage.setItem("stackscroll-learning-v1",JSON.stringify(state));void writeAccountState("learning_state",state).catch(()=>{if(!storageWarned.current){toast("Saved on this device; account sync is temporarily unavailable.");storageWarned.current=true;}});}catch{setStorageOk(false);if(!storageWarned.current){toast("Device storage is unavailable. Library card changes last for this session.");storageWarned.current=true;}}},[state,ready]);
  useEffect(()=>{const timer=setInterval(()=>setNow(Date.now()),30000);return()=>clearInterval(timer);},[]);
  const refreshVideos=useCallback((force=false)=>{
   if(videoRequest.current)return videoRequest.current;

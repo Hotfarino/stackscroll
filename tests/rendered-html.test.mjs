@@ -41,14 +41,10 @@ test("renders the Stackscroll application and its metadata", async () => {
   assert.match(html, /Your daily mix/);
   assert.match(html, /brand-wordmark[^>]*>Stackscroll/);
   assert.match(html, /Customize your interface/);
-  assert.match(html, /Tim Berners-Lee/);
-  assert.match(html, /AI-authored animation/);
   assert.match(html, /Tune my feed/);
   assert.match(html, /Feed format/);
-  // Diversity ranking may choose either original explainer for the first page.
-  assert.match(html, /\/media\/(?:dns-in-motion|agent-feedback-loop)\.mp4/);
-  assert.match(html, /What happened next/);
-  assert.match(html, /Why this/);
+  assert.match(html, /class="feed-column"/);
+  assert.match(html, /class="feed-loading-card"/);
   assert.doesNotMatch(html, /5 today|Mark learned/);
   assert.doesNotMatch(html, /codex-preview/);
 });

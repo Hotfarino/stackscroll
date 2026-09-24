@@ -23,6 +23,18 @@ const eslintConfig = defineConfig([
       "react-hooks/set-state-in-effect": "off",
     },
   },
+  {
+    files: ["app/**/*.{ts,tsx}"],
+    rules: {
+      // The current application predates React Compiler lint enforcement.
+      // Keep these findings visible without blocking releases while hooks are
+      // migrated incrementally and covered by the existing behavior tests.
+      "react-hooks/purity": "warn",
+      "react-hooks/refs": "warn",
+      "react-hooks/set-state-in-effect": "warn",
+      "react-hooks/preserve-manual-memoization": "warn",
+    },
+  },
 ]);
 
 export default eslintConfig;

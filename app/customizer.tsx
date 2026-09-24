@@ -10,6 +10,7 @@ import { topics } from "./content";
 import { ReferenceIcon } from "./reference-icon";
 import { StackButton } from "./brand";
 import { defaultPreferences, preferenceKey, readPreferences, type Preferences } from "./preferences";
+import {readAccountState,writeAccountState} from "./account-state-client";
 
 export function useDisplayPreferences() {
   const [preferences, setPreferences] = useState<Preferences>(defaultPreferences);
@@ -17,6 +18,7 @@ export function useDisplayPreferences() {
   const [canSave, setCanSave] = useState(true);
   const warned = useRef(false);
   useEffect(() => {
+    let active=true;
     try {
       const previous=readPreferences(localStorage.getItem(preferenceKey));
       if(localStorage.getItem("stackscroll-reference-palette-v1")!=="applied") {
@@ -25,7 +27,8 @@ export function useDisplayPreferences() {
       } else setPreferences(previous);
     }
     catch { setCanSave(false); }
-    setLoaded(true);
+    void readAccountState<{preferences:Preferences}>().then(account=>{if(active&&account?.preferences)setPreferences(account.preferences);}).catch(()=>{}).finally(()=>{if(active)setLoaded(true);});
+    return()=>{active=false;};
   }, []);
   useEffect(() => {
     const root = document.documentElement;
@@ -36,7 +39,7 @@ export function useDisplayPreferences() {
     root.style.fontSize = `${preferences.textScale}%`;
     root.classList.toggle("dark", preferences.skin !== "daylight");
     if (!loaded) return;
-    try { localStorage.setItem(preferenceKey, JSON.stringify(preferences)); }
+    try { localStorage.setItem(preferenceKey, JSON.stringify(preferences));void writeAccountState("preferences",preferences).catch(()=>{}); }
     catch {
       setCanSave(false);
       if (!warned.current) { toast("Display changes apply for this session. Device storage is unavailable."); warned.current = true; }
@@ -55,7 +58,7 @@ export function Customizer({ preferences: p, onChange, canSave }: {
       <SheetHeader className="customizer-header">
         <span className="customizer-kicker">STACKSCROLL / YOUR SPACE</span>
         <SheetTitle className="customizer-title">Make it yours.</SheetTitle>
-        <SheetDescription id="customizer-description">{canSave ? "Changes apply immediately and save on this device." : "Changes apply for this session. Device storage is unavailable."}</SheetDescription>
+        <SheetDescription id="customizer-description">{canSave ? "Changes apply immediately and sync to your private account." : "Changes apply for this session. Device storage is unavailable."}</SheetDescription>
       </SheetHeader>
       <div className="customizer-body">
         <section className="custom-section">

@@ -4,6 +4,7 @@ import type {Card,Topic} from "./content";
 import type {TopicFeedback} from "./stacks";
 import {mixedFeed} from "./mixed-feed";
 import {FEED_MEMORY_KEY,emptyFeedMemory,parseFeedMemory,feedCandidates,rotatedCandidates,stableFeed,retuneTail} from "./feed-memory";
+import {readAccountState,writeAccountState} from "./account-state-client";
 
 export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Topic[]=[],pinned:Topic[]=[],layers:{topic:Topic;emphasis:number}[]=[],affinity:Partial<Record<Topic,number>>={}) {
  const memory=useRef(emptyFeedMemory()),latest=useRef({inventory,feedback,path,pinned,layers,affinity});latest.current={inventory,feedback,path,pinned,layers,affinity};
@@ -11,8 +12,8 @@ export function useFeedMemory(inventory:Card[],feedback:TopicFeedback[],path:Top
  const [ready,setReady]=useState(false),[storageOk,setStorageOk]=useState(true),[revision,setRevision]=useState(0);
  const [snapshot,setSnapshot]=useState<{ids:string[];revisited:Set<string>}>({ids:[],revisited:new Set()});
  const revisit=useRef(false);
- const persist=useCallback(()=>{if(!writable.current)return;try{memory.current=parseFeedMemory(JSON.stringify(memory.current));localStorage.setItem(FEED_MEMORY_KEY,JSON.stringify(memory.current));}catch{writable.current=false;setStorageOk(false);}},[]);
- useEffect(()=>{try{memory.current=parseFeedMemory(localStorage.getItem(FEED_MEMORY_KEY));}catch{writable.current=false;setStorageOk(false);}setReady(true);},[]);
+ const persist=useCallback(()=>{if(!writable.current)return;try{memory.current=parseFeedMemory(JSON.stringify(memory.current));localStorage.setItem(FEED_MEMORY_KEY,JSON.stringify(memory.current));void writeAccountState("feed_memory",memory.current).catch(()=>{});}catch{writable.current=false;setStorageOk(false);}},[]);
+ useEffect(()=>{let active=true;try{memory.current=parseFeedMemory(localStorage.getItem(FEED_MEMORY_KEY));}catch{writable.current=false;setStorageOk(false);}void readAccountState<{feed_memory:unknown}>().then(account=>{if(active&&account?.feed_memory)memory.current=parseFeedMemory(JSON.stringify(account.feed_memory));}).catch(()=>{}).finally(()=>{if(active)setReady(true);});return()=>{active=false;};},[]);
  useEffect(()=>{
   if(!ready)return;
   const {inventory,feedback,path,pinned,layers,affinity}=latest.current;

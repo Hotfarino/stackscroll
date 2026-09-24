@@ -45,3 +45,15 @@ test("Supabase privileged credentials stay in server-only runtime code",async()=
  assert.match(route,/\.\.\/\.\.\/supabase-server/);
  assert.doesNotMatch(route,/SUPABASE_SECRET_KEY|sb_secret_/);
 });
+
+test("account state sync validates each field and scopes every request to the signed-in user",async()=>{
+ const route=await readFile(path.join(root,"app/api/user-state/route.ts"),"utf8");
+ const client=await readFile(path.join(root,"app/account-state-client.ts"),"utf8");
+ assert.match(route,/headers\.get\("oai-authenticated-user-id"\)/);
+ assert.match(route,/request\.headers\.get\("origin"\)!==new URL\(request\.url\)\.origin/);
+ assert.match(route,/user_state\?user_id=eq\.\$\{encodeURIComponent\(id\)\}/);
+ assert.match(route,/fields\[input\.field\]\.parse\(input\.value\)/);
+ assert.match(route,/user_id:id/);
+ assert.doesNotMatch(client,/SUPABASE_SECRET_KEY|sb_secret_|service_role/);
+ for(const field of ["learning_state","feed_memory","preferences","video_playlist"]){assert.ok(route.includes(field),`${field} is not synchronized`);}
+});
