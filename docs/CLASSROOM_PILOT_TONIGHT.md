@@ -16,7 +16,7 @@ This is the release checklist for a private Per Scholas classroom pilot. It is n
 
 ## Must finish before classmates test
 
-- [ ] Delete the obsolete Supabase server key after final confirmation.
+- [x] Delete the obsolete Supabase server key after final confirmation.
 - [ ] Run the full build, lint, and test suite after the security-test additions.
 - [ ] Perform a two-account isolation test: user A must not read or overwrite user B's profile, avatar, stacks, likes, saves, or progress.
 - [ ] Add only the intended classmates to the private deployment allowlist.
