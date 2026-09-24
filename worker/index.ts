@@ -5,6 +5,8 @@ import handler from "vinext/server/app-router-entry";
 interface Env {
   ASSETS: Fetcher;
   DB: D1Database;
+  SUPABASE_URL?: string;
+  SUPABASE_SECRET_KEY?: string;
   IMAGES: {
     input(stream: ReadableStream): {
       transform(options: Record<string, unknown>): {
@@ -23,7 +25,7 @@ const securityPolicy=[
   "script-src 'self' 'unsafe-inline'",
   "style-src 'self' 'unsafe-inline'",
   "font-src 'self'",
-  "img-src 'self' data: blob:",
+  "img-src 'self' data: blob: https://znigmlhrodabqdjuhrwe.supabase.co",
   "media-src 'self'",
   "connect-src 'self'",
   "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
