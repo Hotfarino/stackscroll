@@ -22,3 +22,26 @@ test("device wipe removes only StackScroll storage and unregisters its offline s
  assert.match(source,/stackscroll-offline-disabled/);assert.match(offline,/stackscroll-offline-disabled/);
  assert.doesNotMatch(source,/localStorage\.clear/);
 });
+
+test("profile access is authenticated, same-origin for writes, and scoped to one user",async()=>{
+ const route=await readFile(path.join(root,"app/api/profile/route.ts"),"utf8");
+ assert.match(route,/headers\.get\("oai-authenticated-user-id"\)/);
+ assert.match(route,/if\(!id\)return json\(\{error:"Sign in to load your profile\."\},401\)/);
+ assert.match(route,/if\(!id\)return json\(\{error:"Sign in to save your profile\."\},401\)/);
+ assert.match(route,/request\.headers\.get\("origin"\)!==new URL\(request\.url\)\.origin/);
+ assert.match(route,/profiles\?user_id=eq\.\$\{encodeURIComponent\(id\)\}/);
+ assert.match(route,/user_id:id/);
+ assert.match(route,/stableUserPath\(id\)/);
+ assert.doesNotMatch(route,/oai-authenticated-user-email/);
+});
+
+test("Supabase privileged credentials stay in server-only runtime code",async()=>{
+ const helper=await readFile(path.join(root,"app/supabase-server.ts"),"utf8");
+ const route=await readFile(path.join(root,"app/api/profile/route.ts"),"utf8");
+ assert.match(helper,/from "cloudflare:workers"/);
+ assert.match(helper,/SUPABASE_SECRET_KEY/);
+ assert.match(helper,/headers\.set\("Authorization",`Bearer \$\{key\}`\)/);
+ assert.match(helper,/expiresIn:3600/);
+ assert.match(route,/\.\.\/\.\.\/supabase-server/);
+ assert.doesNotMatch(route,/SUPABASE_SECRET_KEY|sb_secret_/);
+});
