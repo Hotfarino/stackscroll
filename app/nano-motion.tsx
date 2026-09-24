@@ -1,6 +1,6 @@
 "use client";
 import {useEffect} from "react";
-import {nanoPhase,type NanoPoint} from "./nano-choreography";
+import {nanoPhase} from "./nano-choreography";
 import {controlSnapshot} from "./nano-snapshot";
 
 /** One canvas / one clock. Page effects do not cancel the control's reassembly. */
@@ -8,7 +8,6 @@ export function NanoMotion(){
  useEffect(()=>{
   const preference=matchMedia("(prefers-reduced-motion: reduce)"),contrast=matchMedia("(forced-colors: active)");
   let canvas:HTMLCanvasElement|null=null,ctx:CanvasRenderingContext2D|null=null,frame=0,lastTap=0;
-  let source:NanoPoint|null=null;
   type Burst={kind:"control"|"screen";start:number;duration:number;draw:(t:number)=>void;restore:()=>void};
   let bursts:Burst[]=[];
   const disabled=()=>preference.matches||contrast.matches||document.documentElement.dataset.motion==="reduced"||document.hidden;
@@ -66,14 +65,19 @@ export function NanoMotion(){
    const rect=target.getBoundingClientRect(),left=Math.max(0,rect.left),top=Math.max(0,rect.top);
    const width=Math.min(innerWidth,rect.right)-left,height=Math.min(innerHeight,rect.bottom)-top;
    if(width<=0||height<=0){if(!bursts.length)clear();return;}
-   const origin=source&&performance.now()-lastTap<700?source:{x:left+width/2,y:top+30};
-   const dots=Array.from({length:72},(_,i)=>({x:left+width*((i*.618034)%1),y:top+Math.min(height,420)*((i*.381966)%1),bend:(i%7-3)*14}));
-   // Page content stays fully opaque and mounted throughout.
-   add({kind:"screen",start:performance.now(),duration:1300,restore:()=>{},draw:t=>{
+   const strips=Array.from({length:7},(_,i)=>({
+    x:left+width*((i*.618034)%1),
+    y:top+Math.min(height,520)*((i*.381966)%1),
+    width:Math.max(18,Math.min(92,width*(.05+(i%3)*.018))),
+    height:i%3===0?2:1,
+    shift:i%2===0?7:-6,
+   }));
+   // A few local scan fragments replace the old outward particle trail.
+   add({kind:"screen",start:performance.now(),duration:560,restore:()=>{},draw:t=>{
     if(!ctx)return;
-    const p=nanoPhase(t),arc=Math.sin(t*Math.PI);
-    ctx.globalAlpha=p.cover*.65;ctx.fillStyle="#8bd5e3";
-    for(const dot of dots)ctx.fillRect(origin.x+(dot.x-origin.x)*p.travel+dot.bend*arc,origin.y+(dot.y-origin.y)*p.travel,2,2);
+    const pulse=Math.sin(t*Math.PI),jitter=t<.5?1:-1;
+    ctx.globalAlpha=pulse*.42;ctx.fillStyle="#8bd5e3";
+    for(const strip of strips)ctx.fillRect(strip.x+strip.shift*jitter*pulse,strip.y,strip.width,strip.height);
     ctx.globalAlpha=1;
    }});
   }
@@ -81,7 +85,7 @@ export function NanoMotion(){
    if(disabled())return;
    const target=event.target instanceof Element?event.target.closest("button,[role='tab'],[role='menuitem'],[role='switch'],[role='checkbox']"):null;
    if(!target||target.matches(":disabled,[aria-disabled='true']")||performance.now()-lastTap<90)return;
-   lastTap=performance.now();const rect=target.getBoundingClientRect();source={x:rect.left+rect.width/2,y:rect.top+rect.height/2};
+   lastTap=performance.now();
    control(target);
   }
   const observer=new MutationObserver(records=>{

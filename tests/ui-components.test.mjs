@@ -46,9 +46,9 @@ test("page fade commits after exit, restores entry, and latest navigation wins",
  const fade=createPageFade(()=>surface,()=>reduced,action=>action());
  try{
   fade.run(()=>commits.push('Radar'));assert.deepEqual(commits,[]);
-  assert.equal(animations[0].options.duration,160);
+  assert.equal(animations[0].options.duration,190);
   animations[0].resolve();await Promise.resolve();
-  assert.deepEqual(commits,['Radar']);assert.equal(animations[1].options.duration,260);
+  assert.deepEqual(commits,['Radar']);assert.equal(animations[1].options.duration,300);
   fade.run(()=>commits.push('Stacks'));const stale=animations.at(-1);
   fade.run(()=>commits.push('Saved'));stale.resolve();await Promise.resolve();
   assert.deepEqual(commits,['Radar']);animations.at(-1).resolve();await Promise.resolve();
@@ -74,7 +74,8 @@ test("nanotech material fully disperses and reassembles with a continuous clock"
  }
  const source=await readFile(path.join(root,'app/nano-motion.tsx'),'utf8');
  assert.match(source,/offset:\.08,opacity:0/);assert.match(source,/offset:\.92,opacity:0/);
- assert.match(source,/duration:1000/);assert.match(source,/duration:1300/);
+ assert.match(source,/duration:1000/);assert.match(source,/duration:560/);
+ assert.doesNotMatch(source,/const dots=|\.travel/);
  assert.match(source,/removeKind\(burst.kind\)/);
  assert.doesNotMatch(source,/createElement\("i"\)|addEventListener\("scroll"/);
  assert.match(source,/prefers-reduced-motion: reduce/);

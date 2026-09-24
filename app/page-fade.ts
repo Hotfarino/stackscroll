@@ -19,13 +19,23 @@ export function createPageFade(getSurface:()=>Element|null,reduced:()=>boolean,c
     animation?.cancel();animation=null;
     const incoming=getSurface();
     if(!incoming||reduced())return;
-    animation=incoming.animate([{opacity:0},{opacity:1}],{duration:260,easing:"cubic-bezier(.22,1,.36,1)"});
+    animation=incoming.animate([
+     {opacity:0,transform:"translateX(0)",filter:"none",clipPath:"inset(0)"},
+     {offset:.16,opacity:.35,transform:"translateX(3px)",filter:"contrast(1.14) saturate(1.18)",clipPath:"inset(18% 0 56% 0)"},
+     {offset:.24,opacity:.56,transform:"translateX(-2px)",filter:"none",clipPath:"inset(58% 0 18% 0)"},
+     {opacity:1,transform:"translateX(0)",filter:"none",clipPath:"inset(0)"},
+    ],{duration:300,easing:"cubic-bezier(.22,1,.36,1)"});
     const current=animation;
     current.finished.then(()=>{if(ticket===generation){current.cancel();animation=null;}},()=>{});
    }catch{animation?.cancel();animation=null;}
   }
   try{
-   animation=surface.animate([{opacity},{opacity:0}],{duration:160,easing:"ease-in",fill:"forwards"});
+   animation=surface.animate([
+    {opacity,transform:"translateX(0)",filter:"none",clipPath:"inset(0)"},
+    {offset:.48,opacity:.78,transform:"translateX(-3px)",filter:"contrast(1.12) saturate(1.16)",clipPath:"inset(12% 0 62% 0)"},
+    {offset:.62,opacity:.58,transform:"translateX(2px)",filter:"none",clipPath:"inset(64% 0 12% 0)"},
+    {opacity:0,transform:"translateX(0)",filter:"none",clipPath:"inset(0)"},
+   ],{duration:190,easing:"ease-in",fill:"forwards"});
    animation.finished.then(enter,()=>{if(ticket===generation)finish();});
    watchdog=setTimeout(()=>{if(ticket===generation)finish();},600);
   }catch{finish();}
