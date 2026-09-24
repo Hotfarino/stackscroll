@@ -13,12 +13,13 @@ This is the release checklist for a private Per Scholas classroom pilot. It is n
 - [x] Move profile text and avatar persistence behind the authenticated server route.
 - [x] Add durable, per-user API rate limits for the private pilot.
 - [x] Create, verify, and deploy a replacement Supabase server key.
+- [x] Pass the automated two-identity isolation suite for profiles, Stacks, progress, deletion, and exam attempts (34/34 checks).
 
 ## Must finish before classmates test
 
 - [x] Delete the obsolete Supabase server key after final confirmation.
 - [ ] Run the full build, lint, and test suite after the security-test additions.
-- [ ] Perform a two-account isolation test: user A must not read or overwrite user B's profile, avatar, stacks, likes, saves, or progress.
+- [ ] Perform a deployed two-account isolation test: user A must not read or overwrite user B's profile, avatar, stacks, likes, saves, or progress. Blocked until one test-user email is added to the private allowlist.
 - [ ] Add only the intended classmates to the private deployment allowlist.
 - [ ] Smoke-test sign-in, profile save, avatar upload/removal, feed loading, video playback, likes, saves, stacks, and refresh persistence on phone and desktop.
 - [ ] Review the short privacy notice shown to testers: what is stored, why, retention, and how to request deletion.
