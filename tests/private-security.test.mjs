@@ -57,3 +57,14 @@ test("account state sync validates each field and scopes every request to the si
  assert.doesNotMatch(client,/SUPABASE_SECRET_KEY|sb_secret_|service_role/);
  for(const field of ["learning_state","feed_memory","preferences","video_playlist"]){assert.ok(route.includes(field),`${field} is not synchronized`);}
 });
+
+test("Supabase Auth sessions use secure http-only cookies and same-origin account writes",async()=>{
+ const helper=await readFile(path.join(root,"app/supabase-auth-server.ts"),"utf8");
+ const signIn=await readFile(path.join(root,"app/api/auth/sign-in/route.ts"),"utf8");
+ const signUp=await readFile(path.join(root,"app/api/auth/sign-up/route.ts"),"utf8");
+ assert.match(helper,/HttpOnly; Secure; SameSite=Lax/);
+ assert.match(helper,/HttpOnly; Secure; SameSite=Strict/);
+ assert.match(signIn,/request\.headers\.get\("origin"\)!==new URL\(request\.url\)\.origin/);
+ assert.match(signUp,/request\.headers\.get\("origin"\)!==new URL\(request\.url\)\.origin/);
+ assert.doesNotMatch(await readFile(path.join(root,"app/account-access.tsx"),"utf8"),/SUPABASE_SECRET_KEY|stackscroll_access/);
+});

@@ -12,6 +12,16 @@ test("worker places every API behind authentication and applies browser defenses
  assert.match(source,/frame-ancestors 'none'/);assert.match(source,/object-src 'none'/);assert.match(source,/Cache-Control","no-store"/);
 });
 
+test("public demo exposes only bounded read routes while account and write APIs stay protected",async()=>{
+ const source=await readFile(path.join(root,"worker/index.ts"),"utf8");
+ for(const route of ["/api/news","/api/videos","/api/videos/thumbnail","/api/catalog/thumbnail","/api/catalog/video"]){assert.ok(source.includes(`\"${route}\"`),`${route} is not in the public read allowlist`);}
+ assert.match(source,/request\.method==="GET"&&publicReads\.has\(url\.pathname\)/);
+ assert.match(source,/url\.pathname\.startsWith\(publicAuthPrefix\)/);
+ assert.match(source,/withSupabaseIdentity/);
+ assert.match(source,/cf-connecting-ip/);
+ for(const route of ["/api/user-state","/api/profile","/api/moderation","/api/diagnostics","/api/stacks"]){assert.ok(!source.includes(`\"${route}\"`),`${route} must not be anonymously allowlisted`);}
+});
+
 test("moderator identity comes only from a server-side environment allowlist",async()=>{
  const source=await readFile(path.join(root,"app/video-server.ts"),"utf8");
  assert.match(source,/STACKSCROLL_OWNER_IDS/);assert.doesNotMatch(source,/@gmail\.com|oai-authenticated-user-email/);

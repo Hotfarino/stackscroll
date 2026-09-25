@@ -1,0 +1,5 @@
+import {z} from "zod";
+import {json,readBody} from "../../../video-server";
+import {appendCookies,authRequest,sessionCookies,type AuthSession} from "../../../supabase-auth-server";
+const input=z.object({email:z.string().email().max(254),password:z.string().min(8).max(128)}).strict();
+export async function POST(request:Request){if(request.headers.get("origin")!==new URL(request.url).origin)return json({error:"This request must come from Stackscroll."},403);try{const data=input.parse(await readBody(request,4000));const response=await authRequest("token?grant_type=password",data);const result=await response.json() as AuthSession;if(!response.ok||!result.access_token)return json({error:"Email or password was not accepted."},401);return appendCookies(json({ok:true,email:result.user?.email||data.email}),sessionCookies(result));}catch(error){return json({error:error instanceof z.ZodError?"Enter a valid email and a password of at least 8 characters.":"Sign-in is temporarily unavailable."},400);}}

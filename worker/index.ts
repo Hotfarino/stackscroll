@@ -16,6 +16,11 @@ interface Env {
   };
 }
 
+const publicReads=new Set([
+  "/api/news","/api/videos","/api/videos/thumbnail","/api/catalog/thumbnail","/api/catalog/video",
+]);
+const publicAuthPrefix="/api/auth/";
+
 const securityPolicy=[
   "default-src 'self'",
   "base-uri 'self'",
@@ -51,13 +56,14 @@ function unauthenticated(request:Request){
 }
 
 function requestLimit(url:URL,method:string){
+  if(url.pathname.startsWith("/api/auth/"))return method==="GET"?60:10;
   if(method!=="GET")return url.pathname==="/api/feed-ingestion"?10:60;
   if(url.pathname.endsWith("/thumbnail"))return 180;
   return 90;
 }
 
 async function rateLimit(request:Request,env:Env,ctx:ExecutionContext){
-  const id=request.headers.get("oai-authenticated-user-id");if(!id)return unauthenticated(request);
+  const id=request.headers.get("oai-authenticated-user-id")||`anonymous:${request.headers.get("cf-connecting-ip")||"unknown"}`;
   const url=new URL(request.url),now=Date.now(),windowMs=60_000,bucket=Math.floor(now/windowMs),expires=(bucket+1)*windowMs;
   const digest=await crypto.subtle.digest("SHA-256",new TextEncoder().encode(`${id}:${request.method}:${url.pathname}:${bucket}`));
   const scope=Array.from(new Uint8Array(digest),byte=>byte.toString(16).padStart(2,"0")).join("");
@@ -71,6 +77,24 @@ async function rateLimit(request:Request,env:Env,ctx:ExecutionContext){
     if(request.method!=="GET")return secured(Response.json({error:"Request protection is temporarily unavailable. Try again."},{status:503}),request);
     return null;
   }
+}
+
+function cookie(request:Request,name:string){
+  for(const part of (request.headers.get("cookie")||"").split(";")){const [key,...value]=part.trim().split("=");if(key===name)return decodeURIComponent(value.join("="));}
+  return "";
+}
+
+async function withSupabaseIdentity(request:Request,env:Env){
+  if(request.headers.get("oai-authenticated-user-id"))return request;
+  const token=cookie(request,"stackscroll_access"),url=env.SUPABASE_URL?.replace(/\/$/,""),key=env.SUPABASE_SECRET_KEY;
+  if(!token||!url||!key)return request;
+  try{
+    const response=await fetch(`${url}/auth/v1/user`,{headers:{apikey:key,Authorization:`Bearer ${token}`},redirect:"manual",signal:AbortSignal.timeout(5000)});
+    if(!response.ok)return request;
+    const account=await response.json() as {id?:string;email?:string};if(!account.id)return request;
+    const headers=new Headers(request.headers);headers.set("oai-authenticated-user-id",account.id);if(account.email)headers.set("oai-authenticated-user-email",account.email);
+    return new Request(request,{headers});
+  }catch{return request;}
 }
 
 interface ExecutionContext {
@@ -91,7 +115,9 @@ const worker = {
     // The Sites access gate is the primary control. This second boundary keeps
     // API data closed if a route is ever exposed through another hostname.
     if(url.pathname.startsWith("/api/")){
-      if(!request.headers.get("oai-authenticated-user-id"))return unauthenticated(request);
+      request=await withSupabaseIdentity(request,env);
+      const publicRequest=(request.method==="GET"&&publicReads.has(url.pathname))||url.pathname.startsWith(publicAuthPrefix);
+      if(!request.headers.get("oai-authenticated-user-id")&&!publicRequest)return unauthenticated(request);
       const limited=await rateLimit(request,env,ctx);if(limited)return limited;
     }
 
