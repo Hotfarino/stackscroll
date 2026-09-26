@@ -93,3 +93,7 @@ export const apiRateLimits = sqliteTable("api_rate_limits", {
  count: integer("count").notNull().default(1),
  expiresAt: integer("expires_at").notNull(),
 }, table => [index("api_rate_limits_expires").on(table.expiresAt)]);
+
+export const socialProjects = sqliteTable("social_projects", {
+ id:text("id").primaryKey(),userId:text("user_id").notNull(),platform:text("platform").notNull(),postUrl:text("post_url").notNull(),creatorHandle:text("creator_handle").notNull(),title:text("title").notNull(),summary:text("summary").notNull(),buildIdea:text("build_idea").notNull(),tags:text("tags").notNull(),status:text("status").notNull().default("pending"),createdAt:integer("created_at").notNull(),updatedAt:integer("updated_at").notNull(),
+},table=>[index("social_projects_status_created").on(table.status,table.createdAt),index("social_projects_user_created").on(table.userId,table.createdAt)]);

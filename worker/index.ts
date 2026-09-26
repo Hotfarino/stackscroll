@@ -17,7 +17,7 @@ interface Env {
 }
 
 const publicReads=new Set([
-  "/api/news","/api/videos","/api/videos/thumbnail","/api/catalog/thumbnail","/api/catalog/video",
+  "/api/news","/api/videos","/api/videos/thumbnail","/api/catalog/thumbnail","/api/catalog/video","/api/social-projects",
 ]);
 const publicAuthPrefix="/api/auth/";
 
