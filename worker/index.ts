@@ -33,7 +33,7 @@ const securityPolicy=[
   "img-src 'self' data: blob: https://znigmlhrodabqdjuhrwe.supabase.co",
   "media-src 'self'",
   "connect-src 'self'",
-  "frame-src https://www.youtube-nocookie.com https://www.youtube.com",
+  "frame-src https://www.youtube-nocookie.com https://www.youtube.com https://www.instagram.com https://www.tiktok.com",
 ].join("; ");
 
 function secured(response:Response,request:Request){
