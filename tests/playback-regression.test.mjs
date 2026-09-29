@@ -49,8 +49,8 @@ test("anonymous state stays local while authenticated state synchronizes",async(
 
 test("expired access sessions can refresh without exposing tokens to client code",async()=>{
  const session=await readFile(path.join(root,"app/api/auth/session/route.ts"),"utf8");
- assert.match(session,/owner:isModeratorId\(id\)/);
- assert.match(session,/owner:isModeratorId\(result\.user\?\.id\|\|null\)/);
+ assert.match(session,/owner:isModeratorIdentity\(id,email\)/);
+ assert.match(session,/owner:isModeratorIdentity\(result\.user\?\.id\|\|null,result\.user\?\.email\|\|null\)/);
  const helper=await readFile(path.join(root,"app/supabase-auth-server.ts"),"utf8");
  assert.match(session,/grant_type=refresh_token/);
  assert.match(session,/requestCookie\(request,"stackscroll_refresh"\)/);

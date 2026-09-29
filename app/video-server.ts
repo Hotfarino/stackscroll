@@ -6,12 +6,19 @@ function moderatorIds() {
   return new Set(value.split(",").map(id=>id.trim()).filter(Boolean));
 }
 
+function moderatorEmails() {
+  const value=(env as unknown as {STACKSCROLL_OWNER_EMAILS?:string}).STACKSCROLL_OWNER_EMAILS||"";
+  return new Set(value.split(",").map(email=>email.trim().toLowerCase()).filter(Boolean));
+}
+
 export function isModerator(request: Request): boolean {
   const id=request.headers.get("oai-authenticated-user-id");
-  return isModeratorId(id);
+  const email=request.headers.get("oai-authenticated-user-email");
+  return isModeratorIdentity(id,email);
 }
 
 export function isModeratorId(id:string|null):boolean{return !!id&&moderatorIds().has(id);}
+export function isModeratorIdentity(id:string|null,email:string|null):boolean{return isModeratorId(id)||!!email&&moderatorEmails().has(email.trim().toLowerCase());}
 
 export function database() {
   if (!env.DB) throw new Error("Report storage unavailable");

@@ -22,9 +22,9 @@ test("public demo exposes only bounded read routes while account and write APIs 
  for(const route of ["/api/user-state","/api/profile","/api/moderation","/api/diagnostics","/api/stacks"]){assert.ok(!source.includes(`\"${route}\"`),`${route} must not be anonymously allowlisted`);}
 });
 
-test("moderator identity comes only from a server-side environment allowlist",async()=>{
+test("moderator identity comes only from server-side ID and email allowlists",async()=>{
  const source=await readFile(path.join(root,"app/video-server.ts"),"utf8");
- assert.match(source,/STACKSCROLL_OWNER_IDS/);assert.doesNotMatch(source,/@gmail\.com|oai-authenticated-user-email/);
+ assert.match(source,/STACKSCROLL_OWNER_IDS/);assert.match(source,/STACKSCROLL_OWNER_EMAILS/);assert.doesNotMatch(source,/@gmail\.com/);
 });
 
 test("client output contains no source maps, private owner identifiers, or secret values",async()=>{
