@@ -1,12 +1,12 @@
 "use client";
 import type {CSSProperties} from "react";
-import {Menu,GitFork,Check} from "lucide-react";
+import {Menu,GitFork,Check,BookOpen} from "lucide-react";
 import {DropdownMenu,DropdownMenuTrigger,DropdownMenuContent,DropdownMenuItem,DropdownMenuLabel,DropdownMenuSeparator} from "@/components/ui/dropdown-menu";
 import {ReferenceIcon,type ReferenceIconName} from "./reference-icon";
 
 type Destination = "feed"|"explore"|"stacks"|"practice"|"repos"|"saved";
 const artwork:Partial<Record<Destination,ReferenceIconName>>={feed:"discover",explore:"radar",stacks:"stacks",practice:"lab",saved:"saved"};
-export function PopoutNavigation({items,view,onNavigate,due=0}:{items:readonly {id:Destination;label:string;detail:string}[];view:Destination;onNavigate:(view:Destination)=>void;due?:number}){
+export function PopoutNavigation({items,view,onNavigate,due=0,onTutorial}:{items:readonly {id:Destination;label:string;detail:string}[];view:Destination;onNavigate:(view:Destination)=>void;due?:number;onTutorial?:()=>void}){
  return <DropdownMenu><DropdownMenuTrigger asChild><button type="button" className="popout-trigger" aria-label="Open workspace menu"><Menu size={20}/><span>Menu</span></button></DropdownMenuTrigger>
  <DropdownMenuContent className="workspace-popout" align="start" sideOffset={10} collisionPadding={12}>
   <DropdownMenuLabel>YOUR WORKSPACE</DropdownMenuLabel><DropdownMenuSeparator/>
@@ -16,5 +16,6 @@ export function PopoutNavigation({items,view,onNavigate,due=0}:{items:readonly {
    {item.id==="practice"&&due>0&&<span className="popout-due" aria-label={`${due} reviews due`}>{due}</span>}
    {view===item.id&&<Check size={16} className="popout-current"/>}
   </DropdownMenuItem>)}
+ {onTutorial&&<><DropdownMenuSeparator/><DropdownMenuItem onSelect={()=>requestAnimationFrame(onTutorial)} className="workspace-popout-item"><BookOpen size={24}/><span className="popout-copy"><strong>Stackscroll guide</strong><small>Build a Stack · replay tutorial</small></span></DropdownMenuItem></>}
  </DropdownMenuContent></DropdownMenu>;
 }
