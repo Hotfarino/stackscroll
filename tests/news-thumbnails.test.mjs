@@ -26,6 +26,6 @@ test('header accents explicitly exclude news and thumbnail loading is lazy with 
  const css=readFileSync('app/continuous-feed.css','utf8');
  assert.match(css,/kind-video,.kind-explainer,.kind-podcast,.kind-quote/);
  assert.match(css,/:not\(\.kind-news\)/);assert.match(css,/#C5A3FF/);
- const component=readFileSync('app/news-thumbnail.tsx','utf8');
- assert.match(component,/loading="lazy"/);assert.match(component,/failed===src\)return null/);assert.match(component,/referrerPolicy="no-referrer"/);
+ const component=readFileSync('app/news-thumbnail.tsx','utf8'),visuals=readFileSync('app/news-visuals.ts','utf8');
+ assert.match(component,/loading="lazy"/);assert.match(component,/failed===src/);assert.match(component,/Topic reference image/);assert.match(component,/referrerPolicy="no-referrer"/);assert.match(visuals,/discoveryVisuals/);assert.match(visuals,/media\/licensed/);
 });

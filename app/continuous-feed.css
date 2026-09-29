@@ -66,9 +66,13 @@ html[data-skin="signal"] body .feed-preview:not(.kind-news) .preview-meta {
 }
 html[data-skin="signal"] body .feed-preview:not(.kind-news) .preview-meta { padding:10px 12px; color:var(--header-accent); }
 html[data-skin="signal"] body .learning-card:not(.kind-news) .card-top :is(.card-author strong,.kind-badge,.topic-icon) { color:var(--header-accent); }
-.news-thumbnail { display:block; width:100%; aspect-ratio:16/9; overflow:hidden; background:#111418; }
+.news-thumbnail { display:block; width:100%; margin:0; background:#111418; }
+.news-thumbnail>a { display:block; aspect-ratio:16/9; overflow:hidden; }
 .news-thumbnail img { display:block; width:100%; height:100%; object-fit:cover; }
-.news-thumbnail:focus-visible { outline:2px solid var(--ring); outline-offset:-3px; }
+.news-thumbnail>a:focus-visible { outline:2px solid var(--ring); outline-offset:-3px; }
+.news-thumbnail figcaption{display:flex;flex-wrap:wrap;gap:5px 10px;padding:7px 9px;border-top:1px solid var(--line);font-size:.65rem;color:var(--soft)}
+.news-thumbnail figcaption span{color:var(--cyan)}
+.news-thumbnail figcaption a{color:inherit;text-decoration:underline;text-underline-offset:2px}
 @media(forced-colors:active) {
  html[data-skin="signal"] body :is(.feed-preview,.learning-card):not(.kind-news) > .card-top,
  html[data-skin="signal"] body .feed-preview:not(.kind-news) .preview-meta { background:Canvas; color:CanvasText; border-color:CanvasText; box-shadow:none; }
