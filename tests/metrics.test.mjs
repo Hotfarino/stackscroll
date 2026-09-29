@@ -37,3 +37,5 @@ test("dashboard reads are owner-only and diagnostics exclude usage buckets",asyn
  const worker=readFileSync("worker/index.ts","utf8");
  assert.match(worker,/request\.method==="POST"&&url\.pathname==="\/api\/metrics"/);
 });
+
+test("the signed-in owner sees a metrics link in the profile panel",()=>{const profile=readFileSync("app/profile.tsx","utf8"),session=readFileSync("app/api/auth/session/route.ts","utf8");assert.match(session,/owner:isModeratorId\(id\)/);assert.match(profile,/session\.owner/);assert.match(profile,/owner&&<section className="profile-owner-tools"/);assert.match(profile,/href="\/metrics"/);assert.match(profile,/Development metrics/);});
