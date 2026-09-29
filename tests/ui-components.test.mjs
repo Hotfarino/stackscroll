@@ -14,7 +14,8 @@ const vite = await createServer({
   configFile: false,
   root,
   resolve: { alias: { "@": root } },
-  server: { middlewareMode: true },
+  // Isolate the middleware runner from preview servers and parallel test jobs.
+  server: { middlewareMode: true, hmr: { port: 30000 + (process.pid % 20000) } },
 });
 
 after(async () => {

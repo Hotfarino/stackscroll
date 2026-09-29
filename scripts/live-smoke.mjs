@@ -19,7 +19,7 @@ for(const [path,status] of checks){
   assert.match(html,/Public demo · account sync optional/);
   assert.match(html,/Stackscroll/);
  }else if(path==="/api/auth/session"){
-  assert.deepEqual(await response.json(),{authenticated:false,email:null});
+  assert.deepEqual(await response.json(),{authenticated:false,email:null,owner:false});
  }else await response.body?.cancel();
  console.log(`ok ${status} ${path}`);
 }
