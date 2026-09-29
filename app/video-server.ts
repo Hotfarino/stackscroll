@@ -8,8 +8,10 @@ function moderatorIds() {
 
 export function isModerator(request: Request): boolean {
   const id=request.headers.get("oai-authenticated-user-id");
-  return !!id && moderatorIds().has(id);
+  return isModeratorId(id);
 }
+
+export function isModeratorId(id:string|null):boolean{return !!id&&moderatorIds().has(id);}
 
 export function database() {
   if (!env.DB) throw new Error("Report storage unavailable");

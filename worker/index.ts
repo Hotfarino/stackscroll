@@ -116,7 +116,8 @@ const worker = {
     // API data closed if a route is ever exposed through another hostname.
     if(url.pathname.startsWith("/api/")){
       request=await withSupabaseIdentity(request,env);
-      const publicRequest=(request.method==="GET"&&publicReads.has(url.pathname))||url.pathname.startsWith(publicAuthPrefix);
+      const publicMetric=request.method==="POST"&&url.pathname==="/api/metrics";
+      const publicRequest=(request.method==="GET"&&publicReads.has(url.pathname))||publicMetric||url.pathname.startsWith(publicAuthPrefix);
       if(!request.headers.get("oai-authenticated-user-id")&&!publicRequest)return unauthenticated(request);
       const limited=await rateLimit(request,env,ctx);if(limited)return limited;
     }

@@ -4,6 +4,7 @@ import {OfflineClient} from "./offline-client";
 import "./nano-motion.css";
 import "./profile.css";
 import {DiagnosticsObserver} from "./diagnostics-client";
+import {MetricsObserver} from "./metrics-client";
 import type { Metadata } from "next";
 import "./globals.css";
 import "./glass-interface.css";
@@ -20,5 +21,5 @@ export const metadata: Metadata = {
   manifest: "/manifest.webmanifest",
 };
 export default function RootLayout({children}: Readonly<{children: React.ReactNode}>) {
-  return <html lang="en" data-skin="signal" className="dark"><body><IconMaterials/><DiagnosticsObserver/><OfflineClient/><NanoMotion/>{children}</body></html>;
+  return <html lang="en" data-skin="signal" className="dark"><body><IconMaterials/><DiagnosticsObserver/><MetricsObserver/><OfflineClient/><NanoMotion/>{children}</body></html>;
 }

@@ -6,7 +6,7 @@ export async function GET(request:Request){
  try {
   const db=database(),now=Date.now();
   await db.prepare("DELETE FROM diagnostic_buckets WHERE hour < ?").bind(now-DIAGNOSTIC_RETENTION).run();
-  const rows=await db.prepare("SELECT code,origin,SUM(count) AS count,MAX(last_seen) AS lastSeen FROM diagnostic_buckets WHERE hour >= ? GROUP BY code,origin ORDER BY lastSeen DESC").bind(now-86400000).all();
+  const rows=await db.prepare("SELECT code,origin,SUM(count) AS count,MAX(last_seen) AS lastSeen FROM diagnostic_buckets WHERE hour >= ? AND code NOT LIKE 'metric:%' GROUP BY code,origin ORDER BY lastSeen DESC").bind(now-86400000).all();
   return json({rows:rows.results,checkedAt:now,windowHours:24});
  }catch{return json({error:"Diagnostic storage is unavailable. This view cannot confirm app health."},503);}
 }
